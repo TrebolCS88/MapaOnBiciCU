@@ -3,7 +3,7 @@
         "id": 1,
         "lat": 23.053988,
         "lng": -82.418994,
-        "title": "👩‍🎓 CUJAE  SSS",
+        "title": "👩‍🎓 CUJAE",
         "desc": "Centro de educación superior.",
         "tipo": "educacion",
         "imagen": "laptopcursor.png",
@@ -104,5 +104,13 @@
         "title": "🏥 Clínica Estomatólogica",
         "desc": "MINSAP",
         "tipo": "hospitales"
+    },
+    {
+        "id": 14,
+        "lat": 23.071919,
+        "lng": -82.432158,
+        "title": "🥑 Plaza de Marianao",
+        "desc": "Mercado Alementicio",
+        "tipo": "sitios"
     }
 ]
