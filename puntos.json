@@ -1,0 +1,108 @@
+[
+    {
+        "id": 1,
+        "lat": 23.053988,
+        "lng": -82.418994,
+        "title": "👩‍🎓 CUJAE",
+        "desc": "Centro de educación superior.",
+        "tipo": "educacion",
+        "imagen": "laptopcursor.png",
+        "enlace": "https://cujae.edu.cu"
+    },
+    {
+        "id": 2,
+        "lat": 23.090332,
+        "lng": -82.424219,
+        "title": "🏥 Hospital Pediatrico Juan Manuel Marquez",
+        "desc": "Pediatrico de Marianao",
+        "tipo": "hospitales"
+    },
+    {
+        "id": 3,
+        "lat": 23.088802,
+        "lng": -82.424423,
+        "title": "🏥 Maternidad Obrera",
+        "desc": "Hospital Materno de Marianao",
+        "tipo": "hospitales"
+    },
+    {
+        "id": 4,
+        "lat": 23.0874424,
+        "lng": -82.4265696,
+        "title": "🏛 Obelisco de Marianao",
+        "desc": "Monumento construido en 1944",
+        "tipo": "sitios"
+    },
+    {
+        "id": 5,
+        "lat": 23.082436,
+        "lng": -82.432158,
+        "title": "🏥 Hospital Militar",
+        "desc": "Hospital Militar Carlos J. Finlay",
+        "tipo": "hospitales"
+    },
+    {
+        "id": 6,
+        "lat": 23.092143,
+        "lng": -82.422030,
+        "title": "🏥 La Ceguera",
+        "desc": "Hospital Oftamológico",
+        "tipo": "hospitales"
+    },
+    {
+        "id": 7,
+        "lat": 23.089922,
+        "lng": -82.429556,
+        "title": "🏙 Ciudad Libertad",
+        "desc": "Antiguo cuartel Columbia convertido en Ciudad escolar al Triunfo de la Revolución",
+        "tipo": "educacion"
+    },
+    {
+        "id": 8,
+        "lat": 23.096293,
+        "lng": -82.417245,
+        "title": "👮‍♂️ ITM",
+        "desc": "Universidad Tecnológica Militar ¨José Martí¨",
+        "tipo": "educacion"
+    },
+    {
+        "id": 9,
+        "lat": 23.083788,
+        "lng": -82.419342,
+        "title": "⚽ Complejo Deportivo - Jesus Menendez",
+        "desc": "Espacio deportivo y recreativo",
+        "tipo": "deportes"
+    },
+    {
+        "id": 10,
+        "lat": 23.083922,
+        "lng": -82.423698,
+        "title": "🏥 Policlinico González Coro",
+        "desc": "Policlinico docente Ramón González Coro",
+        "tipo": "hospitales"
+    },
+    {
+        "id": 11,
+        "lat": 23.081916,
+        "lng": -82.422046,
+        "title": "📚 Biblioteca Municipal",
+        "desc": "Espacio en Remodelación",
+        "tipo": "sitios"
+    },
+    {
+        "id": 12,
+        "lat": 23.074540,
+        "lng": -82.430710,
+        "title": "💵 Banco Metropolitano",
+        "desc": "Sucursal Marianao",
+        "tipo": "bancos"
+    },
+    {
+        "id": 13,
+        "lat": 23.0800808,
+        "lng": -82.4209629,
+        "title": "🏥 Clínica Estomatólogica",
+        "desc": "MINSAP",
+        "tipo": "hospitales"
+    }
+]
