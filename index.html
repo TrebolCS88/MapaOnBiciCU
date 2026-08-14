@@ -593,35 +593,38 @@
             document.getElementById('suggestEditModal').classList.add('open');
         }
 
-        function sendNewSuggestion() {
+                function sendNewSuggestion() {
             const title = document.getElementById('newTitle').value.trim();
             if (!title) { showToast('Por favor, ponle un nombre al lugar', 'error'); return; }
             
-            const coords = document.getElementById('newCoords').innerText;
+            const coordsText = document.getElementById('newCoords').innerText;
             const cat = document.getElementById('newCategory').value;
             const desc = document.getElementById('newDesc').value.trim();
 
-            // Formatear el mensaje
-            const subject = `[Sugerencia OnBiciCU] Nuevo punto: ${title}`;
-            const body = `Se sugiere agregar el siguiente punto al mapa OnBiciCU:\n\nNombre: ${title}\nCategoría: ${cat}\nCoordenadas: ${coords}\nComentarios: ${desc || 'Sin comentarios'}\n\n---\nEnviado desde la app.`;
+            // Extraer solo los números de las coordenadas y unirlos con ;
+            const coordArray = coordsText.match(/-?\d+\.\d+/g);
+            const formattedCoords = coordArray ? coordArray.join(';') : '';
 
-            // PUENTE CON APP INVENTOR: Enviamos la orden mediante WebViewString
-            window.AppInventor.setWebViewString("EMAIL|" + subject + "|" + body);
-            
+            // Formato final: Tipo, Nombre(actual), Nombre(nuevo), Categoría, Coordenadas, Comentario
+            const dataString = `New, --, ${title}, ${cat}, ${formattedCoords}, ${desc}`;
+
+            window.AppInventor.setWebViewString("EMAIL|" + dataString);
             document.getElementById('suggestNewModal').classList.remove('open');
             showToast('Solicitud enviada a la app...', 'success');
         }
 
-            function sendEditSuggestion() {
+        function sendEditSuggestion() {
             const desc = document.getElementById('editDesc').value.trim();
             if (!desc) { showToast('Por favor, describe el cambio que sugieres', 'error'); return; }
 
-            const subject = `[Sugerencia OnBiciCU] Modificar: ${currentEditPoint.title}`;
-            const body = `Se sugiere modificar el siguiente punto en el mapa OnBiciCU:\n\nNombre actual: ${currentEditPoint.title}\nCoordenadas actuales: Lat: ${currentEditPoint.lat}, Lng: ${currentEditPoint.lng}\nCategoría actual: ${currentEditPoint.tipo}\n\nSugerencia de cambio:\n${desc}\n\n---\nEnviado desde la app.`;
+            // Unir coordenadas actuales con ;
+            const formattedCoords = `${currentEditPoint.lat};${currentEditPoint.lng}`;
 
-            // PUENTE CON APP INVENTOR: Enviamos la orden mediante WebViewString
-            window.AppInventor.setWebViewString("EMAIL|" + subject + "|" + body);
+            // Formato final: Tipo, Nombre(actual), Nombre(nuevo), Categoría, Coordenadas, Comentario
+            // Nota: Dejamos "--" en Nombre(nuevo) porque el formulario actual solo tiene un campo de comentarios general.
+            const dataString = `Change, ${currentEditPoint.title}, --, ${currentEditPoint.tipo}, ${formattedCoords}, ${desc}`;
 
+            window.AppInventor.setWebViewString("EMAIL|" + dataString);
             document.getElementById('suggestEditModal').classList.remove('open');
             showToast('Solicitud enviada a la app...', 'success');
         }
