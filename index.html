@@ -183,9 +183,8 @@
         let mapMarkers = [];
 
         // =============================================
-        //  URLS DE GITHUB (ACTUALIZADAS)
+        //  ÚNICA URL FIJA (El directorio principal)
         // =============================================
-        const DATA_URL = 'https://raw.githubusercontent.com/TrebolCS88/MapaOnBiciCU/refs/heads/main/puntos.json';
         const CAT_URL = 'https://raw.githubusercontent.com/TrebolCS88/MapaOnBiciCU/refs/heads/main/categorias.json';
 
         // =============================================
@@ -259,47 +258,68 @@
         }
 
         // =============================================
-        //  CARGA SIMULTÁNEA
+        //  CARGA DINÁMICA POR CATEGORÍAS
         // =============================================
         async function initApp() {
             setDataStatus('loading', 'Cargando datos...');
-            showSidebarEmpty('⏳', 'Descargando configuración...', false);
+            showSidebarEmpty('⏳', 'Descargando categorías...', false);
 
             try {
-                const [catRes, pointsRes] = await Promise.all([
-                    fetch(CAT_URL).then(r => { 
-                        if (!r.ok) throw new Error(`Categorías (HTTP ${r.status})`); 
-                        return r.text(); 
-                    }),
-                    fetch(DATA_URL).then(r => { 
-                        if (!r.ok) throw new Error(`Puntos (HTTP ${r.status})`); 
-                        return r.text(); 
-                    })
-                ]);
-
-                const catData = JSON.parse(catRes);
-                if (!Array.isArray(catData) || catData.length === 0) throw new Error('El archivo de categorías está vacío o es inválido.');
+                // 1. Descargar el archivo principal de categorías
+                const catRes = await fetch(CAT_URL);
+                if (!catRes.ok) throw new Error(`Categorías (HTTP ${catRes.status})`);
+                const catData = await catRes.json();
+                
+                if (!Array.isArray(catData) || catData.length === 0) throw new Error('El archivo de categorías está vacío.');
                 categories = catData;
                 injectCategoryCSS(categories);
 
-                const pointsData = JSON.parse(pointsRes);
-                if (!Array.isArray(pointsData)) throw new Error('El archivo de puntos no contiene un array válido.');
+                // 2. Crear un array de promesas para descargar TODOS los archivos de puntos al mismo tiempo
+                setDataStatus('loading', 'Descargando puntos...');
+                const fetchPromises = categories.map(cat => {
+                    if (!cat.url) return Promise.resolve([]); // Si no tiene URL, devolver array vacío
+                    
+                    return fetch(cat.url)
+                        .then(r => {
+                            if (!r.ok) throw new Error(`No encontré ${cat.nombre}`);
+                            return r.json();
+                        })
+                        .then(data => {
+                            // ASIGNAR EL TIPO AUTOMÁTICAMENTE A CADA PUNTO
+                            if (Array.isArray(data)) {
+                                return data.map(p => ({ ...p, tipo: cat.tipo }));
+                            }
+                            return [];
+                        })
+                        .catch(err => {
+                            // Si falla UN archivo, no rompemos toda la web, solo ignoramos esa categoría
+                            console.warn(`Error ignorando ${cat.nombre}: ${err.message}`);
+                            return [];
+                        });
+                });
 
-                const validPoints = pointsData.filter(p => {
+                // 3. Esperar a que todos los archivos terminen de descargar
+                const results = await Promise.all(fetchPromises);
+
+                // 4. Unir todos los arrays de puntos en uno solo
+                let allPoints = results.flat();
+
+                // 5. Validar y limpiar
+                const validPoints = allPoints.filter(p => {
                     if (!p.lat || !p.lng || !p.title) { console.warn('Punto ignorado:', p); return false; }
                     return true;
                 });
 
-                if (validPoints.length === 0) throw new Error('No se encontraron puntos válidos (necesitan lat, lng y title).');
+                if (validPoints.length === 0) throw new Error('No se encontraron puntos válidos en los archivos enlazados.');
 
                 validPoints.forEach((p, i) => {
                     if (!p.id) p.id = i + 1;
-                    if (!p.tipo) p.tipo = 'general';
                     if (!p.desc) p.desc = '';
                 });
 
                 points = validPoints;
 
+                // 6. Dibujar todo
                 setDataStatus('loaded', `${points.length} puntos`);
                 showToast(`Mapa cargado: ${categories.length} categorías y ${points.length} puntos`, 'success');
                 renderSidebarMenu();
@@ -308,13 +328,13 @@
             } catch (err) {
                 console.error('Error de inicialización:', err);
                 setDataStatus('error', 'Error');
-                showSidebarEmpty('❌', `Fallo la carga:<br><small>${err.message}</small><br><br>Verifica la conexión o los archivos JSON en GitHub.`, true);
+                showSidebarEmpty('❌', `Fallo la carga:<br><small>${err.message}</small><br><br>Revisa <code>categorias.json</code> y las URLs de los archivos.`, true);
                 showToast('Error al cargar la configuración', 'error', 6000);
             }
         }
 
         // =============================================
-        //  SIDEBAR Y FILTRADO
+        //  SIDEBAR Y FILTRADO (Sin cambios necesarios)
         // =============================================
         function renderSidebarMenu() {
             if (points.length === 0) return;
