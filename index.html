@@ -486,35 +486,66 @@
         }
 
         // =============================================
-        //  SISTEMA DE CLIC LARGO (LONG PRESS)
+        //  SISTEMA DE CLIC LARGO (LONG PRESS) MEJORADO
         // =============================================
+        let longPressTimer = null;
+        let isLongPress = false;
+        let currentEditPoint = null;
+        let pointerStartX = 0;
+        let pointerStartY = 0;
+        const MOVE_THRESHOLD = 10; // Si el dedo se mueve más de esto, se cancela el clic largo
+
         function handlePointerDown(e) {
+            // Ignorar si el toque fue en los botones del mapa (Zoom, Ubicación, Coordenadas)
+            if (e.target.closest('.leaflet-control-container') || e.target.closest('.geo-float-btn') || e.target.closest('.coord-display')) {
+                return; 
+            }
+
             isLongPress = false;
-            const target = e.target;
             
+            // Guardar dónde empezó el dedo
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            pointerStartX = clientX;
+            pointerStartY = clientY;
+
             longPressTimer = setTimeout(() => {
                 isLongPress = true;
+                if (navigator.vibrate) navigator.vibrate(50); // Vibrar en móvil
                 
-                // Vibrar si es móvil
-                if (navigator.vibrate) navigator.vibrate(50);
-
                 // Verificar si presionó sobre un marcador
-                const pinEl = target.closest('.pin');
+                const pinEl = e.target.closest('.pin');
                 if (pinEl && pinEl.getAttribute('data-id')) {
                     const id = parseInt(pinEl.getAttribute('data-id'));
                     const pointData = points.find(p => p.id === id);
                     if (pointData) {
-                        // Cerrar modal de info si estaba abierto
                         modal.classList.remove('open');
                         openEditModal(pointData);
                     }
                 } else {
                     // Presionó sobre el mapa vacío
                     modal.classList.remove('open');
-                    const latlng = map.containerPointToLatLng(L.point(e.offsetX, e.offsetY));
+                    const rect = mapDiv.getBoundingClientRect();
+                    const offsetX = (e.clientX || e.touches[0].clientX) - rect.left;
+                    const offsetY = (e.clientY || e.touches[0].clientY) - rect.top;
+                    const latlng = map.containerPointToLatLng(L.point(offsetX, offsetY));
                     openNewModal(latlng.lat, latlng.lng);
                 }
             }, 600); // 600 milisegundos
+        }
+
+        function handlePointerMove(e) {
+            // Calcular cuánto se ha movido el dedo desde que lo bajó
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            
+            const distanceX = Math.abs(clientX - pointerStartX);
+            const distanceY = Math.abs(clientY - pointerStartY);
+
+            // Si se movió más de 10 píxeles, es un arrastre (mover mapa o hacer zoom), cancelar
+            if (distanceX > MOVE_THRESHOLD || distanceY > MOVE_THRESHOLD) {
+                clearTimeout(longPressTimer);
+            }
         }
 
         function handlePointerUp() {
@@ -523,13 +554,24 @@
 
         // Asignar eventos al contenedor del mapa
         mapDiv.addEventListener('mousedown', handlePointerDown);
+        mapDiv.addEventListener('mousemove', handlePointerMove); // NUEVO: Escuchar el movimiento del ratón
         mapDiv.addEventListener('mouseup', handlePointerUp);
         mapDiv.addEventListener('mouseleave', handlePointerUp);
+        
         mapDiv.addEventListener('touchstart', (e) => {
             const touch = e.touches[0];
-            const simulatedEvent = { target: document.elementFromPoint(touch.clientX, touch.clientY), offsetX: touch.clientX - mapDiv.getBoundingClientRect().left, offsetY: touch.clientY - mapDiv.getBoundingClientRect().top };
-            handlePointerDown(simulatedEvent);
+            handlePointerDown({ 
+                target: document.elementFromPoint(touch.clientX, touch.clientY), 
+                clientX: touch.clientX, 
+                clientY: touch.clientY,
+                touches: e.touches 
+            });
         }, { passive: true });
+        
+        mapDiv.addEventListener('touchmove', (e) => { // NUEVO: Escuchar el movimiento del dedo
+            handlePointerMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY, touches: e.touches });
+        }, { passive: true });
+        
         mapDiv.addEventListener('touchend', handlePointerUp);
 
         // =============================================
