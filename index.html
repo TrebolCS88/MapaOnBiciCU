@@ -337,7 +337,7 @@
                 const header = document.createElement('div');
                 header.className = 'cat-header';
                 const label = isTodos ? '🌍 Ver Todo' : `${catObj ? catObj.icono : '📍'} ${catObj ? catObj.nombre : t.charAt(0).toUpperCase() + t.slice(1)}`;
-                header.innerHTML = `<span>${label}</span><div style="display:flex; align-items:center;"><span class="arrow">▼</span></div>`;
+                header.innerHTML = `<span>${label}</span><div style="display:flex; align-items:center;"><span class="badge">${count}</span><span class="arrow">▼</span></div>`;
 
                 const body = document.createElement('div');
                 body.className = 'cat-body';
