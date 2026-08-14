@@ -1,58 +1,29 @@
 [
     {
-        "tipo": "educacion",
-        "nombre": "Educación",
-        "icono": "👩‍🎓",
-        "color": "#2563eb",
-        "borderRadius": "7px",
-        "rotacion": "330deg"
-    },
-    {
-        "tipo": "hospitales",
-        "nombre": "Hospitales y Clínicas",
-        "icono": "🏥",
+        "tipo": "parqueos",
+        "nombre": "Parqueos para Bicicletas",
+        "icono": "🚲",
         "color": "#ff0000",
         "borderRadius": "50%",
-        "rotacion": "330deg"
+        "rotacion": "330deg",
+        "url": "https://trebolcs88.github.io/MapaOnBiciCU/parqueos.json"
     },
     {
-        "tipo": "comercio",
-        "nombre": "Comercio",
-        "icono": "🛒",
-        "color": "#f97316",
-        "borderRadius": "0",
-        "rotacion": "330deg"
+        "tipo": "talleres",
+        "nombre": "Talleres",
+        "icono": "🔧",
+        "color": "#2563eb",
+        "borderRadius": "7px",
+        "rotacion": "330deg",
+        "url": "https://trebolcs88.github.io/MapaOnBiciCU/talleres.json"
     },
     {
-        "tipo": "sitios",
-        "nombre": "Sitios de Interés",
-        "icono": "🏛",
+        "tipo": "poncheras",
+        "nombre": "Poncheras",
+        "icono": "🩹",
         "color": "#16a34a",
         "borderRadius": "50%",
-        "rotacion": "330deg"
-    },
-    {
-        "tipo": "deportes",
-        "nombre": "Deportes",
-        "icono": "⚽",
-        "color": "#eab308",
-        "borderRadius": "0",
-        "rotacion": "330deg"
-    },
-    {
-        "tipo": "bancos",
-        "nombre": "Bancos",
-        "icono": "💵",
-        "color": "#00ff00",
-        "borderRadius": "4px",
-        "rotacion": "330deg"
-    },
-    {
-        "tipo": "general",
-        "nombre": "General",
-        "icono": "📍",
-        "color": "#8b5cf6",
-        "borderRadius": "50%",
-        "rotacion": "330deg"
+        "rotacion": "330deg",
+        "url": "https://trebolcs88.github.io/MapaOnBiciCU/poncheras.json"
     }
 ]
