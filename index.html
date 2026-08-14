@@ -88,12 +88,32 @@
 
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
         .modal.open { opacity: 1; pointer-events: auto; }
-        .modal-card { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal-card { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; }
         .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; float: right; color: #64748b; }
         .modal-img { width: 100%; height: auto; max-height: 250px; object-fit: cover; border-radius: 8px; margin-top: 15px; display: none; background-color: #f1f5f9; }
         .modal-link { display: none; width: 100%; text-align: center; margin-top: 15px; padding: 12px; background-color: white; color: var(--primary-color); border: 1px solid var(--primary-color); text-decoration: none; border-radius: 6px; font-weight: 600; transition: all 0.2s; }
         .modal-link.visible { display: block !important; }
         .modal-link:hover { background-color: var(--primary-color); color: white; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        /* --- ESTILOS PARA FORMULARIOS DE SUGERENCIA --- */
+        .form-group { margin-top: 15px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 5px; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;
+            font-size: 0.9rem; font-family: inherit; transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group .coord-copy { font-family: 'Courier New', monospace; font-size: 0.8rem; background: #f1f5f9; padding: 8px; border-radius: 4px; color: #475569; word-break: break-all; }
+        .btn-submit-suggest {
+            margin-top: 20px; width: 100%; padding: 12px; background: #16a34a; color: white;
+            border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;
+        }
+        .btn-submit-suggest:hover { background: #15803d; }
+        .hint-text { font-size: 0.75rem; color: #94a3b8; margin-top: 10px; text-align: center; line-height: 1.4; }
 
         .toast-container { position: fixed; top: 75px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .toast { background: white; padding: 14px 20px; border-radius: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; font-size: 0.88rem; color: #334155; pointer-events: auto; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-left: 4px solid #94a3b8; max-width: 340px; }
@@ -164,6 +184,7 @@
 
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- MODAL INFORMACIÓN NORMAL -->
     <div class="modal" id="infoModal">
         <div class="modal-card">
             <button class="close-modal" id="closeModal">&times;</button>
@@ -171,6 +192,67 @@
             <p id="mDesc" style="color:#475569; line-height:1.6;">Descripción...</p>
             <img id="mImg" class="modal-img" src="" alt="Foto del lugar">
             <a id="mLink" class="modal-link" href="#" target="_blank">👉Mas información...</a>
+            <div class="hint-text">💡 <i>Mantén presionado aquí si quieres sugerir un cambio</i></div>
+        </div>
+    </div>
+
+    <!-- MODAL SUGERIR PUNTO NUEVO -->
+    <div class="modal" id="suggestNewModal">
+        <div class="modal-card">
+            <button class="close-modal" onclick="document.getElementById('suggestNewModal').classList.remove('open')">&times;</button>
+            <h3 style="margin-bottom:5px; color:#16a34a;">📍 Sugerir nuevo punto</h3>
+            <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:15px;">Estás sugiriendo un lugar en estas coordenadas:</p>
+            
+            <div class="form-group">
+                <label>Coordenadas (Automático)</label>
+                <div class="coord-copy" id="newCoords">Cargando...</div>
+            </div>
+
+            <div class="form-group">
+                <label>Nombre del lugar *</label>
+                <input type="text" id="newTitle" placeholder="Ej: Parqueo en la esquina de 5ta y 2da" required>
+            </div>
+
+            <div class="form-group">
+                <label>Categoría sugerida</label>
+                <select id="newCategory">
+                    <!-- Se llena dinámicamente -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Descripción o Comentarios</label>
+                <textarea id="newDesc" placeholder="Capacidad, estado, si tiene techo, etc..."></textarea>
+            </div>
+
+            <button class="btn-submit-suggest" onclick="sendNewSuggestion()">
+                📩 Enviar sugerencia por correo
+            </button>
+            <div class="hint-text">Se abrirá tu aplicación de correo con los datos listos para enviar.</div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR PUNTO EXISTENTE -->
+    <div class="modal" id="suggestEditModal">
+        <div class="modal-card">
+            <button class="close-modal" onclick="document.getElementById('suggestEditModal').classList.remove('open')">&times;</button>
+            <h3 style="margin-bottom:5px; color:#f59e0b;">✏️ Sugerir cambio en punto</h3>
+            <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:15px;">Datos actuales del punto que quieres modificar:</p>
+            
+            <div style="background:#f8fafc; padding:10px; border-radius:6px; margin-bottom:15px; border-left: 4px solid #cbd5e1;">
+                <div style="font-weight:600; font-size:0.9rem;" id="editCurrentTitle">-</div>
+                <div style="font-size:0.8rem; color:#64748b; margin-top:4px;" id="editCurrentCoords">-</div>
+            </div>
+
+            <div class="form-group">
+                <label>¿Qué cambiaría o agregaría?</label>
+                <textarea id="editDesc" placeholder="Ej: El nombre correcto es..., Agregar que tiene capacidad para 20 bicicletas..."></textarea>
+            </div>
+
+            <button class="btn-submit-suggest" style="background: #f59e0b;" onclick="sendEditSuggestion()" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
+                📩 Enviar corrección por correo
+            </button>
+            <div class="hint-text">Se abrirá tu aplicación de correo con los datos actuales y tu sugerencia.</div>
         </div>
     </div>
 
@@ -181,11 +263,17 @@
         let points = [];
         let categories = [];
         let mapMarkers = [];
+        
+        // Variables para el "Clic Largo"
+        let longPressTimer = null;
+        let isLongPress = false;
+        let currentEditPoint = null;
 
         // =============================================
-        //  ÚNICA URL FIJA (El directorio principal)
+        //  CONFIGURACIÓN
         // =============================================
         const CAT_URL = 'categorias.json';
+        const CONTACT_EMAIL = 'TU_CORREO@AQUI.com'; // <--- CAMBIA ESTO POR TU CORREO
 
         // =============================================
         //  REFERENCIAS AL DOM
@@ -205,11 +293,12 @@
         const coordAcc = document.getElementById('coordAcc');
         const toastContainer = document.getElementById('toastContainer');
         const dataStatus = document.getElementById('dataStatus');
+        const mapDiv = document.getElementById('map');
 
         // =============================================
         //  MAPA BASE
         // =============================================
-        const map = L.map('map').setView([23.07961, -82.42297], 16);
+        const map = L.map('map', { zoomControl: true }).setView([23.07961, -82.42297], 16);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 19
@@ -244,17 +333,25 @@
         // =============================================
         function injectCategoryCSS(cats) {
             let styleEl = document.getElementById('dynamic-cat-styles');
-            if (!styleEl) {
-                styleEl = document.createElement('style');
-                styleEl.id = 'dynamic-cat-styles';
-                document.head.appendChild(styleEl);
-            }
+            if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-cat-styles'; document.head.appendChild(styleEl); }
             let css = '';
             cats.forEach(c => {
                 css += `.pin.${c.tipo} { background-color: ${c.color}; border-radius: ${c.borderRadius}; transform: rotate(${c.rotacion}); }\n`;
                 css += `.pin.${c.tipo}:hover { transform: rotate(360deg) scale(1.2) !important; }\n`;
             });
             styleEl.textContent = css;
+        }
+
+        // Llenar el select de categorías en el formulario de nuevo punto
+        function populateCategorySelect() {
+            const select = document.getElementById('newCategory');
+            select.innerHTML = '';
+            categories.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.tipo;
+                opt.innerText = `${c.icono} ${c.nombre}`;
+                select.appendChild(opt);
+            });
         }
 
         // =============================================
@@ -265,7 +362,6 @@
             showSidebarEmpty('⏳', 'Descargando categorías...', false);
 
             try {
-                // 1. Descargar el archivo principal de categorías
                 const catRes = await fetch(CAT_URL);
                 if (!catRes.ok) throw new Error(`Categorías (HTTP ${catRes.status})`);
                 const catData = await catRes.json();
@@ -273,38 +369,20 @@
                 if (!Array.isArray(catData) || catData.length === 0) throw new Error('El archivo de categorías está vacío.');
                 categories = catData;
                 injectCategoryCSS(categories);
+                populateCategorySelect();
 
-                // 2. Crear un array de promesas para descargar TODOS los archivos de puntos al mismo tiempo
                 setDataStatus('loading', 'Descargando puntos...');
                 const fetchPromises = categories.map(cat => {
-                    if (!cat.url) return Promise.resolve([]); // Si no tiene URL, devolver array vacío
-                    
+                    if (!cat.url) return Promise.resolve([]);
                     return fetch(cat.url)
-                        .then(r => {
-                            if (!r.ok) throw new Error(`No encontré ${cat.nombre}`);
-                            return r.json();
-                        })
-                        .then(data => {
-                            // ASIGNAR EL TIPO AUTOMÁTICAMENTE A CADA PUNTO
-                            if (Array.isArray(data)) {
-                                return data.map(p => ({ ...p, tipo: cat.tipo }));
-                            }
-                            return [];
-                        })
-                        .catch(err => {
-                            // Si falla UN archivo, no rompemos toda la web, solo ignoramos esa categoría
-                            console.warn(`Error ignorando ${cat.nombre}: ${err.message}`);
-                            return [];
-                        });
+                        .then(r => { if (!r.ok) throw new Error(`No encontré ${cat.nombre}`); return r.json(); })
+                        .then(data => { if (Array.isArray(data)) return data.map(p => ({ ...p, tipo: cat.tipo })); return []; })
+                        .catch(err => { console.warn(`Error ignorando ${cat.nombre}: ${err.message}`); return []; });
                 });
 
-                // 3. Esperar a que todos los archivos terminen de descargar
                 const results = await Promise.all(fetchPromises);
-
-                // 4. Unir todos los arrays de puntos en uno solo
                 let allPoints = results.flat();
 
-                // 5. Validar y limpiar
                 const validPoints = allPoints.filter(p => {
                     if (!p.lat || !p.lng || !p.title) { console.warn('Punto ignorado:', p); return false; }
                     return true;
@@ -319,7 +397,6 @@
 
                 points = validPoints;
 
-                // 6. Dibujar todo
                 setDataStatus('loaded', `${points.length} puntos`);
                 showToast(`Mapa cargado: ${categories.length} categorías y ${points.length} puntos`, 'success');
                 renderSidebarMenu();
@@ -328,26 +405,21 @@
             } catch (err) {
                 console.error('Error de inicialización:', err);
                 setDataStatus('error', 'Error');
-                showSidebarEmpty('❌', `Fallo la carga:<br><small>${err.message}</small><br><br>Revisa <code>categorias.json</code> y las URLs de los archivos.`, true);
+                showSidebarEmpty('❌', `Fallo la carga:<br><small>${err.message}</small><br><br>Revisa <code>categorias.json</code> y las URLs.`, true);
                 showToast('Error al cargar la configuración', 'error', 6000);
             }
         }
 
         // =============================================
-        //  SIDEBAR Y FILTRADO (Sin cambios necesarios)
+        //  SIDEBAR Y FILTRADO
         // =============================================
         function renderSidebarMenu() {
             if (points.length === 0) return;
             categoryList.innerHTML = '';
 
             const uniqueTypes = ['todos'];
-            categories.forEach(c => {
-                if (points.some(p => (p.tipo || 'general') === c.tipo)) uniqueTypes.push(c.tipo);
-            });
-            points.forEach(p => {
-                const tipo = p.tipo || 'general';
-                if (!uniqueTypes.includes(tipo)) uniqueTypes.push(tipo);
-            });
+            categories.forEach(c => { if (points.some(p => (p.tipo || 'general') === c.tipo)) uniqueTypes.push(c.tipo); });
+            points.forEach(p => { const tipo = p.tipo || 'general'; if (!uniqueTypes.includes(tipo)) uniqueTypes.push(tipo); });
 
             uniqueTypes.forEach(t => {
                 const isTodos = t === 'todos';
@@ -367,12 +439,7 @@
                     const item = document.createElement('div');
                     item.className = 'point-item';
                     item.innerText = p.title;
-                    item.onclick = (e) => {
-                        e.stopPropagation();
-                        map.flyTo([p.lat, p.lng], 17, { duration: 1 });
-                        openModal(p);
-                        if (window.innerWidth <= 768) toggleMenu();
-                    };
+                    item.onclick = (e) => { e.stopPropagation(); map.flyTo([p.lat, p.lng], 17, { duration: 1 }); openModal(p); if (window.innerWidth <= 768) toggleMenu(); };
                     body.appendChild(item);
                 });
 
@@ -396,18 +463,143 @@
             let pts = filterType === 'todos' ? points : points.filter(p => (p.tipo || 'general') === filterType);
 
             pts.forEach(p => {
+                // INYECTAMOS data-id EN EL PIN PARA SABER CUÁL ES AL HACER CLIC LARGO
                 const icon = L.divIcon({
                     className: 'custom-map-icon',
-                    html: `<div class="pin ${p.tipo || 'general'}"></div><div class="tooltip">${p.title}</div>`,
+                    html: `<div class="pin ${p.tipo || 'general'}" data-id="${p.id}"></div><div class="tooltip">${p.title}</div>`,
                     iconSize: [24, 24],
                     iconAnchor: [12, 12]
                 });
                 const marker = L.marker([p.lat, p.lng], { icon: icon }).addTo(map);
-                marker.on('click', () => openModal(p));
+                
+                // Clic normal
+                marker.on('click', () => {
+                    if (isLongPress) { isLongPress = false; return; } // Ignorar si fue clic largo
+                    openModal(p);
+                });
+
                 mapMarkers.push(marker);
             });
 
             if (pts.length > 0) map.fitBounds(L.featureGroup(mapMarkers).getBounds().pad(0.1));
+        }
+
+        // =============================================
+        //  SISTEMA DE CLIC LARGO (LONG PRESS)
+        // =============================================
+        function handlePointerDown(e) {
+            isLongPress = false;
+            const target = e.target;
+            
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                
+                // Vibrar si es móvil
+                if (navigator.vibrate) navigator.vibrate(50);
+
+                // Verificar si presionó sobre un marcador
+                const pinEl = target.closest('.pin');
+                if (pinEl && pinEl.getAttribute('data-id')) {
+                    const id = parseInt(pinEl.getAttribute('data-id'));
+                    const pointData = points.find(p => p.id === id);
+                    if (pointData) {
+                        // Cerrar modal de info si estaba abierto
+                        modal.classList.remove('open');
+                        openEditModal(pointData);
+                    }
+                } else {
+                    // Presionó sobre el mapa vacío
+                    modal.classList.remove('open');
+                    const latlng = map.containerPointToLatLng(L.point(e.offsetX, e.offsetY));
+                    openNewModal(latlng.lat, latlng.lng);
+                }
+            }, 600); // 600 milisegundos
+        }
+
+        function handlePointerUp() {
+            clearTimeout(longPressTimer);
+        }
+
+        // Asignar eventos al contenedor del mapa
+        mapDiv.addEventListener('mousedown', handlePointerDown);
+        mapDiv.addEventListener('mouseup', handlePointerUp);
+        mapDiv.addEventListener('mouseleave', handlePointerUp);
+        mapDiv.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            const simulatedEvent = { target: document.elementFromPoint(touch.clientX, touch.clientY), offsetX: touch.clientX - mapDiv.getBoundingClientRect().left, offsetY: touch.clientY - mapDiv.getBoundingClientRect().top };
+            handlePointerDown(simulatedEvent);
+        }, { passive: true });
+        mapDiv.addEventListener('touchend', handlePointerUp);
+
+        // =============================================
+        //  MODALES DE SUGERENCIA
+        // =============================================
+        function openNewModal(lat, lng) {
+            document.getElementById('newCoords').innerText = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newDesc').value = '';
+            document.getElementById('newCategory').selectedIndex = 0;
+            document.getElementById('suggestNewModal').classList.add('open');
+        }
+
+        function openEditModal(pointData) {
+            currentEditPoint = pointData;
+            document.getElementById('editCurrentTitle').innerText = pointData.title;
+            document.getElementById('editCurrentCoords').innerText = `Lat: ${pointData.lat}, Lng: ${pointData.lng} (${pointData.tipo})`;
+            document.getElementById('editDesc').value = '';
+            document.getElementById('suggestEditModal').classList.add('open');
+        }
+
+        function sendNewSuggestion() {
+            const title = document.getElementById('newTitle').value.trim();
+            if (!title) { showToast('Por favor, ponle un nombre al lugar', 'error'); return; }
+            
+            const coords = document.getElementById('newCoords').innerText;
+            const cat = document.getElementById('newCategory').value;
+            const desc = document.getElementById('newDesc').value.trim();
+
+            const subject = encodeURIComponent(`[Sugerencia OnBiciCU] Nuevo punto: ${title}`);
+            const body = encodeURIComponent(
+                `Se sugiere agregar el siguiente punto al mapa OnBiciCU:\n\n` +
+                `Nombre: ${title}\n` +
+                `Categoría: ${cat}\n` +
+                `Coordenadas: ${coords}\n` +
+                `Comentarios: ${desc || 'Sin comentarios'}\n\n` +
+                `---\nEnviado desde el mapa web.`
+            );
+
+            window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+            document.getElementById('suggestNewModal').classList.remove('open');
+            showToast('Abriendo correo para enviar sugerencia...', 'success');
+        }
+
+        function sendEditSuggestion() {
+            const desc = document.getElementById('editDesc').value.trim();
+            if (!desc) { showToast('Por favor, describe el cambio que sugieres', 'error'); return; }
+
+            const subject = encodeURIComponent(`[Sugerencia OnBiciCU] Modificar: ${currentEditPoint.title}`);
+            const body = encodeURIComponent(
+                `Se sugiere modificar el siguiente punto en el mapa OnBiciCU:\n\n` +
+                `Nombre actual: ${currentEditPoint.title}\n` +
+                `Coordenadas actuales: Lat: ${currentEditPoint.lat}, Lng: ${currentEditPoint.lng}\n` +
+                `Categoría actual: ${currentEditPoint.tipo}\n\n` +
+                `Sugerencia de cambio:\n${desc}\n\n` +
+                `---\nEnviado desde el mapa web.`
+            );
+
+            window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+            document.getElementById('suggestEditModal').classList.remove('open');
+            showToast('Abriendo correo para enviar corrección...', 'success');
+        }
+
+        // =============================================
+        //  MODAL INFORMACIÓN NORMAL
+        // =============================================
+        function openModal(data) {
+            mTitle.innerText = data.title; mDesc.innerText = data.desc;
+            if (data.imagen) { mImg.src = data.imagen; mImg.style.display = 'block'; } else { mImg.style.display = 'none'; mImg.src = ""; }
+            if (data.enlace) { mLink.href = data.enlace; mLink.classList.add('visible'); } else { mLink.classList.remove('visible'); mLink.href = "#"; }
+            modal.classList.add('open');
         }
 
         // =============================================
@@ -442,21 +634,17 @@
         geoFloatBtn.addEventListener('click', startLocating);
 
         // =============================================
-        //  MODAL
-        // =============================================
-        function openModal(data) {
-            mTitle.innerText = data.title; mDesc.innerText = data.desc;
-            if (data.imagen) { mImg.src = data.imagen; mImg.style.display = 'block'; } else { mImg.style.display = 'none'; mImg.src = ""; }
-            if (data.enlace) { mLink.href = data.enlace; mLink.classList.add('visible'); } else { mLink.classList.remove('visible'); mLink.href = "#"; }
-            modal.classList.add('open');
-        }
-
-        // =============================================
-        //  MENÚ MÓVIL
+        //  MENÚ MÓVIL Y CIERRE DE MODALES
         // =============================================
         function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarOverlay').classList.toggle('open'); }
+        
         closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
         modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+        
+        // Cerrar modales de sugerencia al hacer clic fuera
+        document.getElementById('suggestNewModal').addEventListener('click', (e) => { if (e.target.id === 'suggestNewModal') e.target.classList.remove('open'); });
+        document.getElementById('suggestEditModal').addEventListener('click', (e) => { if (e.target.id === 'suggestEditModal') e.target.classList.remove('open'); });
+
         document.getElementById('menuToggle').addEventListener('click', toggleMenu);
         document.getElementById('sidebarOverlay').addEventListener('click', toggleMenu);
 
