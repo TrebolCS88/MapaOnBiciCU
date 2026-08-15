@@ -146,7 +146,7 @@
     <header>
         <div class="header-left">
             <button class="menu-btn" id="menuToggle">☰</button>
-            <h1>OnBiciCU 🗺Mapa</h1>
+            <h1>OnBiciCU Mapa</h1>
         </div>
         <div class="header-right">
             <div class="data-status loading" id="dataStatus">
@@ -530,7 +530,7 @@
                     const latlng = map.containerPointToLatLng(L.point(offsetX, offsetY));
                     openNewModal(latlng.lat, latlng.lng);
                 }
-            }, 2500); // 2500 milisegundos (2.5 segundos)
+            }, 1500); // 1500 milisegundos (1.5 segundos)
         }
 
         function handlePointerMove(e) {
