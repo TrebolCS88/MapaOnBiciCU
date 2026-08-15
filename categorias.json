@@ -6,7 +6,7 @@
         "color": "#00ff00",
         "borderRadius": "50%",
         "rotacion": "330deg",
-        "url": "https://trebolcs88.github.io/MapaOnBiciCU/parqueos.json"
+        "url": "parqueos.json"
     },
     {
         "tipo": "talleres",
@@ -15,7 +15,7 @@
         "color": "#2563eb",
         "borderRadius": "7px",
         "rotacion": "330deg",
-        "url": "https://trebolcs88.github.io/MapaOnBiciCU/talleres.json"
+        "url": "talleres.json"
     },
     {
         "tipo": "poncheras",
@@ -24,6 +24,6 @@
         "color": "#16a34a",
         "borderRadius": "50%",
         "rotacion": "330deg",
-        "url": "https://trebolcs88.github.io/MapaOnBiciCU/poncheras.json"
+        "url": "poncheras.json"
     }
 ]
