@@ -146,7 +146,7 @@
     <header>
         <div class="header-left">
             <button class="menu-btn" id="menuToggle">☰</button>
-            <h1>OnBiciCU Mapa</h1>
+            <h1>OnBiciCU 🗺Mapa</h1>
         </div>
         <div class="header-right">
             <div class="data-status loading" id="dataStatus">
@@ -193,7 +193,7 @@
             <p id="mDesc" style="color:#475569; line-height:1.6;">Descripción...</p>
             <img id="mImg" class="modal-img" src="" alt="Foto del lugar">
             <a id="mLink" class="modal-link" href="#" target="_blank">👉Mas información...</a>
-            <div class="hint-text">💡 <i>Mantén presionado aquí si quieres sugerir un cambio</i></div>
+                        <div class="hint-text" style="display:flex; align-items:center; justify-content:center; gap:5px; flex-wrap:wrap;">📍 Si hay algo erróneo con este marcador puedes <button onclick="triggerEditFromModal()" style="background:none; border:none; color:var(--primary-color); font-weight:700; cursor:pointer; font-size:0.85rem; padding:0; text-decoration:underline;">👉 Sugerir</button></div>
         </div>
     </div>
 
@@ -264,6 +264,7 @@
         let points = [];
         let categories = [];
         let mapMarkers = [];
+        let currentModalPoint = null;
         
         // Variables para el "Clic Largo"
         let longPressTimer = null;
@@ -500,18 +501,19 @@
 
             isLongPress = false;
             
-            // Guardar dónde empezó el dedo
-            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            // Guardar DÓNDE empezó el dedo y CUÁL fue el objetivo INMEDIATAMENTE
+            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
             pointerStartX = clientX;
             pointerStartY = clientY;
+            const targetEl = e.target;
 
             longPressTimer = setTimeout(() => {
                 isLongPress = true;
-                if (navigator.vibrate) navigator.vibrate(50); // Vibrar en móvil
+                if (navigator.vibrate) navigator.vibrate(50); 
                 
                 // Verificar si presionó sobre un marcador
-                const pinEl = e.target.closest('.pin');
+                const pinEl = targetEl.closest('.pin');
                 if (pinEl && pinEl.getAttribute('data-id')) {
                     const id = parseInt(pinEl.getAttribute('data-id'));
                     const pointData = points.find(p => p.id === id);
@@ -523,12 +525,12 @@
                     // Presionó sobre el mapa vacío
                     modal.classList.remove('open');
                     const rect = mapDiv.getBoundingClientRect();
-                    const offsetX = (e.clientX || e.touches[0].clientX) - rect.left;
-                    const offsetY = (e.clientY || e.touches[0].clientY) - rect.top;
+                    const offsetX = clientX - rect.left;
+                    const offsetY = clientY - rect.top;
                     const latlng = map.containerPointToLatLng(L.point(offsetX, offsetY));
                     openNewModal(latlng.lat, latlng.lng);
                 }
-            }, 600); // 600 milisegundos
+            }, 2500); // 2500 milisegundos (2.5 segundos)
         }
 
         function handlePointerMove(e) {
@@ -630,10 +632,19 @@
         //  MODAL INFORMACIÓN NORMAL
         // =============================================
         function openModal(data) {
+            currentModalPoint = data; // <--- AGREGADO: Recordar cuál punto se está viendo
             mTitle.innerText = data.title; mDesc.innerText = data.desc;
             if (data.imagen) { mImg.src = data.imagen; mImg.style.display = 'block'; } else { mImg.style.display = 'none'; mImg.src = ""; }
             if (data.enlace) { mLink.href = data.enlace; mLink.classList.add('visible'); } else { mLink.classList.remove('visible'); mLink.href = "#"; }
             modal.classList.add('open');
+        }
+
+        // Función del nuevo botón "Sugerir"
+        function triggerEditFromModal() {
+            if (currentModalPoint) {
+                modal.classList.remove('open'); // Cerrar info
+                openEditModal(currentModalPoint); // Abrir formulario de edición
+            }
         }
 
         // =============================================
