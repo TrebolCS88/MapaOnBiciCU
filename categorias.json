@@ -25,5 +25,50 @@
         "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "poncheras.json"
+    },
+    {
+        "tipo": "tiendas",
+        "nombre": "Tiendas",
+        "icono": "🛒",
+        "color": "#16a34a",
+        "borderRadius": "50%",
+        "rotacion": "330deg",
+        "url": "tiendas.json"
+    },
+    {
+        "tipo": "alquiler",
+        "nombre": "Alquiler",
+        "icono": "🤝",
+        "color": "#16a34a",
+        "borderRadius": "50%",
+        "rotacion": "330deg",
+        "url": "alquiler.json"
+    },
+    {
+        "tipo": "salud",
+        "nombre": "Emergencias Médicas",
+        "icono": "🏥",
+        "color": "#ef4444",
+        "borderRadius": "7px",
+        "rotacion": "330deg",
+        "url": "salud.json"
+    },
+    {
+        "tipo": "agua",
+        "nombre": "Puntos de Agua",
+        "icono": "💧",
+        "color": "#06b6d4",
+        "borderRadius": "50%",
+        "rotacion": "0deg",
+        "url": "agua.json"
+    },
+    {
+        "tipo": "alimentos",
+        "nombre": "Alimentación Rápida",
+        "icono": "🍔",
+        "color": "#f97316",
+        "borderRadius": "0",
+        "rotacion": "330deg",
+        "url": "alimentos.json"
     }
 ]
