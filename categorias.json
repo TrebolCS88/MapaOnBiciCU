@@ -70,5 +70,14 @@
         "borderRadius": "0",
         "rotacion": "330deg",
         "url": "alimentos.json"
+    },
+    {
+        "tipo": "otros",
+        "nombre": "Otros de Interés",
+        "icono": "👁",
+        "color": "#f97316",
+        "borderRadius": "0",
+        "rotacion": "330deg",
+        "url": "otros.json"
     }
 ]
