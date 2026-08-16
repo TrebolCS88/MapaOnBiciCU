@@ -21,7 +21,7 @@
         "tipo": "poncheras",
         "nombre": "Poncheras",
         "icono": "🩹",
-        "color": "#16a34a",
+        "color": "#ff0000",
         "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "poncheras.json"
