@@ -1,0 +1,44 @@
+[
+    {
+        "lat": 23.143951,
+        "lng": -82.355471,
+        "title": "🚌 Ciclobus Habana",
+        "desc": "Punto de Descarga y Recogida"
+    },
+    {
+        "lat": 23.154960,
+        "lng": -82.332643,
+        "title": "🚌 Ciclobus Naval",
+        "desc": "Punto de Descarga"
+    },
+	{
+        "lat": 23.154960,
+        "lng": -82.332643,
+        "title": "🚌 Ciclobus C. Cienfuegos",
+        "desc": "Punto de Recogida"
+    },
+	{
+        "lat": 23.133839,
+        "lng": -82.347094,
+        "title": "⛴ Lanchita de Regla (Habana)",
+        "desc": "Hacia Regla y Casablanca"
+    },
+	{
+        "lat": 23.142012,
+        "lng": -82.344530,
+        "title": "⛴ Lanchita de Regla (Casablanca)",
+        "desc": "Hacia La Habana"
+    },
+	{
+        "lat": 23.132896,
+        "lng": -82.337130,
+        "title": "⛴ Lanchita de Regla",
+        "desc": "Hacia La Habana"
+    },
+	{
+        "lat": 23.138730,
+        "lng": -82.378047,
+        "title": "🚴‍♂️🚴‍♀️ Punto de partida de la Masa Crítica",
+        "desc": "Cada 1er domingo de cada mes sale un grupo de amantes de las bicicletas a hacer un pequeño recorrido por las calles de la habana. SUMATE!!"
+    }
+]
