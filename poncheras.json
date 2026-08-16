@@ -1,0 +1,38 @@
+[
+    {
+        "lat": 23.12269,
+        "lng": -82.32964,
+        "title": "🩹 Calle Martí, Regla",
+        "desc": "Abierta por el día"
+    },
+    {
+        "lat": 23.08341,
+        "lng": -82.42046,
+        "title": "🩹 43 y 94 Marianao",
+        "desc": "Al lado de la avenida 51"
+    },
+    {
+        "lat": 23.09053,
+        "lng": -82.42154,
+        "title": "🩹 Avenida 43, El Lido",
+        "desc": "Cerca de la Ceguera"
+    },
+    {
+        "lat": 23.10925,
+        "lng": -82.37113,
+        "title": "🩹 Via Blanca y Rodríguez",
+        "desc": "Cerro"
+    },
+    {
+        "lat": 23.1136,
+        "lng": -82.36722,
+        "title": "🩹 Agua dulce y Vía Blanca",
+        "desc": "El Cerro"
+    },
+    {
+        "lat": 23.14343,
+        "lng": -82.33723,
+        "title": "🩹 Ponchera Casablanca",
+        "desc": ""
+    }
+]
