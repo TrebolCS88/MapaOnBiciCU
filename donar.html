@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apoya OnBiciCU</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 35px 25px 30px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Franja superior decorativa */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #2563eb, #16a34a);
+        }
+
+        .emoji-hero {
+            font-size: 60px;
+            display: inline-block;
+            animation: latido 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes latido {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        h2 {
+            color: #0f172a;
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        /* Contenedores de los datos */
+        .data-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px 15px;
+            margin-bottom: 20px;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+        .data-box:active {
+            transform: scale(0.98);
+            border-color: #2563eb;
+        }
+        
+        .data-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .data-value {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #0f172a;
+            background: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 2px dashed #cbd5e1;
+            word-break: break-all;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        /* Botón de copiar mágico */
+        .copy-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #e2e8f0;
+            color: #334155;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .footer-text {
+            margin-top: 25px;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="emoji-hero">🚲❤️</div>
+        <h2>¡Impulsa el pedal!</h2>
+        <p class="subtitle">Cada aporte mantiene a OnBiciCU rodando, libre de anuncios y al alcance de todos.</p>
+
+        <!-- TARJETA BANCARIA -->
+        <div class="data-box">
+            <div class="data-label">🏦 Transferencia a Tarjeta</div>
+            <div class="data-value" id="numTarjeta">
+                <!-- ⬇️ CAMBIA ESTO POR TU NÚMERO REAL AQUÍ ⬇️ -->
+                9202959872137348
+                <!-- ⬆️ CAMBIA ESTO POR TU NÚMERO REAL AQUÍ ⬆️ -->
+            </div>
+            <button class="copy-btn" onclick="copiarTexto('numTarjeta', this)">📋 Copiar número de tarjeta</button>
+        </div>
+
+        <!-- TELÉFONO DE VERIFICACIÓN -->
+        <div class="data-box">
+            <div class="data-label">📱 Verificación por Teléfono</div>
+            <div class="data-value" id="numTelefono">
+                <!-- ⬇️ CAMBIA ESTO POR TU NÚMERO REAL AQUÍ ⬇️ -->
+                +53 5426 2182
+                <!-- ⬆️ CAMBIA ESTO POR TU NÚMERO REAL AQUÍ ⬆️ -->
+            </div>
+            <button class="copy-btn" onclick="copiarTexto('numTelefono', this)">📋 Copiar número de teléfono</button>
+        </div>
+
+        <p class="footer-text">
+            Los datos se copian al portapapeles de tu dispositivo.<br>
+            ¡Gracias por creer en este proyecto! 🇨🇺
+        </p>
+    </div>
+
+    <script>
+        // Función mágica para copiar y cambiar el botón
+        function copiarTexto(id, boton) {
+            const textoACopiar = document.getElementById(id).innerText;
+            
+            navigator.clipboard.writeText(textoACopiar).then(() => {
+                // Cambiar visual del botón a "¡Copiado!"
+                const textoOriginal = boton.innerText;
+                boton.innerText = '✅ ¡Copiado al portapapeles!';
+                boton.style.backgroundColor = '#16a34a';
+                boton.style.color = 'white';
+                
+                // Restaurar el botón después de 3 segundos
+                setTimeout(() => {
+                    boton.innerText = textoOriginal;
+                    boton.style.backgroundColor = '#e2e8f0';
+                    boton.style.color = '#334155';
+                }, 3000);
+            }).catch(err => {
+                // Por si el navegador está muy restringido
+                alert("Por favor, selecciona y copia el número manualmente.");
+            });
+        }
+    </script>
+</body>
+</html>
