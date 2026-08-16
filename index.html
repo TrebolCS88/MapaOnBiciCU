@@ -553,11 +553,16 @@
 
         // Asignar eventos al contenedor del mapa
         mapDiv.addEventListener('mousedown', handlePointerDown);
-        mapDiv.addEventListener('mousemove', handlePointerMove); // NUEVO: Escuchar el movimiento del ratón
+        mapDiv.addEventListener('mousemove', handlePointerMove); 
         mapDiv.addEventListener('mouseup', handlePointerUp);
         mapDiv.addEventListener('mouseleave', handlePointerUp);
         
         mapDiv.addEventListener('touchstart', (e) => {
+            // SEGURIDAD ANTI-ZOOM: Si toca con 2 o más dedos, cancelar inmediatamente
+            if (e.touches.length > 1) {
+                clearTimeout(longPressTimer);
+                return; 
+            }
             const touch = e.touches[0];
             handlePointerDown({ 
                 target: document.elementFromPoint(touch.clientX, touch.clientY), 
@@ -567,7 +572,12 @@
             });
         }, { passive: true });
         
-        mapDiv.addEventListener('touchmove', (e) => { // NUEVO: Escuchar el movimiento del dedo
+        mapDiv.addEventListener('touchmove', (e) => { 
+            // SEGURIDAD ANTI-ZOOM: Si aparece un segundo dedo mientras mantiene, cancelar
+            if (e.touches.length > 1) {
+                clearTimeout(longPressTimer);
+                return;
+            }
             handlePointerMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY, touches: e.touches });
         }, { passive: true });
         
