@@ -1,27 +1,67 @@
 <div style="font-family: 'Segoe UI', sans-serif; padding: 20px; line-height: 1.6; color: #334155;">
+    <style>
+        /* Animaciones personalizadas para cada emoji */
+        .anim-mapa { display: inline-block; animation: mover-mapa 3s ease-in-out infinite; }
+        @keyframes mover-mapa { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(10px); } }
+
+        .anim-pin { display: inline-block; animation: caer-pin 2s ease-in-out infinite; }
+        @keyframes caer-pin { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+        .anim-loc { display: inline-block; animation: pulso-loc 2s ease-in-out infinite; }
+        @keyframes pulso-loc { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+        .anim-sparkle { display: inline-block; animation: brillar 2s ease-in-out infinite; }
+        @keyframes brillar { 0%, 100% { transform: rotate(0deg) scale(1); opacity: 1; } 50% { transform: rotate(15deg) scale(1.1); opacity: 0.8; } }
+
+        .anim-signal { display: inline-block; animation: cortar-senal 2.5s ease-in-out infinite; }
+        @keyframes cortar-senal { 0%, 100% { transform: rotate(0deg); } 20% { transform: rotate(-15deg); } 40% { transform: rotate(15deg); } 60% { transform: rotate(-10deg); } 80% { transform: rotate(10deg); } }
+
+        .anim-corazon { display: inline-block; animation: latir-corazon 1.5s ease-in-out infinite; }
+        @keyframes latir-corazon { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.3); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } }
+
+        .anim-redes { display: inline-block; animation: vibrar-redes 1s ease-in-out infinite; }
+        @keyframes vibrar-redes { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-15deg); } 75% { transform: rotate(15deg); } }
+
+        /* Estilos de los botones */
+        .btn-ayuda {
+            display: inline-block; padding: 8px 20px; background-color: #2563eb; color: white;
+            text-decoration: none; border-radius: 6px; font-weight: 600; margin: 5px;
+            font-size: 0.95rem; transition: background 0.2s;
+        }
+        .btn-ayuda:active { background-color: #1d4ed8; }
+        
+        .btn-donar {
+            display: inline-block; padding: 10px 25px; background-color: #16a34a; color: white;
+            text-decoration: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+            border: none; font-size: 1rem; transition: background 0.2s;
+        }
+        .btn-donar:active { background-color: #15803d; }
+        
+        .botones-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 15px; }
+    </style>
     
     <h2 style="color: #2563eb; margin-bottom: 15px; text-align: center;">🚲 Guía de OnBiciCU</h2>
     <p style="text-align: center; color: #64748b; margin-bottom: 25px;">Tu mapa colaborativo para moverte en bicicleta.</p>
 
-    <h3 style="color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">🗺️ Navegar el mapa</h3>
+    <h3 style="color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;"><span class="anim-mapa">🗺️</span> Navegar el mapa</h3>
     <ul style="margin-bottom: 20px; padding-left: 20px;">
         <li><strong>Arrastra</strong> el dedo para moverte por el mapa.</li>
         <li><strong>Pellizca</strong> con dos dedos para hacer zoom (acercar o alejar).</li>
         <li>Usa el botón <strong>☰</strong> para abrir el menú de categorías y ver los lugares por tipo (Parqueos, Talleres, etc.).</li>
     </ul>
 
-    <h3 style="color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">📍 Ver información</h3>
+    <h3 style="color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;"><span class="anim-pin">📍</span> Ver información</h3>
     <ul style="margin-bottom: 20px; padding-left: 20px;">
         <li>Toca <strong>una vez</strong> sobre cualquier marcador en el mapa para ver su nombre y detalles.</li>
         <li>Toca un lugar en la lista lateral para que el mapa te lleve automáticamente ahí.</li>
     </ul>
 
-    <h3 style="color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">📏 Mi ubicación</h3>
+    <h3 style="color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;"><span class="anim-loc">📏</span> Mi ubicación</h3>
     <ul style="margin-bottom: 20px; padding-left: 20px;">
         <li>Pulsa el botón de la brújula en la esquina para encontrar tu ubicación actual en el mapa (necesitas activar el GPS).</li>
     </ul>
 
-    <h3 style="color: #2563eb; border-bottom: 2px solid #bfdbfe; padding-bottom: 5px;">✨ Colaborar y Sugerir</h3>
+    <h3 style="color: #2563eb; border-bottom: 2px solid #bfdbfe; padding-bottom: 5px;"><span class="anim-sparkle">✨</span> Colaborar y Sugerir</h3>
     <p style="margin-bottom: 10px; font-weight: 600;">¿Conoces un parqueo o taller que no está?</p>
     <ul style="margin-bottom: 20px; padding-left: 20px; background: #f0fdf4; padding: 10px 10px 10px 20px; border-radius: 8px;">
         <li>Mantén presionado sobre un <strong>espacio vacío</strong> del mapa durante unos segundos.</li>
@@ -34,9 +74,27 @@
         <li>Escribe cuál es el error o lo que falta y envíalo para que lo corrijamos.</li>
     </ul>
 
-    <h3 style="color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">📡 Sin conexión</h3>
+    <h3 style="color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;"><span class="anim-signal">📡</span> Sin conexión</h3>
     <p style="color: #64748b; font-size: 0.9rem;">Si no tienes internet, el mapa no podrá cargar los datos. En ese caso aparecerá una pantalla avisándote. Reconecta tu Wi-Fi o datos y pulsa "Reintentar".</p>
 
-    <p style="text-align: center; margin-top: 30px; font-size: 0.85rem; color: #94a3b8;">OnBiciCU vBeta1 · Hecho con esfuerzo cubano 🇨🇺</p>
+    <!-- SECCIONES NUEVAS -->
+    <div style="margin-top: 30px; border-top: 2px solid #e2e8f0; padding-top: 20px;">
+        <h3 style="color: #16a34a; border-bottom: 2px solid #bbf7d0; padding-bottom: 5px;"><span class="anim-corazon">❤️</span> Colabora con nosotros</h3>
+        <p style="color: #64748b; margin-bottom: 10px;">Usted puede colaborar con este proyecto haciendo un donativo de lo que estime.</p>
+        <div class="botones-container">
+            <button class="btn-donar" onclick="window.AppInventor.setWebViewString('DONAR')" style="background-color: #00aaff;">❤️ Donar</button>
+        </div>
+    </div>
+
+    <div style="margin-top: 25px;">
+        <h3 style="color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;"><span class="anim-redes">📱</span> Síguenos en nuestras redes</h3>
+        <div class="botones-container">
+            <a href="https://www.youtube.com/@onbicicu" target="_blank" class="btn-ayuda" style="background-color: #ff0000;">▶️ Youtube</a>
+            <a href="https://whatsapp.com/channel/0029VbBxUXD0gcfRvXrdPa0k" target="_blank" class="btn-ayuda" style="background-color: #00aa00;">💬 Canal de Whatsapp</a>
+        </div>
+    </div>
+    <!-- FIN SECCIONES NUEVAS -->
+
+    <p style="text-align: center; margin-top: 40px; font-size: 0.85rem; color: #94a3b8;">OnBiciCU v1 · Hecho con esfuerzo cubano 🇨🇺</p>
 
 </div>
