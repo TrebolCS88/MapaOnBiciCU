@@ -30,7 +30,7 @@
         "tipo": "tiendas",
         "nombre": "Tiendas",
         "icono": "🛒",
-        "color": "#00ff00",
+        "color": "#16a34a",
         "borderRadius": "0",
         "rotacion": "330deg",
         "url": "tiendas.json"
