@@ -1,0 +1,44 @@
+[
+    {
+        "lat": 23.040416,
+        "lng": -82.466296,
+        "title": "🛒 Venta de piezas - Arroyo Arenas",
+        "desc": "Pequeño quiosco de venta de piezas y accesorios para bicicletas. Aveces hay alguien que da mantenimiento"
+    },
+    {
+        "lat": 23.112738,
+        "lng": -82.381657,
+        "title": "🛒 Venta de piezas - Bicimanía",
+        "desc": "Atención por reservación"
+    },
+	{
+        "lat": 23.079376,
+        "lng": -82.423114,
+        "title": "🛒 Venta de piezas - Ave 51",
+        "desc": "Pequeño quiosco de venta de piezas y accesorios para bicicletas."
+    },
+	{
+        "lat": 23.070624,
+        "lng": -82.437133,
+        "title": "🛒 Venta de piezas - Puente La Lisa",
+        "desc": "Pequeño quiosco de venta de piezas y accesorios para bicicletas."
+    },
+	{
+        "lat": 23.132808,
+        "lng": -82.357665,
+        "title": "🛒 Venta de piezas - Monte y Prado",
+        "desc": "Pequeño quiosco de venta de piezas y accesorios para bicicletas."
+    },
+	{
+        "lat": 23.078937,
+        "lng": -82.381625,
+        "title": "🛒 Venta de piezas - Vento",
+        "desc": "Atención por reservación"
+    },
+	{
+        "lat": 23.128392,
+        "lng": -82.393607,
+        "title": "🛒 Venta de piezas - Zapata y 2",
+        "desc": "Pequeño quiosco de venta de piezas y accesorios para bicicletas."
+    }
+]
