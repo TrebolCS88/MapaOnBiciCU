@@ -2,8 +2,8 @@
     {
         "tipo": "parqueos",
         "nombre": "Parqueos para Bicicletas",
-        "icono": "🚲",
-        "color": "#000000",
+        "icono": "P",
+        "color": "#ffffff",
         "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "parqueos.json"
@@ -38,7 +38,7 @@
     {
         "tipo": "alquiler",
         "nombre": "Alquiler",
-        "icono": "🤝",
+        "icono": "🚲",
         "color": "#16a34a",
         "borderRadius": "50%",
         "rotacion": "330deg",
@@ -74,7 +74,7 @@
     {
         "tipo": "otros",
         "nombre": "Otros de Interés",
-        "icono": "➕",
+        "icono": "📍",
         "color": "#f97316",
         "borderRadius": "50%",
         "rotacion": "330deg",
