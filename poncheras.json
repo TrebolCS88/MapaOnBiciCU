@@ -58,5 +58,11 @@
         "lng": -82.3586,
         "title": "Prado 20",
         "desc": "Centro Multiservicio"
+    },
+    {
+        "lat": 23.144074,
+        "lng": -82.298487,
+        "title": "Rotonda de Cojimar -Habana del Este",
+        "desc": "Colaboración"
     }
 ]
