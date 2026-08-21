@@ -4,7 +4,7 @@
         "nombre": "Parqueos para Bicicletas",
         "icono": "🚲",
         "color": "#00ff00",
-        "borderRadius": "7px",
+        "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "parqueos.json"
     },
@@ -13,7 +13,7 @@
         "nombre": "Talleres",
         "icono": "🔧",
         "color": "#2563eb",
-        "borderRadius": "7px",
+        "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "talleres.json"
     },
@@ -31,7 +31,7 @@
         "nombre": "Tiendas",
         "icono": "🛒",
         "color": "#16a34a",
-        "borderRadius": "0",
+        "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "tiendas.json"
     },
@@ -49,7 +49,7 @@
         "nombre": "Emergencias Médicas",
         "icono": "🏥",
         "color": "#ef4444",
-        "borderRadius": "7px",
+        "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "salud.json"
     },
@@ -67,16 +67,16 @@
         "nombre": "Alimentación Rápida",
         "icono": "🍔",
         "color": "#f97316",
-        "borderRadius": "0",
+        "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "alimentos.json"
     },
     {
         "tipo": "otros",
         "nombre": "Otros de Interés",
-        "icono": "👁",
+        "icono": "➕",
         "color": "#f97316",
-        "borderRadius": "0",
+        "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "otros.json"
     }
