@@ -347,7 +347,7 @@ function injectCategoryCSS(cats) {
     let css = '';
     cats.forEach(c => {
         // Efecto glow con el color de la categoría
-        css += `.pin.${c.tipo} { filter: drop-shadow(0 0 4px ${c.color}) drop-shadow(0 0 8px ${c.color}) drop-shadow(0 0 14px ${c.color}80); }\n`;
+        css += `.pin.${c.tipo} { filter: drop-shadow(0 0 2px ${c.color}) drop-shadow(0 0 4px ${c.color}) drop-shadow(0 0 7px ${c.color}80); }\n`;
         // Glow más intenso al hacer hover
         css += `.pin.${c.tipo}:hover { filter: drop-shadow(0 0 6px ${c.color}) drop-shadow(0 0 12px ${c.color}) drop-shadow(0 0 22px ${c.color}) drop-shadow(0 0 35px ${c.color}80); transform: scale(1.35) !important; }\n`;
     });
