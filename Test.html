@@ -338,18 +338,16 @@
             categoryList.innerHTML = `<div class="sidebar-empty"><div class="sidebar-empty-icon">${icon}</div><div class="sidebar-empty-text">${message}</div>${showRetry ? '<button class="retry-btn" onclick="initApp()">Reintentar</button>' : ''}</div>`;
         }
 
-        // =============================================
-//  INYECTOR DINÁMICO DE CSS - EMOJI CON GLOW
-// =============================================
-function injectCategoryCSS(cats) {
+        function injectCategoryCSS(cats) {
     let styleEl = document.getElementById('dynamic-cat-styles');
     if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-cat-styles'; document.head.appendChild(styleEl); }
     let css = '';
+    
+    const GLOW = 2;  // Solo ajusta este número
+    
     cats.forEach(c => {
-        // Efecto glow con el color de la categoría
-        css += `.pin.${c.tipo} { filter: drop-shadow(0 0 2px ${c.color}) drop-shadow(0 0 4px ${c.color}) drop-shadow(0 0 7px ${c.color}80); }\n`;
-        // Glow más intenso al hacer hover
-        css += `.pin.${c.tipo}:hover { filter: drop-shadow(0 0 5px ${c.color}) drop-shadow(0 0 10px ${c.color}) drop-shadow(0 0 18px ${c.color}) drop-shadow(0 0 35px ${c.color}80); transform: scale(1.35) !important; }\n`;
+        css += `.pin.${c.tipo} { filter: drop-shadow(0 0 ${GLOW}px ${c.color}); }\n`;
+        css += `.pin.${c.tipo}:hover { filter: drop-shadow(0 0 ${GLOW * 2}px ${c.color}); transform: scale(1.35) !important; }\n`;
     });
     styleEl.textContent = css;
 }
