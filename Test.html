@@ -339,17 +339,20 @@
         }
 
         // =============================================
-        //  INYECTOR DINÁMICO DE CSS - SOLO HOVER
-        // =============================================
-        function injectCategoryCSS(cats) {
-            let styleEl = document.getElementById('dynamic-cat-styles');
-            if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-cat-styles'; document.head.appendChild(styleEl); }
-            let css = '';
-            cats.forEach(c => {
-                css += `.pin.${c.tipo}:hover { transform: scale(1.4) !important; }\n`;
-            });
-            styleEl.textContent = css;
-        }
+//  INYECTOR DINÁMICO DE CSS - EMOJI CON GLOW
+// =============================================
+function injectCategoryCSS(cats) {
+    let styleEl = document.getElementById('dynamic-cat-styles');
+    if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-cat-styles'; document.head.appendChild(styleEl); }
+    let css = '';
+    cats.forEach(c => {
+        // Efecto glow con el color de la categoría
+        css += `.pin.${c.tipo} { filter: drop-shadow(0 0 4px ${c.color}) drop-shadow(0 0 8px ${c.color}) drop-shadow(0 0 14px ${c.color}80); }\n`;
+        // Glow más intenso al hacer hover
+        css += `.pin.${c.tipo}:hover { filter: drop-shadow(0 0 6px ${c.color}) drop-shadow(0 0 12px ${c.color}) drop-shadow(0 0 22px ${c.color}) drop-shadow(0 0 35px ${c.color}80); transform: scale(1.35) !important; }\n`;
+    });
+    styleEl.textContent = css;
+}
 
         function populateCategorySelect() {
             const select = document.getElementById('newCategory');
