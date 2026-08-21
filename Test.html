@@ -80,25 +80,25 @@
         .user-dot-inner { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; transform: translate(-50%, -50%); background: var(--primary-color); border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.5); z-index: 2; }
         @keyframes user-pulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; } }
 
-        /* ===== EMOJI CON COLOR DE FONDO ===== */
-        .custom-map-icon { background: transparent !important; border: none !important; width: 32px !important; height: 32px !important; overflow: visible; }
+        /* ===== EMOJI SIN FONDO ===== */
+        .custom-map-icon { background: transparent !important; border: none !important; width: 28px !important; height: 28px !important; overflow: visible; }
         .pin { 
-            width: 32px; 
-            height: 32px; 
+            width: 28px; 
+            height: 28px; 
+            background: transparent;
             border: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+            box-shadow: none;
             position: absolute; 
             top: 0; 
             left: 0; 
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 24px;
             line-height: 1;
-            border-radius: 50%;
         }
-        .pin:hover { transform: scale(1.35) !important; z-index: 10000 !important; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+        .pin:hover { transform: scale(1.4) !important; z-index: 10000 !important; }
         .tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.95); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap; opacity: 0; visibility: hidden; transition: opacity 0.2s; pointer-events: none; z-index: 99999; margin-bottom: 5px; }
         .custom-map-icon:hover .tooltip { opacity: 1; visibility: visible; }
 
@@ -173,7 +173,6 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
                 <span class="btn-label">Mi ubicación</span>
             </button>
-            
         </div>
     </header>
 
@@ -340,16 +339,14 @@
         }
 
         // =============================================
-        //  INYECTOR DINÁMICO DE CSS - CON COLOR DE FONDO
+        //  INYECTOR DINÁMICO DE CSS - SOLO HOVER
         // =============================================
         function injectCategoryCSS(cats) {
             let styleEl = document.getElementById('dynamic-cat-styles');
             if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-cat-styles'; document.head.appendChild(styleEl); }
             let css = '';
             cats.forEach(c => {
-                // Aplicamos color de fondo y border-radius de la categoría
-                css += `.pin.${c.tipo} { background-color: ${c.color}; border-radius: ${c.borderRadius}; }\n`;
-                css += `.pin.${c.tipo}:hover { transform: scale(1.35) !important; }\n`;
+                css += `.pin.${c.tipo}:hover { transform: scale(1.4) !important; }\n`;
             });
             styleEl.textContent = css;
         }
@@ -471,7 +468,7 @@
         }
 
         // =============================================
-        //  FILTRADO DEL MAPA - CON EMOJI Y COLOR
+        //  FILTRADO DEL MAPA - SOLO EMOJI
         // =============================================
         function filterMap(filterType) {
             mapMarkers.forEach(m => map.removeLayer(m));
@@ -479,15 +476,14 @@
             let pts = filterType === 'todos' ? points : points.filter(p => (p.tipo || 'general') === filterType);
 
             pts.forEach(p => {
-                // Obtener emoji de la categoría
                 const catObj = categories.find(c => c.tipo === (p.tipo || 'general'));
                 const emoji = catObj ? catObj.icono : '📍';
                 
                 const icon = L.divIcon({
                     className: 'custom-map-icon',
                     html: `<div class="pin ${p.tipo || 'general'}" data-id="${p.id}">${emoji}</div><div class="tooltip">${p.title}</div>`,
-                    iconSize: [32, 32],
-                    iconAnchor: [16, 16]
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14]
                 });
                 const marker = L.marker([p.lat, p.lng], { icon: icon }).addTo(map);
                 
