@@ -343,7 +343,7 @@
     if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-cat-styles'; document.head.appendChild(styleEl); }
     let css = '';
     
-    const GLOW = 2;  // Solo ajusta este número
+    const GLOW = 3;  // Solo ajusta este número
     
     cats.forEach(c => {
         css += `.pin.${c.tipo} { filter: drop-shadow(0 0 ${GLOW}px ${c.color}); }\n`;
