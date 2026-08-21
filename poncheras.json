@@ -34,5 +34,17 @@
         "lng": -82.33723,
         "title": "🩹 Ponchera Casablanca",
         "desc": ""
+    },
+    {
+        "lat": 23.082251,
+        "lng": -82.418200,
+        "title": "🩹 55A y 92A -Marianao",
+        "desc": "Detras del complejo deportivo Jesús Menéndez, al lado del tanque de Pogolotti"
+    },
+    {
+        "lat": 23.141380,
+        "lng": -82.308795,
+        "title": "🩹 92 e/13 y 14 -Bahía, Habana del Este",
+        "desc": "Tiene techo y es en un pasillo"
     }
 ]
