@@ -40,5 +40,11 @@
         "lng": -82.393607,
         "title": "Venta de piezas - Zapata y 2",
         "desc": "Pequeño quiosco de venta de piezas y accesorios para bicicletas."
+    },
+	{
+        "lat": 23.039777,
+        "lng": -82.263772,
+        "title": "FUSH BIKE - Piezas",
+        "desc": "Venta de bicicletas, piezas y componentes para ciclismo, tanto nuevos como usados 📍 Dirección: Avenida 103 #3018 entre 30 y 32, Magdalena"
     }
 ]
