@@ -3,9 +3,8 @@
         "tipo": "parqueos",
         "nombre": "Parqueos para Bicicletas",
         "icono": "🔒",
-        "mostrarIcono": true,
-        "color": "#000000",
-        "borderRadius": "50%",
+        "color": "#00ff00",
+        "borderRadius": "7px",
         "rotacion": "330deg",
         "url": "parqueos.json"
     },
@@ -13,8 +12,7 @@
         "tipo": "talleres",
         "nombre": "Talleres",
         "icono": "🔧",
-        "mostrarIcono": true,
-        "color": "#000000",
+        "color": "#2563eb",
         "borderRadius": "7px",
         "rotacion": "330deg",
         "url": "talleres.json"
@@ -23,8 +21,7 @@
         "tipo": "poncheras",
         "nombre": "Poncheras",
         "icono": "🩹",
-        "mostrarIcono": true,
-        "color": "#000000",
+        "color": "#ff0000",
         "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "poncheras.json"
@@ -33,9 +30,8 @@
         "tipo": "tiendas",
         "nombre": "Tiendas",
         "icono": "🛒",
-        "mostrarIcono": true,
-        "color": "#000000",
-        "borderRadius": "50%",
+        "color": "#16a34a",
+        "borderRadius": "0",
         "rotacion": "330deg",
         "url": "tiendas.json"
     },
@@ -43,8 +39,7 @@
         "tipo": "alquiler",
         "nombre": "Alquiler",
         "icono": "🚲",
-        "mostrarIcono": true,
-        "color": "#000000",
+        "color": "#16a34a",
         "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "alquiler.json"
@@ -53,8 +48,7 @@
         "tipo": "salud",
         "nombre": "Emergencias Médicas",
         "icono": "🏥",
-        "mostrarIcono": true,
-        "color": "#000000",
+        "color": "#ef4444",
         "borderRadius": "7px",
         "rotacion": "330deg",
         "url": "salud.json"
@@ -63,8 +57,7 @@
         "tipo": "agua",
         "nombre": "Puntos de Agua",
         "icono": "💧",
-        "mostrarIcono": true,
-        "color": "#000000",
+        "color": "#06b6d4",
         "borderRadius": "50%",
         "rotacion": "0deg",
         "url": "agua.json"
@@ -73,8 +66,7 @@
         "tipo": "alimentos",
         "nombre": "Alimentación Rápida",
         "icono": "🍔",
-        "mostrarIcono": true,
-        "color": "#000000",
+        "color": "#f97316",
         "borderRadius": "0",
         "rotacion": "330deg",
         "url": "alimentos.json"
@@ -83,8 +75,7 @@
         "tipo": "otros",
         "nombre": "Otros de Interés",
         "icono": "📍",
-        "mostrarIcono": true,
-        "color": "#000000",
+        "color": "#f97316",
         "borderRadius": "0",
         "rotacion": "330deg",
         "url": "otros.json"
