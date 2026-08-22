@@ -2,7 +2,7 @@
     {
         "tipo": "parqueos",
         "nombre": "Parqueos para Bicicletas",
-        "icono": "🔒",
+        "icono": "",
         "color": "#ffffff",
         "borderRadius": "50%",
         "rotacion": "330deg",
