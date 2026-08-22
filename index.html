@@ -342,14 +342,34 @@
 
         // =============================================
 //  INYECTOR DINÁMICO DE CSS
-// // =============================================
+// =============================================
 function injectCategoryCSS(cats) {
     let styleEl = document.getElementById('dynamic-cat-styles');
     if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-cat-styles'; document.head.appendChild(styleEl); }
     let css = '';
+    
+    // ===== AJUSTA EL GLOW AQUÍ =====
+    const GLOW1 = 2;      // Halo cercano
+    const GLOW2 = 1;      // Halo medio
+    const GLOW3 = 1;     // Halo lejano
+    const GLOW_OPACIDAD = "ff";  // Opacidad del halo lejano (00-ff)
+    
+    const HOVER_GLOW1 = 4;
+    const HOVER_GLOW2 = 9;
+    const HOVER_GLOW3 = 16;
+    const HOVER_GLOW4 = 25;
+    const HOVER_OPACIDAD = "80";
+    // ================================
+    
     cats.forEach(c => {
-        // Solo aplicar estilos de punto de color si NO tiene emoji
-        if (!c.icono || c.icono.trim() === '') {
+        const mostrarIcono = c.mostrarIcono !== undefined ? c.mostrarIcono : false;
+        
+        if (mostrarIcono && c.icono && c.icono.trim() !== '') {
+            // Estilo con GLOW para emoji
+            css += `.pin-emoji.${c.tipo} { filter: drop-shadow(0 0 ${GLOW1}px ${c.color}) drop-shadow(0 0 ${GLOW2}px ${c.color}) drop-shadow(0 0 ${GLOW3}px ${c.color}${GLOW_OPACIDAD}); }\n`;
+            css += `.pin-emoji.${c.tipo}:hover { filter: drop-shadow(0 0 ${HOVER_GLOW1}px ${c.color}) drop-shadow(0 0 ${HOVER_GLOW2}px ${c.color}) drop-shadow(0 0 ${HOVER_GLOW3}px ${c.color}) drop-shadow(0 0 ${HOVER_GLOW4}px ${c.color}${HOVER_OPACIDAD}); }\n`;
+        } else {
+            // Estilo de punto de color original
             css += `.pin.${c.tipo} { background-color: ${c.color}; border-radius: ${c.borderRadius}; transform: rotate(${c.rotacion}); }\n`;
             css += `.pin.${c.tipo}:hover { transform: rotate(360deg) scale(1.2) !important; }\n`;
         }
@@ -483,19 +503,18 @@ function injectCategoryCSS(cats) {
 
     pts.forEach(p => {
         const catObj = categories.find(c => c.tipo === (p.tipo || 'general'));
-        const tieneEmoji = catObj && catObj.icono && catObj.icono.trim() !== '';
+        // Si mostrarIcono es true Y tiene emoji → emoji, si no → punto de color
+        const usarEmoji = catObj && catObj.mostrarIcono === true && catObj.icono && catObj.icono.trim() !== '';
         
         let iconHtml;
-        if (tieneEmoji) {
-            // Mostrar emoji
+        if (usarEmoji) {
             iconHtml = `<div class="pin-emoji ${p.tipo || 'general'}" data-id="${p.id}">${catObj.icono}</div><div class="tooltip">${p.title}</div>`;
         } else {
-            // Mostrar punto de color original
             iconHtml = `<div class="pin ${p.tipo || 'general'}" data-id="${p.id}"></div><div class="tooltip">${p.title}</div>`;
         }
         
-        const iconSize = tieneEmoji ? [28, 28] : [24, 24];
-        const iconAnchor = tieneEmoji ? [14, 14] : [12, 12];
+        const iconSize = usarEmoji ? [28, 28] : [24, 24];
+        const iconAnchor = usarEmoji ? [14, 14] : [12, 12];
         
         const icon = L.divIcon({
             className: 'custom-map-icon',
@@ -505,7 +524,6 @@ function injectCategoryCSS(cats) {
         });
         const marker = L.marker([p.lat, p.lng], { icon: icon }).addTo(map);
         
-        // Clic normal
         marker.on('click', () => {
             if (isLongPress) { isLongPress = false; return; }
             openModal(p);
@@ -661,6 +679,7 @@ function injectCategoryCSS(cats) {
         function openModal(data) {
     currentModalPoint = data;
     const catObj = categories.find(c => c.tipo === (data.tipo || 'general'));
+    // Siempre mostrar emoji en el título si existe (independiente de mostrarIcono)
     const tieneEmoji = catObj && catObj.icono && catObj.icono.trim() !== '';
     
     if (tieneEmoji) {
