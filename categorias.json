@@ -14,7 +14,7 @@
         "nombre": "Talleres",
         "icono": "🔧",
         "mostrarIcono": true,
-        "color": "#2563eb",
+        "color": "#000000",
         "borderRadius": "7px",
         "rotacion": "330deg",
         "url": "talleres.json"
@@ -24,7 +24,7 @@
         "nombre": "Poncheras",
         "icono": "🩹",
         "mostrarIcono": true,
-        "color": "#16a34a",
+        "color": "#000000",
         "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "poncheras.json"
@@ -34,7 +34,7 @@
         "nombre": "Tiendas",
         "icono": "🛒",
         "mostrarIcono": true,
-        "color": "#16a34a",
+        "color": "#000000",
         "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "tiendas.json"
@@ -44,7 +44,7 @@
         "nombre": "Alquiler",
         "icono": "🚲",
         "mostrarIcono": true,
-        "color": "#16a34a",
+        "color": "#000000",
         "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "alquiler.json"
@@ -54,7 +54,7 @@
         "nombre": "Emergencias Médicas",
         "icono": "🏥",
         "mostrarIcono": true,
-        "color": "#ef4444",
+        "color": "#000000",
         "borderRadius": "7px",
         "rotacion": "330deg",
         "url": "salud.json"
@@ -74,7 +74,7 @@
         "nombre": "Alimentación Rápida",
         "icono": "🍔",
         "mostrarIcono": true,
-        "color": "#f97316",
+        "color": "#000000",
         "borderRadius": "0",
         "rotacion": "330deg",
         "url": "alimentos.json"
@@ -84,7 +84,7 @@
         "nombre": "Otros de Interés",
         "icono": "📍",
         "mostrarIcono": true,
-        "color": "#f97316",
+        "color": "#000000",
         "borderRadius": "0",
         "rotacion": "330deg",
         "url": "otros.json"
