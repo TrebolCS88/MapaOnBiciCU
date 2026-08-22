@@ -63,8 +63,8 @@
         "tipo": "agua",
         "nombre": "Puntos de Agua",
         "icono": "💧",
-        "mostrarIcono": false,
-        "color": "#06b6d4",
+        "mostrarIcono": true,
+        "color": "#000000",
         "borderRadius": "50%",
         "rotacion": "0deg",
         "url": "agua.json"
