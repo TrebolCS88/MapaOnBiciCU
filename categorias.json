@@ -3,8 +3,8 @@
         "tipo": "parqueos",
         "nombre": "Parqueos para Bicicletas",
         "icono": "🔒",
-        "mostrarIcono": true,
-        "color": "#00ff00",
+        "mostrarIcono": false,
+        "color": "#000000",
         "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "parqueos.json"
