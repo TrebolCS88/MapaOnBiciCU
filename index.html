@@ -99,6 +99,8 @@
             line-height: 1;
         }
         .pin:hover { transform: scale(1.4) !important; z-index: 10000 !important; }
+        .pin-emoji { width: 28px; height: 28px; background: transparent !important; border: none !important; box-shadow: none !important; display: flex; align-items: center; justify-content: center; font-size: 22px; line-height: 1; position: absolute; top: -2px; left: -2px; transition: transform 0.2s; }
+        .pin-emoji:hover { transform: scale(1.3) !important; }
         .tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.95); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; white-space: nowrap; opacity: 0; visibility: hidden; transition: opacity 0.2s; pointer-events: none; z-index: 99999; margin-bottom: 5px; }
         .custom-map-icon:hover .tooltip { opacity: 1; visibility: visible; }
 
@@ -338,16 +340,19 @@
             categoryList.innerHTML = `<div class="sidebar-empty"><div class="sidebar-empty-icon">${icon}</div><div class="sidebar-empty-text">${message}</div>${showRetry ? '<button class="retry-btn" onclick="initApp()">Reintentar</button>' : ''}</div>`;
         }
 
-        function injectCategoryCSS(cats) {
+        // =============================================
+//  INYECTOR DINÁMICO DE CSS
+// // =============================================
+function injectCategoryCSS(cats) {
     let styleEl = document.getElementById('dynamic-cat-styles');
     if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-cat-styles'; document.head.appendChild(styleEl); }
     let css = '';
-    
-    const GLOW = 4;  // Solo ajusta este número
-    
     cats.forEach(c => {
-        css += `.pin.${c.tipo} { filter: drop-shadow(0 0 ${GLOW}px ${c.color}); }\n`;
-        css += `.pin.${c.tipo}:hover { filter: drop-shadow(0 0 ${GLOW * 2}px ${c.color}); transform: scale(1.35) !important; }\n`;
+        // Solo aplicar estilos de punto de color si NO tiene emoji
+        if (!c.icono || c.icono.trim() === '') {
+            css += `.pin.${c.tipo} { background-color: ${c.color}; border-radius: ${c.borderRadius}; transform: rotate(${c.rotacion}); }\n`;
+            css += `.pin.${c.tipo}:hover { transform: rotate(360deg) scale(1.2) !important; }\n`;
+        }
     });
     styleEl.textContent = css;
 }
@@ -469,35 +474,48 @@
         }
 
         // =============================================
-        //  FILTRADO DEL MAPA - SOLO EMOJI
+        //  FILTRADO DEL MAPA - EMOJI/CIRCULO
         // =============================================
         function filterMap(filterType) {
-            mapMarkers.forEach(m => map.removeLayer(m));
-            mapMarkers = [];
-            let pts = filterType === 'todos' ? points : points.filter(p => (p.tipo || 'general') === filterType);
+    mapMarkers.forEach(m => map.removeLayer(m));
+    mapMarkers = [];
+    let pts = filterType === 'todos' ? points : points.filter(p => (p.tipo || 'general') === filterType);
 
-            pts.forEach(p => {
-                const catObj = categories.find(c => c.tipo === (p.tipo || 'general'));
-                const emoji = catObj ? catObj.icono : '📍';
-                
-                const icon = L.divIcon({
-                    className: 'custom-map-icon',
-                    html: `<div class="pin ${p.tipo || 'general'}" data-id="${p.id}">${emoji}</div><div class="tooltip">${p.title}</div>`,
-                    iconSize: [28, 28],
-                    iconAnchor: [14, 14]
-                });
-                const marker = L.marker([p.lat, p.lng], { icon: icon }).addTo(map);
-                
-                marker.on('click', () => {
-                    if (isLongPress) { isLongPress = false; return; }
-                    openModal(p);
-                });
-
-                mapMarkers.push(marker);
-            });
-
-            if (pts.length > 0) map.fitBounds(L.featureGroup(mapMarkers).getBounds().pad(0.1));
+    pts.forEach(p => {
+        const catObj = categories.find(c => c.tipo === (p.tipo || 'general'));
+        const tieneEmoji = catObj && catObj.icono && catObj.icono.trim() !== '';
+        
+        let iconHtml;
+        if (tieneEmoji) {
+            // Mostrar emoji
+            iconHtml = `<div class="pin-emoji ${p.tipo || 'general'}" data-id="${p.id}">${catObj.icono}</div><div class="tooltip">${p.title}</div>`;
+        } else {
+            // Mostrar punto de color original
+            iconHtml = `<div class="pin ${p.tipo || 'general'}" data-id="${p.id}"></div><div class="tooltip">${p.title}</div>`;
         }
+        
+        const iconSize = tieneEmoji ? [28, 28] : [24, 24];
+        const iconAnchor = tieneEmoji ? [14, 14] : [12, 12];
+        
+        const icon = L.divIcon({
+            className: 'custom-map-icon',
+            html: iconHtml,
+            iconSize: iconSize,
+            iconAnchor: iconAnchor
+        });
+        const marker = L.marker([p.lat, p.lng], { icon: icon }).addTo(map);
+        
+        // Clic normal
+        marker.on('click', () => {
+            if (isLongPress) { isLongPress = false; return; }
+            openModal(p);
+        });
+
+        mapMarkers.push(marker);
+    });
+
+    if (pts.length > 0) map.fitBounds(L.featureGroup(mapMarkers).getBounds().pad(0.1));
+}
 
         // =============================================
         //  SISTEMA DE CLIC LARGO
@@ -641,15 +659,21 @@
         //  MODAL INFORMACIÓN NORMAL
         // =============================================
         function openModal(data) {
-            currentModalPoint = data;
-            const catObj = categories.find(c => c.tipo === (data.tipo || 'general'));
-            const emoji = catObj ? catObj.icono : '📍';
-            mTitle.innerHTML = `${emoji} ${data.title}`;
-            mDesc.innerText = data.desc;
-            if (data.imagen) { mImg.src = data.imagen; mImg.style.display = 'block'; } else { mImg.style.display = 'none'; mImg.src = ""; }
-            if (data.enlace) { mLink.href = data.enlace; mLink.classList.add('visible'); } else { mLink.classList.remove('visible'); mLink.href = "#"; }
-            modal.classList.add('open');
-        }
+    currentModalPoint = data;
+    const catObj = categories.find(c => c.tipo === (data.tipo || 'general'));
+    const tieneEmoji = catObj && catObj.icono && catObj.icono.trim() !== '';
+    
+    if (tieneEmoji) {
+        mTitle.innerHTML = `${catObj.icono} ${data.title}`;
+    } else {
+        mTitle.innerText = data.title;
+    }
+    
+    mDesc.innerText = data.desc;
+    if (data.imagen) { mImg.src = data.imagen; mImg.style.display = 'block'; } else { mImg.style.display = 'none'; mImg.src = ""; }
+    if (data.enlace) { mLink.href = data.enlace; mLink.classList.add('visible'); } else { mLink.classList.remove('visible'); mLink.href = "#"; }
+    modal.classList.add('open');
+}
 
         function triggerEditFromModal() {
             if (currentModalPoint) {
