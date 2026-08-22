@@ -46,5 +46,11 @@
         "lng": -82.263772,
         "title": "FUSH BIKE - Piezas",
         "desc": "Venta de bicicletas, piezas y componentes para ciclismo, tanto nuevos como usados 📍 Dirección: Avenida 103 #3018 entre 30 y 32, Magdalena"
+    },
+	{
+        "lat": 23.080034,
+        "lng": -82.438221,
+        "title": "29 e/ 124 y 128 - Marianao",
+        "desc": "Tienda y taller"
     }
 ]
