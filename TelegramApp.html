@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OnBiciCU Mapa</title>
+    <link rel="icon" href="ObCIcon.png" type="image/png">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --accent-color: #ef4444;
+            --sidebar-width: 280px;
+            --header-height: 56px;
+            --bg-dark: #e2e8f0;
+            /* Variables de tema Telegram — se sobreescriben dinámicamente */
+            --tg-bg: #ffffff;
+            --tg-bg-secondary: #f8fafc;
+            --tg-text: #0f172a;
+            --tg-text-secondary: #64748b;
+            --tg-hint: #94a3b8;
+            --tg-border: #e2e8f0;
+            --tg-button: #2563eb;
+            --tg-button-text: #ffffff;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: var(--tg-text);
+        }
+
+        /* ========== HEADER ========== */
+        header {
+            height: var(--header-height);
+            background: var(--tg-bg);
+            border-bottom: 1px solid var(--tg-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            padding-top: var(--safe-top);
+            z-index: 1000;
+            flex-shrink: 0;
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        h1 { font-size: 1rem; color: var(--tg-text); font-weight: 700; }
+        .menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--tg-text-secondary);
+            padding: 4px;
+        }
+
+        .geo-btn-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            background: var(--tg-button);
+            color: var(--tg-button-text);
+            border: none;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .geo-btn-header:hover { opacity: 0.9; }
+        .geo-btn-header:active { transform: scale(0.97); }
+        .geo-btn-header.loading { pointer-events: none; opacity: 0.7; }
+        .geo-btn-header.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px; height: 16px;
+            border: 2px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            right: 10px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        .data-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .data-status.loading { color: #f59e0b; background: #fffbeb; }
+        .data-status.loaded { color: #16a34a; background: #f0fdf4; }
+        .data-status.error { color: #ef4444; background: #fef2f2; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+        .data-status.loading .status-dot { background: #f59e0b; animation: blink 1s ease-in-out infinite; }
+        .data-status.loaded .status-dot { background: #16a34a; }
+        .data-status.error .status-dot { background: #ef4444; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* ========== CONTENEDOR PRINCIPAL ========== */
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - var(--header-height) - var(--safe-top));
+            position: relative;
+        }
+
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--tg-bg);
+            border-right: 1px solid var(--tg-border);
+            padding: 0;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            -webkit-overflow-scrolling: touch;
+        }
+        .sidebar-title {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--tg-border);
+        }
+
+        .cat-header {
+            padding: 13px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: var(--tg-text-secondary);
+            background: var(--tg-bg);
+            border-bottom: 1px solid var(--tg-border);
+            transition: background 0.2s;
+            border-left: 4px solid transparent;
+            user-select: none;
+        }
+        .cat-header:hover { background-color: var(--tg-bg-secondary); color: var(--tg-button); }
+        .cat-header.active { background-color: var(--tg-bg-secondary); color: var(--tg-button); border-left-color: var(--tg-button); }
+        .badge { background: var(--tg-border); color: var(--tg-text-secondary); font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; }
+        .arrow { font-size: 0.8rem; transition: transform 0.3s; color: var(--tg-hint); margin-left: 10px; }
+        .cat-header.active .arrow { transform: rotate(180deg); color: var(--tg-button); }
+
+        .cat-body {
+            max-height: 0;
+            overflow: hidden;
+            background-color: var(--tg-bg-secondary);
+            transition: max-height 0.3s ease-out;
+        }
+        .cat-body.open { max-height: 500px; overflow-y: auto; transition: max-height 0.5s ease-in; }
+
+        .point-item {
+            padding: 10px 20px 10px 35px;
+            font-size: 0.88rem;
+            color: var(--tg-text-secondary);
+            cursor: pointer;
+            border-left: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .point-item:hover { color: var(--tg-button); background-color: var(--tg-border); padding-left: 40px; }
+
+        .sidebar-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .sidebar-empty { padding: 30px 20px; text-align: center; color: var(--tg-hint); }
+        .sidebar-empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .sidebar-empty-text { font-size: 0.85rem; line-height: 1.6; }
+        .sidebar-empty-text code { background: var(--tg-border); padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; color: var(--tg-text-secondary); }
+        .retry-btn {
+            margin-top: 15px;
+            padding: 8px 20px;
+            background: var(--tg-button);
+            color: var(--tg-button-text);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+        .retry-btn:hover { opacity: 0.9; }
+
+        /* ========== MAPA ========== */
+        #map { flex: 1; background-color: var(--bg-dark); z-index: 1; }
+
+        .geo-float-btn {
+            position: absolute;
+            bottom: calc(30px + var(--safe-bottom));
+            right: 15px;
+            z-index: 1000;
+            width: 46px; height: 46px;
+            background: var(--tg-bg);
+            border: 2px solid var(--tg-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            transition: all 0.25s ease;
+        }
+        .geo-float-btn:hover { background: var(--tg-button); border-color: var(--tg-button); transform: scale(1.08); }
+        .geo-float-btn:hover svg { fill: white; stroke: white; }
+        .geo-float-btn.active { background: var(--tg-button); border-color: var(--tg-button); }
+        .geo-float-btn.active svg { fill: white; stroke: white; }
+        .geo-float-btn.loading-btn { pointer-events: none; }
+        .geo-float-btn.loading-btn svg { animation: pulse-icon 1s ease-in-out infinite; }
+        @keyframes pulse-icon { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+
+        /* ========== MARCADOR DE USUARIO ========== */
+        .user-location-marker {
+            background: transparent !important;
+            border: none !important;
+            width: 40px !important;
+            height: 40px !important;
+            overflow: visible !important;
+        }
+        .user-dot-outer {
+            position: absolute; top: 50%; left: 50%;
+            width: 40px; height: 40px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.15);
+            animation: user-pulse 2s ease-out infinite;
+        }
+        .user-dot-inner {
+            position: absolute; top: 50%; left: 50%;
+            width: 16px; height: 16px;
+            transform: translate(-50%, -50%);
+            background: var(--tg-button);
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.5);
+            z-index: 2;
+        }
+        @keyframes user-pulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; } }
+
+        /* ========== PINES DEL MAPA ========== */
+        .custom-map-icon {
+            background: transparent !important;
+            border: none !important;
+            width: 24px !important;
+            height: 24px !important;
+            overflow: visible;
+        }
+        .pin {
+            width: 20px; height: 20px;
+            background-color: var(--accent-color);
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            position: absolute; top: 2px; left: 2px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .pin:hover { transform: scale(1.2) !important; z-index: 10000 !important; }
+        .tooltip {
+            position: absolute; bottom: 100%; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 99999;
+            margin-bottom: 5px;
+        }
+        .custom-map-icon:hover .tooltip { opacity: 1; visibility: visible; }
+
+        /* ========== MODALES ========== */
+        .modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(2px);
+            padding: 20px;
+        }
+        .modal.open { opacity: 1; pointer-events: auto; }
+        .modal-card {
+            background: var(--tg-bg);
+            padding: 24px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+        .close-modal {
+            background: none; border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            float: right;
+            color: var(--tg-hint);
+            padding: 0;
+            line-height: 1;
+        }
+        .modal-img {
+            width: 100%; height: auto;
+            max-height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            background-color: var(--tg-border);
+        }
+        .modal-link {
+            display: none;
+            width: 100%;
+            text-align: center;
+            margin-top: 15px;
+            padding: 12px;
+            background-color: var(--tg-bg);
+            color: var(--tg-button);
+            border: 1px solid var(--tg-button);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .modal-link.visible { display: block !important; }
+        .modal-link:hover { background-color: var(--tg-button); color: white; }
+
+        /* ========== FORMULARIOS ========== */
+        .form-group { margin-top: 15px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--tg-text-secondary); margin-bottom: 5px; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 10px;
+            border: 1px solid var(--tg-border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: var(--tg-bg-secondary);
+            color: var(--tg-text);
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--tg-button);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group .coord-copy { font-family: 'Courier New', monospace; font-size: 0.8rem; background: var(--tg-bg-secondary); padding: 8px; border-radius: 8px; color: var(--tg-text-secondary); word-break: break-all; border: 1px solid var(--tg-border); }
+        .btn-submit-suggest {
+            margin-top: 20px; width: 100%; padding: 12px;
+            background: #16a34a; color: white;
+            border: none; border-radius: 8px;
+            font-size: 0.95rem; font-weight: 600;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: opacity 0.2s;
+        }
+        .btn-submit-suggest:hover { opacity: 0.9; }
+        .btn-submit-suggest:active { transform: scale(0.98); }
+        .hint-text { font-size: 0.75rem; color: var(--tg-hint); margin-top: 10px; text-align: center; line-height: 1.4; }
+
+        /* ========== TOAST ========== */
+        .toast-container {
+            position: fixed;
+            top: calc(70px + var(--safe-top));
+            right: 16px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            background: var(--tg-bg);
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.85rem;
+            color: var(--tg-text);
+            pointer-events: auto;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-left: 4px solid var(--tg-hint);
+            max-width: 320px;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-left-color: #16a34a; } .toast.success .toast-icon { color: #16a34a; }
+        .toast.error { border-left-color: #ef4444; } .toast.error .toast-icon { color: #ef4444; }
+        .toast.info { border-left-color: var(--tg-button); } .toast.info .toast-icon { color: var(--tg-button); }
+        .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+        .toast-text { line-height: 1.4; }
+
+        /* ========== COORDENADAS ========== */
+        .coord-display {
+            position: absolute;
+            bottom: calc(30px + var(--safe-bottom));
+            left: 15px;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(6px);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-family: 'Courier New', monospace;
+            display: none;
+            gap: 12px;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .coord-display.visible { display: flex; }
+        .coord-label { color: #94a3b8; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .coord-val { color: #7dd3fc; }
+        .coord-accuracy { color: #fbbf24; font-size: 0.7rem; }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .menu-btn { display: block; }
+            .sidebar {
+                position: absolute;
+                height: 100%;
+                transform: translateX(-100%);
+                box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+                padding-bottom: var(--safe-bottom);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.open { opacity: 1; visibility: visible; }
+            .geo-btn-header span.btn-label { display: none; }
+            .geo-btn-header { padding: 7px 10px; }
+            .coord-display { left: 10px; bottom: calc(85px + var(--safe-bottom)); font-size: 0.7rem; }
+            .data-status span.status-text { display: none; }
+            .header-right > div:not(.data-status):not(.geo-btn-header) { display: none; }
+        }
+
+        /* ========== REDUCIR MOVIMIENTO ========== */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <button class="menu-btn" id="menuToggle" aria-label="Abrir menú">☰</button>
+            <h1>OnBiciCU Mapa</h1>
+        </div>
+        <div class="header-right">
+            <div class="data-status loading" id="dataStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">Cargando datos...</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--tg-hint);">v1</div>
+            <button class="geo-btn-header" id="geoBtnHeader" title="Mostrar mi ubicación">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+                <span class="btn-label">Mi ubicación</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-title">
+                <h3 style="font-size:0.85rem; color:var(--tg-hint); text-transform:uppercase; margin:0; letter-spacing:0.5px;">Categorías</h3>
+            </div>
+            <div id="categoryList"></div>
+        </aside>
+
+        <div id="map">
+            <button class="geo-float-btn" id="geoFloatBtn" title="Mi ubicación">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--tg-text-secondary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+            </button>
+            <div class="coord-display" id="coordDisplay">
+                <div><div class="coord-label">Lat</div><div class="coord-val" id="coordLat">--</div></div>
+                <div><div class="coord-label">Lng</div><div class="coord-val" id="coordLng">--</div></div>
+                <div><div class="coord-label">Precisión</div><div class="coord-accuracy" id="coordAcc">--</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- MODAL INFORMACIÓN NORMAL -->
+    <div class="modal" id="infoModal">
+        <div class="modal-card">
+            <button class="close-modal" id="closeModal" aria-label="Cerrar">&times;</button>
+            <h3 id="mTitle" style="margin-bottom:10px; color:var(--tg-button);">Título</h3>
+            <p id="mDesc" style="color:var(--tg-text-secondary); line-height:1.6;">Descripción...</p>
+            <img id="mImg" class="modal-img" src="" alt="Foto del lugar">
+            <a id="mLink" class="modal-link" href="#" target="_blank">Mas información...</a>
+            <div class="hint-text" style="display:flex; align-items:center; justify-content:center; gap:5px; flex-wrap:wrap;">
+                Si hay algo erróneo con este marcador puedes
+                <button onclick="triggerEditFromModal()" style="background:none; border:none; color:var(--tg-button); font-weight:700; cursor:pointer; font-size:0.85rem; padding:0; text-decoration:underline;">Sugerir cambio</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SUGERIR PUNTO NUEVO -->
+    <div class="modal" id="suggestNewModal">
+        <div class="modal-card">
+            <button class="close-modal" onclick="closeModalById('suggestNewModal')" aria-label="Cerrar">&times;</button>
+            <h3 style="margin-bottom:5px; color:#16a34a;">Sugerir nuevo punto</h3>
+            <p style="font-size:0.8rem; color:var(--tg-hint); margin-bottom:15px;">Estás sugiriendo un lugar en estas coordenadas:</p>
+
+            <div class="form-group">
+                <label>Coordenadas (Automático)</label>
+                <div class="coord-copy" id="newCoords">Cargando...</div>
+            </div>
+            <div class="form-group">
+                <label>Nombre del lugar *</label>
+                <input type="text" id="newTitle" placeholder="Ej: Parqueo en la esquina de 5ta y 2da" required>
+            </div>
+            <div class="form-group">
+                <label>Categoría sugerida</label>
+                <select id="newCategory"></select>
+            </div>
+            <div class="form-group">
+                <label>Descripción o Comentarios</label>
+                <textarea id="newDesc" placeholder="Capacidad, estado, si tiene techo, etc..."></textarea>
+            </div>
+
+            <button class="btn-submit-suggest" onclick="sendNewSuggestion()">
+                Enviar sugerencia
+            </button>
+            <div class="hint-text" id="newSuggestHint">Se enviarán los datos al bot de Telegram.</div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR PUNTO EXISTENTE -->
+    <div class="modal" id="suggestEditModal">
+        <div class="modal-card">
+            <button class="close-modal" onclick="closeModalById('suggestEditModal')" aria-label="Cerrar">&times;</button>
+            <h3 style="margin-bottom:5px; color:#f59e0b;">Sugerir cambio en punto</h3>
+            <p style="font-size:0.8rem; color:var(--tg-hint); margin-bottom:15px;">Datos actuales del punto que quieres modificar:</p>
+
+            <div style="background:var(--tg-bg-secondary); padding:10px; border-radius:8px; margin-bottom:15px; border-left: 4px solid var(--tg-border);">
+                <div style="font-weight:600; font-size:0.9rem;" id="editCurrentTitle">-</div>
+                <div style="font-size:0.8rem; color:var(--tg-text-secondary); margin-top:4px;" id="editCurrentCoords">-</div>
+            </div>
+            <div class="form-group">
+                <label>¿Qué cambiaría o agregaría?</label>
+                <textarea id="editDesc" placeholder="Ej: El nombre correcto es..., Agregar que tiene capacidad para 20 bicicletas..."></textarea>
+            </div>
+
+            <button class="btn-submit-suggest" style="background: #f59e0b;" onclick="sendEditSuggestion()">
+                Enviar corrección
+            </button>
+            <div class="hint-text" id="editSuggestHint">Se enviarán los datos al bot de Telegram.</div>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        //  TELEGRAM WEB APP — INICIALIZACIÓN
+        // =============================================
+        const tg = window.Telegram && window.Telegram.WebApp;
+        let isTelegram = false;
+
+        if (tg) {
+            isTelegram = true;
+            tg.ready();
+            tg.expand();
+            tg.enableClosingConfirmation();
+            applyTelegramTheme();
+
+            // Reaccionar si el usuario cambia de tema en Telegram
+            tg.onEvent('themeChanged', applyTelegramTheme);
+
+            // Botón "Volver" de Telegram: cierra el modal/panel que esté abierto
+            tg.BackButton.onClick(() => {
+                const infoM = document.getElementById('infoModal');
+                const newM = document.getElementById('suggestNewModal');
+                const editM = document.getElementById('suggestEditModal');
+                const sidebar = document.getElementById('sidebar');
+
+                if (newM.classList.contains('open')) { closeModalById('suggestNewModal'); return; }
+                if (editM.classList.contains('open')) { closeModalById('suggestEditModal'); return; }
+                if (infoM.classList.contains('open')) { infoM.classList.remove('open'); tg.BackButton.hide(); return; }
+                if (sidebar.classList.contains('open')) { toggleMenu(); return; }
+            });
+
+            // Datos del usuario (disponibles si la app se abrió desde un chat)
+            const tgUser = tg.initDataUnsafe?.user;
+            if (tgUser) {
+                console.log('Usuario Telegram:', tgUser.first_name, '@' + (tgUser.username || '—'), 'ID:', tgUser.id);
+            }
+        } else {
+            console.warn('SDK de Telegram no detectado. Funcionando en modo standalone.');
+        }
+
+        /**
+         * Aplica los colores del tema de Telegram a las variables CSS
+         */
+        function applyTelegramTheme() {
+            if (!tg || !tg.themeParams) return;
+            const r = document.documentElement.style;
+            const tp = tg.themeParams;
+
+            // Mapear colores del tema de Telegram a nuestras variables
+            if (tp.bg_color) r.setProperty('--tg-bg', tp.bg_color);
+            if (tp.secondary_bg_color) r.setProperty('--tg-bg-secondary', tp.secondary_bg_color);
+            if (tp.text_color) r.setProperty('--tg-text', tp.text_color);
+            if (tp.secondary_text_color || tp.hint_color) r.setProperty('--tg-text-secondary', tp.secondary_text_color || tp.hint_color);
+            if (tp.hint_color) r.setProperty('--tg-hint', tp.hint_color);
+            if (tp.hint_color) r.setProperty('--tg-border', tp.hint_color + '33');
+            if (tp.button_color) {
+                r.setProperty('--tg-button', tp.button_color);
+                r.setProperty('--primary-color', tp.button_color);
+            }
+            if (tp.button_text_color) r.setProperty('--tg-button-text', tp.button_text_color);
+
+            // Actualizar meta theme-color para la barra de estado del navegador
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta && tp.bg_color) meta.setAttribute('content', tp.bg_color);
+        }
+
+        /**
+         * Feedback háptico: usa el de Telegram si está disponible,
+         * sino fallback a navigator.vibrate
+         */
+        function haptic(type) {
+            if (isTelegram && tg.HapticFeedback) {
+                switch (type) {
+                    case 'light': tg.HapticFeedback.impactOccurred('light'); break;
+                    case 'medium': tg.HapticFeedback.impactOccurred('medium'); break;
+                    case 'heavy': tg.HapticFeedback.impactOccurred('heavy'); break;
+                    case 'success': tg.HapticFeedback.notificationOccurred('success'); break;
+                    case 'error': tg.HapticFeedback.notificationOccurred('error'); break;
+                    case 'warning': tg.HapticFeedback.notificationOccurred('warning'); break;
+                    case 'selection': tg.HapticFeedback.selectionChanged(); break;
+                }
+            } else if (navigator.vibrate) {
+                navigator.vibrate(type === 'light' ? 30 : type === 'error' ? [50, 30, 50] : 50);
+            }
+        }
+
+        // =============================================
+        //  VARIABLES GLOBALES
+        // =============================================
+        let points = [];
+        let categories = [];
+        let mapMarkers = [];
+        let currentModalPoint = null;
+        let longPressTimer = null;
+        let isLongPress = false;
+        let currentEditPoint = null;
+
+        // =============================================
+        //  CONFIGURACIÓN
+        // =============================================
+        const CAT_URL = 'categorias.json';
+        const CONTACT_EMAIL = 'onbicicu@gmail.com';
+
+        // =============================================
+        //  REFERENCIAS AL DOM
+        // =============================================
+        const categoryList = document.getElementById('categoryList');
+        const modal = document.getElementById('infoModal');
+        const mTitle = document.getElementById('mTitle');
+        const mDesc = document.getElementById('mDesc');
+        const mImg = document.getElementById('mImg');
+        const mLink = document.getElementById('mLink');
+        const closeModalBtn = document.getElementById('closeModal');
+        const geoBtnHeader = document.getElementById('geoBtnHeader');
+        const geoFloatBtn = document.getElementById('geoFloatBtn');
+        const coordDisplay = document.getElementById('coordDisplay');
+        const coordLat = document.getElementById('coordLat');
+        const coordLng = document.getElementById('coordLng');
+        const coordAcc = document.getElementById('coordAcc');
+        const toastContainer = document.getElementById('toastContainer');
+        const dataStatus = document.getElementById('dataStatus');
+        const mapDiv = document.getElementById('map');
+
+        // =============================================
+        //  MAPA BASE
+        // =============================================
+        const map = L.map('map', { zoomControl: true }).setView([23.07961, -82.42297], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 19
+        }).addTo(map);
+
+        // =============================================
+        //  UTILIDADES
+        // =============================================
+        function showToast(message, type = 'info', duration = 4000) {
+            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span><span class="toast-text">${message}</span>`;
+            toastContainer.appendChild(toast);
+            toast.offsetHeight;
+            toast.classList.add('show');
+            haptic(type === 'success' ? 'success' : type === 'error' ? 'error' : 'light');
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, duration);
+        }
+
+        function setDataStatus(state, text) {
+            dataStatus.className = `data-status ${state}`;
+            const textEl = dataStatus.querySelector('.status-text');
+            if (textEl) textEl.textContent = text;
+        }
+
+        function showSidebarEmpty(icon, message, showRetry = false) {
+            categoryList.innerHTML = `<div class="sidebar-empty"><div class="sidebar-empty-icon">${icon}</div><div class="sidebar-empty-text">${message}</div>${showRetry ? '<button class="retry-btn" onclick="initApp()">Reintentar</button>' : ''}</div>`;
+        }
+
+        // =============================================
+        //  INYECTOR DINÁMICO DE CSS
+        // =============================================
+        function injectCategoryCSS(cats) {
+            let styleEl = document.getElementById('dynamic-cat-styles');
+            if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = 'dynamic-cat-styles'; document.head.appendChild(styleEl); }
+            let css = '';
+            cats.forEach(c => {
+                css += `.pin.${c.tipo} { background-color: ${c.color}; border-radius: ${c.borderRadius}; transform: rotate(${c.rotacion}); }\n`;
+                css += `.pin.${c.tipo}:hover { transform: rotate(360deg) scale(1.2) !important; }\n`;
+            });
+            styleEl.textContent = css;
+        }
+
+        function populateCategorySelect() {
+            const select = document.getElementById('newCategory');
+            select.innerHTML = '';
+            categories.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.tipo;
+                opt.innerText = `${c.icono} ${c.nombre}`;
+                select.appendChild(opt);
+            });
+        }
+
+        // =============================================
+        //  CARGA DINÁMICA POR CATEGORÍAS
+        // =============================================
+        async function initApp() {
+            setDataStatus('loading', 'Cargando datos...');
+            showSidebarEmpty('⏳', 'Descargando categorías...', false);
+
+            try {
+                const catRes = await fetch(CAT_URL);
+                if (!catRes.ok) throw new Error(`Categorías (HTTP ${catRes.status})`);
+                const catData = await catRes.json();
+
+                if (!Array.isArray(catData) || catData.length === 0) throw new Error('El archivo de categorías está vacío.');
+                categories = catData;
+                injectCategoryCSS(categories);
+                populateCategorySelect();
+
+                setDataStatus('loading', 'Descargando puntos...');
+                const fetchPromises = categories.map(cat => {
+                    if (!cat.url) return Promise.resolve([]);
+                    return fetch(cat.url)
+                        .then(r => { if (!r.ok) throw new Error(`No encontré ${cat.nombre}`); return r.json(); })
+                        .then(data => { if (Array.isArray(data)) return data.map(p => ({ ...p, tipo: cat.tipo })); return []; })
+                        .catch(err => { console.warn(`Error ignorando ${cat.nombre}: ${err.message}`); return []; });
+                });
+
+                const results = await Promise.all(fetchPromises);
+                let allPoints = results.flat();
+
+                const validPoints = allPoints.filter(p => {
+                    if (!p.lat || !p.lng || !p.title) { console.warn('Punto ignorado:', p); return false; }
+                    return true;
+                });
+
+                if (validPoints.length === 0) throw new Error('No se encontraron puntos válidos en los archivos enlazados.');
+
+                validPoints.forEach((p, i) => {
+                    if (!p.id) p.id = i + 1;
+                    if (!p.desc) p.desc = '';
+                });
+
+                points = validPoints;
+
+                setDataStatus('loaded', `${points.length} puntos`);
+                showToast(`Mapa cargado: ${categories.length} categorías, ${points.length} puntos`, 'success');
+                renderSidebarMenu();
+                filterMap('todos');
+
+            } catch (err) {
+                console.error('Error de inicialización:', err);
+                setDataStatus('error', 'Error');
+                showSidebarEmpty('❌', `Fallo la carga:<br><small>${err.message}</small><br><br>Revisa <code>categorias.json</code> y las URLs.`, true);
+                showToast('Error al cargar la configuración', 'error', 6000);
+            }
+        }
+
+        // =============================================
+        //  SIDEBAR Y FILTRADO
+        // =============================================
+        function renderSidebarMenu() {
+            if (points.length === 0) return;
+            categoryList.innerHTML = '';
+
+            const uniqueTypes = ['todos'];
+            categories.forEach(c => { if (points.some(p => (p.tipo || 'general') === c.tipo)) uniqueTypes.push(c.tipo); });
+            points.forEach(p => { const tipo = p.tipo || 'general'; if (!uniqueTypes.includes(tipo)) uniqueTypes.push(tipo); });
+
+            uniqueTypes.forEach(t => {
+                const isTodos = t === 'todos';
+                const catObj = categories.find(c => c.tipo === t);
+                const count = isTodos ? points.length : points.filter(p => (p.tipo || 'general') === t).length;
+
+                const header = document.createElement('div');
+                header.className = 'cat-header';
+                const label = isTodos ? 'Ver Todo' : `${catObj ? catObj.icono : '📍'} ${catObj ? catObj.nombre : t.charAt(0).toUpperCase() + t.slice(1)}`;
+                header.innerHTML = `<span>${label}</span><div style="display:flex; align-items:center;"><span class="badge">${count}</span><span class="arrow">▼</span></div>`;
+
+                const body = document.createElement('div');
+                body.className = 'cat-body';
+                const pts = isTodos ? points : points.filter(p => (p.tipo || 'general') === t);
+
+                pts.forEach(p => {
+                    const item = document.createElement('div');
+                    item.className = 'point-item';
+                    item.innerText = p.title;
+                    item.onclick = (e) => {
+                        e.stopPropagation();
+                        haptic('light');
+                        map.flyTo([p.lat, p.lng], 17, { duration: 1 });
+                        openModal(p);
+                        if (window.innerWidth <= 768) toggleMenu();
+                    };
+                    body.appendChild(item);
+                });
+
+                header.onclick = () => {
+                    haptic('selection');
+                    document.querySelectorAll('.cat-header').forEach(h => { if (h !== header) h.classList.remove('active'); });
+                    document.querySelectorAll('.cat-body').forEach(b => { if (b !== body) b.classList.remove('open'); });
+                    body.classList.toggle('open');
+                    header.classList.toggle('active');
+                    filterMap(t);
+                };
+
+                categoryList.appendChild(header);
+                categoryList.appendChild(body);
+                if (isTodos) { body.classList.add('open'); header.classList.add('active'); }
+            });
+        }
+
+        function filterMap(filterType) {
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+            let pts = filterType === 'todos' ? points : points.filter(p => (p.tipo || 'general') === filterType);
+
+            pts.forEach(p => {
+                const icon = L.divIcon({
+                    className: 'custom-map-icon',
+                    html: `<div class="pin ${p.tipo || 'general'}" data-id="${p.id}"></div><div class="tooltip">${p.title}</div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+                const marker = L.marker([p.lat, p.lng], { icon: icon }).addTo(map);
+
+                marker.on('click', () => {
+                    if (isLongPress) { isLongPress = false; return; }
+                    haptic('light');
+                    openModal(p);
+                });
+
+                mapMarkers.push(marker);
+            });
+
+            if (pts.length > 0) map.fitBounds(L.featureGroup(mapMarkers).getBounds().pad(0.1));
+        }
+
+        // =============================================
+        //  SISTEMA DE CLIC LARGO (LONG PRESS)
+        // =============================================
+        let pointerStartX = 0;
+        let pointerStartY = 0;
+        const MOVE_THRESHOLD = 10;
+
+        function handlePointerDown(e) {
+            if (e.target.closest('.leaflet-control-container') || e.target.closest('.geo-float-btn') || e.target.closest('.coord-display')) return;
+
+            isLongPress = false;
+            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+            pointerStartX = clientX;
+            pointerStartY = clientY;
+            const targetEl = e.target;
+
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                haptic('medium');
+
+                const pinEl = targetEl.closest('.pin');
+                if (pinEl && pinEl.getAttribute('data-id')) {
+                    const id = parseInt(pinEl.getAttribute('data-id'));
+                    const pointData = points.find(p => p.id === id);
+                    if (pointData) {
+                        modal.classList.remove('open');
+                        openEditModal(pointData);
+                    }
+                } else {
+                    modal.classList.remove('open');
+                    const rect = mapDiv.getBoundingClientRect();
+                    const offsetX = clientX - rect.left;
+                    const offsetY = clientY - rect.top;
+                    const latlng = map.containerPointToLatLng(L.point(offsetX, offsetY));
+                    openNewModal(latlng.lat, latlng.lng);
+                }
+            }, 1500);
+        }
+
+        function handlePointerMove(e) {
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            if (Math.abs(clientX - pointerStartX) > MOVE_THRESHOLD || Math.abs(clientY - pointerStartY) > MOVE_THRESHOLD) {
+                clearTimeout(longPressTimer);
+            }
+        }
+
+        function handlePointerUp() { clearTimeout(longPressTimer); }
+
+        mapDiv.addEventListener('mousedown', handlePointerDown);
+        mapDiv.addEventListener('mousemove', handlePointerMove);
+        mapDiv.addEventListener('mouseup', handlePointerUp);
+        mapDiv.addEventListener('mouseleave', handlePointerUp);
+
+        mapDiv.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) { clearTimeout(longPressTimer); return; }
+            const touch = e.touches[0];
+            handlePointerDown({
+                target: document.elementFromPoint(touch.clientX, touch.clientY),
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                touches: e.touches
+            });
+        }, { passive: true });
+
+        mapDiv.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 1) { clearTimeout(longPressTimer); return; }
+            handlePointerMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY, touches: e.touches });
+        }, { passive: true });
+
+        mapDiv.addEventListener('touchend', handlePointerUp);
+
+        // =============================================
+        //  MODALES
+        // =============================================
+
+        /** Cerrar cualquier modal por ID y gestionar el botón Back de Telegram */
+        function closeModalById(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('open');
+            // Si no hay ningún modal abierto, ocultar el botón Back de Telegram
+            const anyOpen = document.querySelector('.modal.open');
+            if (!anyOpen && isTelegram) tg.BackButton.hide();
+        }
+
+        function openNewModal(lat, lng) {
+            document.getElementById('newCoords').innerText = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newDesc').value = '';
+            document.getElementById('newCategory').selectedIndex = 0;
+            document.getElementById('suggestNewModal').classList.add('open');
+            if (isTelegram) tg.BackButton.show();
+        }
+
+        function openEditModal(pointData) {
+            currentEditPoint = pointData;
+            document.getElementById('editCurrentTitle').innerText = pointData.title;
+            document.getElementById('editCurrentCoords').innerText = `Lat: ${pointData.lat}, Lng: ${pointData.lng} (${pointData.tipo})`;
+            document.getElementById('editDesc').value = '';
+            document.getElementById('suggestEditModal').classList.add('open');
+            if (isTelegram) tg.BackButton.show();
+        }
+
+        /**
+         * Enviar sugerencia de punto NUEVO.
+         * - En Telegram: usa tg.sendData() para mandar datos al bot.
+         * - Fuera de Telegram: fallback a mailto.
+         */
+        function sendNewSuggestion() {
+            const title = document.getElementById('newTitle').value.trim();
+            if (!title) { showToast('Por favor, ponle un nombre al lugar', 'error'); return; }
+
+            const coordsText = document.getElementById('newCoords').innerText;
+            const cat = document.getElementById('newCategory').value;
+            const desc = document.getElementById('newDesc').value.trim();
+
+            const coordArray = coordsText.match(/-?\d+\.\d+/g);
+            const formattedCoords = coordArray ? coordArray.join(';') : '';
+
+            // Datos estructurados para el bot
+            const payload = JSON.stringify({
+                action: 'new',
+                title: title,
+                category: cat,
+                coords: formattedCoords,
+                description: desc,
+                user: isTelegram ? (tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.id || 'anon') : 'standalone'
+            });
+
+            if (isTelegram) {
+                // tg.sendData cierra la Web App y envía el string al bot
+                // El bot lo recibe en el callback_data del botón que abrió la app
+                tg.sendData(payload);
+                // Por si sendData no cierra inmediatamente
+                closeModalById('suggestNewModal');
+                showToast('Sugerencia enviada al bot', 'success');
+            } else {
+                // Fallback: intentar AppInventor bridge o mailto
+                if (window.AppInventor && window.AppInventor.setWebViewString) {
+                    const dataString = `New, --, ${title}, ${cat}, ${formattedCoords}, ${desc}`;
+                    window.AppInventor.setWebViewString("EMAIL|" + dataString);
+                } else {
+                    // Fallback final: mailto
+                    const subject = encodeURIComponent(`[OnBiciCU] Nuevo punto: ${title}`);
+                    const body = encodeURIComponent(`Nombre: ${title}\nCategoría: ${cat}\nCoordenadas: ${coordsText}\nDescripción: ${desc}`);
+                    window.open(`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`, '_blank');
+                }
+                closeModalById('suggestNewModal');
+                showToast('Solicitud enviada', 'success');
+            }
+        }
+
+        /**
+         * Enviar sugerencia de EDICIÓN de punto existente.
+         */
+        function sendEditSuggestion() {
+            const desc = document.getElementById('editDesc').value.trim();
+            if (!desc) { showToast('Por favor, describe el cambio que sugieres', 'error'); return; }
+
+            const formattedCoords = `${currentEditPoint.lat};${currentEditPoint.lng}`;
+
+            const payload = JSON.stringify({
+                action: 'edit',
+                currentTitle: currentEditPoint.title,
+                category: currentEditPoint.tipo,
+                coords: formattedCoords,
+                suggestion: desc,
+                user: isTelegram ? (tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.id || 'anon') : 'standalone'
+            });
+
+            if (isTelegram) {
+                tg.sendData(payload);
+                closeModalById('suggestEditModal');
+                showToast('Corrección enviada al bot', 'success');
+            } else {
+                if (window.AppInventor && window.AppInventor.setWebViewString) {
+                    const dataString = `Change, ${currentEditPoint.title}, --, ${currentEditPoint.tipo}, ${formattedCoords}, ${desc}`;
+                    window.AppInventor.setWebViewString("EMAIL|" + dataString);
+                } else {
+                    const subject = encodeURIComponent(`[OnBiciCU] Corrección: ${currentEditPoint.title}`);
+                    const body = encodeURIComponent(`Punto: ${currentEditPoint.title}\nCoordenadas: ${currentEditPoint.lat}, ${currentEditPoint.lng}\nCategoría: ${currentEditPoint.tipo}\nSugerencia: ${desc}`);
+                    window.open(`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`, '_blank');
+                }
+                closeModalById('suggestEditModal');
+                showToast('Corrección enviada', 'success');
+            }
+        }
+
+        // =============================================
+        //  MODAL INFORMACIÓN NORMAL
+        // =============================================
+        function openModal(data) {
+            currentModalPoint = data;
+            mTitle.innerText = data.title;
+            mDesc.innerText = data.desc;
+            if (data.imagen) { mImg.src = data.imagen; mImg.style.display = 'block'; } else { mImg.style.display = 'none'; mImg.src = ''; }
+            if (data.enlace) { mLink.href = data.enlace; mLink.classList.add('visible'); } else { mLink.classList.remove('visible'); mLink.href = '#'; }
+            modal.classList.add('open');
+            if (isTelegram) tg.BackButton.show();
+        }
+
+        function triggerEditFromModal() {
+            if (currentModalPoint) {
+                modal.classList.remove('open');
+                // No ocultamos BackButton porque vamos a abrir otro modal
+                openEditModal(currentModalPoint);
+            }
+        }
+
+        // =============================================
+        //  GEOLOCALIZACIÓN
+        // =============================================
+        let userMarker = null, accuracyCircle = null, watchId = null, isLocating = false;
+        const userIcon = L.divIcon({
+            className: 'user-location-marker',
+            html: `<div class="user-dot-outer"></div><div class="user-dot-inner"></div>`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+
+        function setUserLocation(lat, lng, accuracy, flyTo = true) {
+            if (userMarker) { userMarker.setLatLng([lat, lng]); }
+            else { userMarker = L.marker([lat, lng], { icon: userIcon, zIndexOffset: 10000 }).addTo(map); }
+            if (accuracyCircle) { accuracyCircle.setLatLng([lat, lng]); accuracyCircle.setRadius(accuracy); }
+            else { accuracyCircle = L.circle([lat, lng], { radius: accuracy, color: '#2563eb', fillColor: '#2563eb', fillOpacity: 0.08, weight: 1.5, opacity: 0.3 }).addTo(map); }
+            coordLat.textContent = lat.toFixed(6);
+            coordLng.textContent = lng.toFixed(6);
+            coordAcc.textContent = accuracy < 1000 ? `±${Math.round(accuracy)}m` : `±${(accuracy / 1000).toFixed(1)}km`;
+            coordDisplay.classList.add('visible');
+            if (flyTo) { map.flyTo([lat, lng], accuracy < 50 ? 18 : accuracy < 200 ? 17 : 16, { duration: 1.2 }); }
+            geoFloatBtn.classList.add('active');
+        }
+
+        function startLocating() {
+            if (isLocating) return;
+            isLocating = true;
+            geoBtnHeader.classList.add('loading');
+            geoFloatBtn.classList.add('loading-btn');
+
+            if (!navigator.geolocation) {
+                showToast('Navegador no soporta geolocalización', 'error');
+                stopLocating();
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    setUserLocation(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, true);
+                    showToast(`Ubicación encontrada (±${Math.round(pos.coords.accuracy)}m)`, 'success');
+                    stopLocating();
+                    startWatching();
+                },
+                (err) => {
+                    const m = { 1: 'Permiso denegado.', 2: 'Sin señal GPS.', 3: 'Tiempo agotado.' };
+                    showToast(m[err.code] || 'Error desconocido.', 'error', 6000);
+                    stopLocating();
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            );
+        }
+
+        function startWatching() {
+            if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+            watchId = navigator.geolocation.watchPosition(
+                (p) => setUserLocation(p.coords.latitude, p.coords.longitude, p.coords.accuracy, false),
+                () => {},
+                { enableHighAccuracy: true, timeout: 30000, maximumAge: 5000 }
+            );
+        }
+
+        function stopLocating() {
+            isLocating = false;
+            geoBtnHeader.classList.remove('loading');
+            geoFloatBtn.classList.remove('loading-btn');
+        }
+
+        geoBtnHeader.addEventListener('click', () => { haptic('light'); startLocating(); });
+        geoFloatBtn.addEventListener('click', () => { haptic('light'); startLocating(); });
+
+        // =============================================
+        //  MENÚ MÓVIL Y CIERRE DE MODALES
+        // =============================================
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const isOpen = sidebar.classList.toggle('open');
+            overlay.classList.toggle('open', isOpen);
+            if (isTelegram) {
+                if (isOpen) tg.BackButton.show();
+                else {
+                    // Solo ocultar si no hay modales abiertos
+                    const anyModal = document.querySelector('.modal.open');
+                    if (!anyModal) tg.BackButton.hide();
+                }
+            }
+        }
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.remove('open');
+            if (isTelegram) tg.BackButton.hide();
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('open');
+                if (isTelegram) tg.BackButton.hide();
+            }
+        });
+
+        document.getElementById('suggestNewModal').addEventListener('click', (e) => {
+            if (e.target.id === 'suggestNewModal') closeModalById('suggestNewModal');
+        });
+        document.getElementById('suggestEditModal').addEventListener('click', (e) => {
+            if (e.target.id === 'suggestEditModal') closeModalById('suggestEditModal');
+        });
+
+        document.getElementById('menuToggle').addEventListener('click', () => { haptic('light'); toggleMenu(); });
+        document.getElementById('sidebarOverlay').addEventListener('click', () => { haptic('light'); toggleMenu(); });
+
+        // =============================================
+        //  INICIO
+        // =============================================
+        initApp();
+    </script>
+</body>
+</html>
