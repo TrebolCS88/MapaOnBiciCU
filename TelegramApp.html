@@ -3,259 +3,440 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OnBiciCU Mapa</title>
+    <title>OnBiciCU</title>
     <link rel="icon" href="ObCIcon.png" type="image/png">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
+        /* ===================== VARIABLES ===================== */
         :root {
-            --primary: #2563eb;
-            --accent: #ef4444;
-            --sidebar-w: 280px;
-            --header-h: 56px;
-            --bg-map: #e2e8f0;
-            --safe-t: env(safe-area-inset-top, 0px);
-            --safe-b: env(safe-area-inset-bottom, 0px);
-            /* Se sobreescriben con el tema de Telegram */
-            --bg: #fff;
-            --bg2: #f8fafc;
-            --fg: #0f172a;
-            --fg2: #64748b;
-            --muted: #94a3b8;
-            --border: #e2e8f0;
-            --btn: #2563eb;
-            --btn-fg: #fff;
+            --primary:#2563eb;--accent:#ef4444;--sb-w:280px;--hdr-h:56px;--bg-map:#e2e8f0;
+            --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+            --bg:#fff;--bg2:#f8fafc;--fg:#0f172a;--fg2:#64748b;
+            --muted:#94a3b8;--border:#e2e8f0;--btn:#2563eb;--btn-fg:#fff;
         }
         *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-        body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-map);height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;color:var(--fg)}
+        body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-map);height:100vh;height:100dvh;overflow:hidden;color:var(--fg)}
 
-        /* Header */
-        header{height:var(--header-h);background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;padding-top:var(--safe-t);z-index:1000;flex-shrink:0}
-        .h-left{display:flex;align-items:center;gap:12px}
-        h1{font-size:1rem;font-weight:700}
-        .menu-btn{display:none;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--fg2);padding:4px}
-        .h-right{display:flex;align-items:center;gap:10px}
-        .geo-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--btn);color:var(--btn-fg);border:none;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;position:relative;overflow:hidden;transition:opacity .2s}
-        .geo-btn:active{opacity:.85;transform:scale(.97)}
-        .geo-btn.loading{pointer-events:none;opacity:.7}
-        .geo-btn.loading::after{content:'';position:absolute;width:16px;height:16px;border:2px solid transparent;border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;right:10px}
-        @keyframes spin{to{transform:rotate(360deg)}}
+        /* ===================== SISTEMA DE VISTAS ===================== */
+        .view{display:none;flex-direction:column;height:100%;overflow:hidden}
+        .view.active{display:flex;animation:fadeV .2s ease}
+        @keyframes fadeV{from{opacity:0}to{opacity:1}}
+
+        /* ===================== PANTALLA INICIO ===================== */
+        .home{align-items:center;justify-content:center;padding:30px 24px;background:var(--bg);gap:8px}
+        .home-icon{width:90px;height:90px;border-radius:22px;object-fit:cover;animation:homeBounce 3s ease-in-out infinite;margin-bottom:4px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
+        @keyframes homeBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+        .home-title{font-size:28px;font-weight:800;letter-spacing:-.5px;text-align:center}
+        .home-sub{font-size:.9rem;color:var(--fg2);text-align:center;margin-bottom:28px;line-height:1.5}
+        .home-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:320px;padding:18px;border:none;border-radius:16px;font-size:1.15rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s}
+        .home-btn:active{transform:scale(.96)}
+        .home-btn-main{background:var(--btn);color:var(--btn-fg);box-shadow:0 4px 20px rgba(37,99,235,.3)}
+        .home-row{display:flex;gap:12px;width:100%;max-width:320px}
+        .home-btn-sec{flex:1;padding:14px 10px;border-radius:14px;font-size:.95rem;font-weight:600;background:var(--bg2);color:var(--fg2);border:1.5px solid var(--border)}
+        .home-btn-sec:active{transform:scale(.96);background:var(--border)}
+        .home-foot{margin-top:auto;padding-bottom:calc(16px + var(--safe-b));font-size:.8rem;color:var(--muted);text-align:center}
+
+        /* ===================== PANTALLA AYUDA ===================== */
+        .help{background:var(--bg)}
+        .help-hdr{padding:calc(var(--safe-t) + 14px) 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+        .help-back{width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--fg);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;flex-shrink:0}
+        .help-back:active{transform:scale(.92);background:var(--border)}
+        .help-body{flex:1;overflow-y:auto;padding:20px;-webkit-overflow-scrolling:touch}
+        .help-body::-webkit-scrollbar{width:0}
+        .help-h2{color:var(--btn);margin-bottom:15px;text-align:center;font-size:1.2rem}
+        .help-sub{text-align:center;color:var(--fg2);margin-bottom:25px;font-size:.9rem}
+        .help-h3{color:var(--fg);border-bottom:2px solid var(--border);padding-bottom:5px;margin-bottom:12px;font-size:1rem;display:flex;align-items:center;gap:6px}
+        .help-h3.blue{color:var(--btn);border-color:rgba(37,99,235,.2)}
+        .help-h3.green{color:#16a34a;border-color:rgba(22,163,74,.2)}
+        .help-ul{margin-bottom:20px;padding-left:20px;color:var(--fg2);font-size:.9rem;line-height:1.8}
+        .help-ul li{margin-bottom:2px}
+        .help-highlight{border-radius:8px;padding:12px 12px 12px 20px;margin-bottom:18px}
+        .help-highlight.green{background:rgba(22,163,74,.06);border-left:3px solid #16a34a}
+        .help-highlight.yellow{background:rgba(245,158,11,.06);border-left:3px solid #f59e0b}
+        .help-label{font-weight:600;margin-bottom:8px;color:var(--fg);font-size:.9rem}
+        .help-p{color:var(--fg2);font-size:.88rem;line-height:1.6;margin-bottom:10px}
+        .help-socials{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:15px}
+        .help-sbtn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;color:#fff;border:none;border-radius:10px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .2s}
+        .help-sbtn:active{opacity:.8;transform:scale(.96)}
+        .help-sbtn.tg{background:#0055ff}
+        .help-sbtn.yt{background:#ff0000}
+        .help-sbtn.wa{background:#00aa00}
+        .help-donate-btn{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;background:#00aaff;transition:opacity .2s;margin-top:10px}
+        .help-donate-btn:active{opacity:.8;transform:scale(.96)}
+        .help-foot{text-align:center;padding:20px;font-size:.82rem;color:var(--muted);border-top:1px solid var(--border);flex-shrink:0}
+        .help-anim{display:inline-block}
+        .a-map{animation:aMap 3s ease-in-out infinite}
+        .a-pin{animation:aPin 2s ease-in-out infinite}
+        .a-loc{animation:aLoc 2s ease-in-out infinite}
+        .a-spark{animation:aSpark 2s ease-in-out infinite}
+        .a-sig{animation:aSig 2.5s ease-in-out infinite}
+        .a-heart{animation:aHeart 1.5s ease-in-out infinite}
+        .a-redes{animation:aRedes 1s ease-in-out infinite}
+        @keyframes aMap{0%,100%{transform:translateX(0)}50%{transform:translateX(10px)}}
+        @keyframes aPin{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        @keyframes aLoc{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+        @keyframes aSpark{0%,100%{transform:rotate(0) scale(1);opacity:1}50%{transform:rotate(15deg) scale(1.1);opacity:.8}}
+        @keyframes aSig{0%,100%{transform:rotate(0)}20%{transform:rotate(-15deg)}40%{transform:rotate(15deg)}60%{transform:rotate(-10deg)}80%{transform:rotate(10deg)}}
+        @keyframes aHeart{0%,100%{transform:scale(1)}15%{transform:scale(1.3)}30%{transform:scale(1)}45%{transform:scale(1.15)}}
+        @keyframes aRedes{0%,100%{transform:rotate(0)}25%{transform:rotate(-15deg)}75%{transform:rotate(15deg)}}
+
+        /* ===================== PANTALLA DONAR ===================== */
+        .donate-body{flex:1;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,var(--bg2) 0%,rgba(22,163,74,.05) 100%);overflow-y:auto;-webkit-overflow-scrolling:touch}
+        .don-card{background:var(--bg);border-radius:24px;padding:32px 22px 28px;max-width:380px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.08);position:relative;overflow:hidden}
+        .don-card::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--btn),#16a34a)}
+        .don-hero{font-size:56px;display:inline-block;animation:aHeart 2s ease-in-out infinite;margin-bottom:8px}
+        .don-h2{color:var(--fg);font-size:1.5rem;margin-bottom:6px;text-align:center}
+        .don-sub{color:var(--fg2);font-size:.9rem;line-height:1.5;margin-bottom:28px;text-align:center}
+        .don-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:18px 14px;margin-bottom:16px;text-align:left;transition:all .2s}
+        .don-box:active{transform:scale(.98);border-color:var(--btn)}
+        .don-label{font-size:.78rem;font-weight:700;color:var(--fg2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+        .don-val{font-family:'Courier New',monospace;font-size:1.15rem;font-weight:800;color:var(--fg);background:var(--bg);padding:12px 14px;border-radius:10px;border:2px dashed var(--border);word-break:break-all;margin-bottom:12px;letter-spacing:1px}
+        .don-copy{display:block;width:100%;padding:12px;background:var(--border);color:var(--fg2);border:none;border-radius:10px;font-size:.92rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+        .don-copy:active{transform:scale(.95)}
+        .don-copy.ok{background:#16a34a;color:#fff}
+        .don-foot{margin-top:20px;font-size:.78rem;color:var(--muted);text-align:center;line-height:1.4}
+
+        /* ===================== MAPA: HEADER ===================== */
+        .mhdr{height:var(--hdr-h);background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;padding-top:var(--safe-t);z-index:1000;flex-shrink:0}
+        .mhdr-l{display:flex;align-items:center;gap:12px}
+        .mhdr h1{font-size:1rem;font-weight:700}
+        .mbtn{display:none;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--fg2);padding:4px}
+        .mhdr-r{display:flex;align-items:center;gap:10px}
+        .gbtn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--btn);color:var(--btn-fg);border:none;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;position:relative;overflow:hidden;transition:opacity .2s}
+        .gbtn:active{opacity:.85;transform:scale(.97)}
+        .gbtn.ld{pointer-events:none;opacity:.7}
+        .gbtn.ld::after{content:'';position:absolute;width:16px;height:16px;border:2px solid transparent;border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;right:10px}
+        @keyframes sp{to{transform:rotate(360deg)}}
         .ds{display:flex;align-items:center;gap:6px;font-size:.72rem;padding:3px 8px;border-radius:20px;transition:all .3s}
-        .ds.loading{color:#f59e0b;background:#fffbeb}
-        .ds.loaded{color:#16a34a;background:#f0fdf4}
-        .ds.error{color:#ef4444;background:#fef2f2}
-        .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
-        .ds.loading .dot{background:#f59e0b;animation:blink 1s ease-in-out infinite}
-        .ds.loaded .dot{background:#16a34a}
-        .ds.error .dot{background:#ef4444}
-        @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+        .ds.ld{color:#f59e0b;background:#fffbeb}.ds.ok{color:#16a34a;background:#f0fdf4}.ds.er{color:#ef4444;background:#fef2f2}
+        .dt{width:6px;height:6px;border-radius:50%;display:inline-block}
+        .ds.ld .dt{background:#f59e0b;animation:bk 1s ease-in-out infinite}
+        .ds.ok .dt{background:#16a34a}.ds.er .dt{background:#ef4444}
+        @keyframes bk{0%,100%{opacity:1}50%{opacity:.3}}
 
-        /* Layout */
-        .wrap{display:flex;flex:1;height:calc(100vh - var(--header-h) - var(--safe-t));height:calc(100dvh - var(--header-h) - var(--safe-t));position:relative}
+        /* ===================== MAPA: LAYOUT ===================== */
+        .wrap{display:flex;flex:1;height:calc(100vh - var(--hdr-h) - var(--safe-t));height:calc(100dvh - var(--hdr-h) - var(--safe-t));position:relative}
 
-        /* Sidebar */
-        .sb{width:var(--sidebar-w);background:var(--bg);border-right:1px solid var(--border);overflow-y:auto;z-index:1000;transition:transform .3s;display:flex;flex-direction:column;-webkit-overflow-scrolling:touch}
-        .sb-title{padding:16px 20px;border-bottom:1px solid var(--border)}
-        .sb-title h3{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+        /* ===================== MAPA: SIDEBAR ===================== */
+        .sb{width:var(--sb-w);background:var(--bg);border-right:1px solid var(--border);overflow-y:auto;z-index:1000;transition:transform .3s;display:flex;flex-direction:column;-webkit-overflow-scrolling:touch}
+        .sb-t{padding:16px 20px;border-bottom:1px solid var(--border)}
+        .sb-t h3{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
         .ch{padding:13px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;color:var(--fg2);background:var(--bg);border-bottom:1px solid var(--border);border-left:4px solid transparent;transition:all .2s;user-select:none}
         .ch:hover{background:var(--bg2);color:var(--btn)}
         .ch.on{background:var(--bg2);color:var(--btn);border-left-color:var(--btn)}
-        .badge{background:var(--border);color:var(--fg2);font-size:.72rem;padding:2px 8px;border-radius:12px}
-        .arr{font-size:.8rem;transition:transform .3s;color:var(--muted);margin-left:10px}
-        .ch.on .arr{transform:rotate(180deg);color:var(--btn)}
+        .bg{background:var(--border);color:var(--fg2);font-size:.72rem;padding:2px 8px;border-radius:12px}
+        .ar{font-size:.8rem;transition:transform .3s;color:var(--muted);margin-left:10px}
+        .ch.on .ar{transform:rotate(180deg);color:var(--btn)}
         .cb{max-height:0;overflow:hidden;background:var(--bg2);transition:max-height .3s ease-out}
-        .cb.open{max-height:500px;overflow-y:auto;transition:max-height .5s ease-in}
+        .cb.op{max-height:500px;overflow-y:auto;transition:max-height .5s ease-in}
         .pi{padding:10px 20px 10px 35px;font-size:.88rem;color:var(--fg2);cursor:pointer;border-left:2px solid transparent;transition:all .2s}
         .pi:hover{color:var(--btn);background:var(--border);padding-left:40px}
         .sb-ov{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:999;opacity:0;visibility:hidden;transition:all .3s}
-        .sb-ov.open{opacity:1;visibility:visible}
-        .sb-empty{padding:30px 20px;text-align:center;color:var(--muted)}
-        .sb-empty-ico{font-size:2.5rem;margin-bottom:10px}
-        .sb-empty-txt{font-size:.85rem;line-height:1.6}
-        .sb-empty-txt code{background:var(--border);padding:2px 6px;border-radius:4px;font-size:.8rem;color:var(--fg2)}
-        .retry{margin-top:15px;padding:8px 20px;background:var(--btn);color:var(--btn-fg);border:none;border-radius:6px;cursor:pointer;font-size:.85rem}
-        .retry:active{opacity:.85}
+        .sb-ov.op{opacity:1;visibility:visible}
+        .sb-e{padding:30px 20px;text-align:center;color:var(--muted)}
+        .sb-e i{font-size:2.5rem;margin-bottom:10px;display:block}
+        .sb-e p{font-size:.85rem;line-height:1.6}
+        .sb-e code{background:var(--border);padding:2px 6px;border-radius:4px;font-size:.8rem;color:var(--fg2)}
+        .rbtn{margin-top:15px;padding:8px 20px;background:var(--btn);color:var(--btn-fg);border:none;border-radius:6px;cursor:pointer;font-size:.85rem}
+        .rbtn:active{opacity:.85}
 
-        /* Mapa */
+        /* ===================== MAPA: CANVAS Y CONTROLES ===================== */
         #map{flex:1;background:var(--bg-map);z-index:1}
-        .geo-fab{position:absolute;bottom:calc(30px + var(--safe-b));right:15px;z-index:1000;width:46px;height:46px;background:var(--bg);border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.15);transition:all .25s}
-        .geo-fab:active{transform:scale(.92)}
-        .geo-fab.on,.geo-fab:hover{background:var(--btn);border-color:var(--btn)}
-        .geo-fab.on svg,.geo-fab:hover svg{fill:#fff;stroke:#fff}
-        .geo-fab.ld{pointer-events:none}
-        .geo-fab.ld svg{animation:pulse-ico 1s ease-in-out infinite}
-        @keyframes pulse-ico{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+        .gfb{position:absolute;bottom:calc(30px + var(--safe-b));right:15px;z-index:1000;width:46px;height:46px;background:var(--bg);border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.15);transition:all .25s}
+        .gfb:active{transform:scale(.92)}
+        .gfb.on,.gfb:hover{background:var(--btn);border-color:var(--btn)}
+        .gfb.on svg,.gfb:hover svg{fill:#fff;stroke:#fff}
+        .gfb.ld{pointer-events:none}
+        .gfb.ld svg{animation:pi 1s ease-in-out infinite}
+        @keyframes pi{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+        .cd{position:absolute;bottom:calc(30px + var(--safe-b));left:15px;z-index:1000;background:rgba(15,23,42,.85);backdrop-filter:blur(6px);color:#fff;padding:8px 14px;border-radius:10px;font-size:.75rem;font-family:'Courier New',monospace;display:none;gap:12px;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+        .cd.vis{display:flex}
+        .cl{color:#94a3b8;font-size:.65rem;text-transform:uppercase;letter-spacing:.5px}
+        .cv{color:#7dd3fc}.ca{color:#fbbf24;font-size:.7rem}
 
-        /* Marcador usuario */
+        /* ===================== MAPA: MARCADORES ===================== */
         .ulm{background:transparent!important;border:none!important;width:40px!important;height:40px!important;overflow:visible!important}
-        .udo{position:absolute;top:50%;left:50%;width:40px;height:40px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(37,99,235,.15);animation:upulse 2s ease-out infinite}
+        .udo{position:absolute;top:50%;left:50%;width:40px;height:40px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(37,99,235,.15);animation:up 2s ease-out infinite}
         .udi{position:absolute;top:50%;left:50%;width:16px;height:16px;transform:translate(-50%,-50%);background:var(--btn);border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(37,99,235,.5);z-index:2}
-        @keyframes upulse{0%{transform:translate(-50%,-50%) scale(.5);opacity:1}100%{transform:translate(-50%,-50%) scale(2.2);opacity:0}}
-
-        /* Pines */
+        @keyframes up{0%{transform:translate(-50%,-50%) scale(.5);opacity:1}100%{transform:translate(-50%,-50%) scale(2.2);opacity:0}}
         .cmi{background:transparent!important;border:none!important;width:24px!important;height:24px!important;overflow:visible}
         .pin{width:20px;height:20px;background:var(--accent);border:2px solid #fff;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,.5);position:absolute;top:2px;left:2px;transition:transform .2s,background-color .2s}
         .pin:hover{transform:scale(1.2)!important;z-index:10000!important}
         .tip{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.95);color:#fff;padding:4px 8px;border-radius:4px;font-size:.75rem;white-space:nowrap;opacity:0;visibility:hidden;transition:opacity .2s;pointer-events:none;z-index:99999;margin-bottom:5px}
         .cmi:hover .tip{opacity:1;visibility:visible}
 
-        /* Modales */
+        /* ===================== MODALES ===================== */
         .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:center;z-index:2000;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(2px);padding:20px}
-        .modal.open{opacity:1;pointer-events:auto}
+        .modal.op{opacity:1;pointer-events:auto}
         .mc{background:var(--bg);padding:24px;border-radius:16px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 25px -5px rgba(0,0,0,.1);position:relative;-webkit-overflow-scrolling:touch}
         .x{background:none;border:none;font-size:1.5rem;cursor:pointer;float:right;color:var(--muted);padding:0;line-height:1}
         .m-img{width:100%;height:auto;max-height:250px;object-fit:cover;border-radius:8px;margin-top:15px;display:none;background:var(--border)}
-        .m-link{display:none;width:100%;text-align:center;margin-top:15px;padding:12px;background:var(--bg);color:var(--btn);border:1px solid var(--btn);text-decoration:none;border-radius:8px;font-weight:600;transition:all .2s}
-        .m-link.vis{display:block!important}
-        .m-link:active{background:var(--btn);color:#fff}
+        .m-lnk{display:none;width:100%;text-align:center;margin-top:15px;padding:12px;background:var(--bg);color:var(--btn);border:1px solid var(--btn);text-decoration:none;border-radius:8px;font-weight:600;transition:all .2s}
+        .m-lnk.vis{display:block!important}
+        .m-lnk:active{background:var(--btn);color:#fff}
 
-        /* Formularios */
+        /* ===================== FORMULARIOS ===================== */
         .fg{margin-top:15px}
         .fg label{display:block;font-size:.85rem;font-weight:600;color:var(--fg2);margin-bottom:5px}
         .fg input,.fg textarea,.fg select{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;font-size:.9rem;font-family:inherit;background:var(--bg2);color:var(--fg);transition:border-color .2s}
         .fg input:focus,.fg textarea:focus,.fg select:focus{outline:none;border-color:var(--btn);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
         .fg textarea{resize:vertical;min-height:80px}
         .fg .cc{font-family:'Courier New',monospace;font-size:.8rem;background:var(--bg2);padding:8px;border-radius:8px;color:var(--fg2);word-break:break-all;border:1px solid var(--border)}
-        .btn-s{margin-top:20px;width:100%;padding:12px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s}
+        .btn-s{margin-top:20px;width:100%;padding:12px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s}
         .btn-s:active{opacity:.85;transform:scale(.98)}
-        .btn-s.warn{background:#f59e0b}
+        .btn-s:disabled{opacity:.5;pointer-events:none}
+        .btn-s.w{background:#f59e0b}
+        .btn-s .spin{width:18px;height:18px;border:2px solid transparent;border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:none}
+        .btn-s.sending .spin{display:block}
+        .btn-s.sending .sl{display:none}
         .hint{font-size:.75rem;color:var(--muted);margin-top:10px;text-align:center;line-height:1.4}
         .hint button{background:none;border:none;color:var(--btn);font-weight:700;cursor:pointer;font-size:.85rem;padding:0;text-decoration:underline}
 
-        /* Toast */
+        /* ===================== TOAST ===================== */
         .tc{position:fixed;top:calc(70px + var(--safe-t));right:16px;z-index:3000;display:flex;flex-direction:column;gap:10px;pointer-events:none}
         .toast{background:var(--bg);padding:12px 16px;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,.15);display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--fg);pointer-events:auto;transform:translateX(120%);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);border-left:4px solid var(--muted);max-width:320px}
         .toast.show{transform:translateX(0)}
         .toast.success{border-left-color:#16a34a}.toast.success .ti{color:#16a34a}
         .toast.error{border-left-color:#ef4444}.toast.error .ti{color:#ef4444}
         .toast.info{border-left-color:var(--btn)}.toast.info .ti{color:var(--btn)}
-        .ti{font-size:1.1rem;flex-shrink:0}
-        .tt{line-height:1.4}
+        .ti{font-size:1.1rem;flex-shrink:0}.tt{line-height:1.4}
 
-        /* Coordenadas */
-        .cd{position:absolute;bottom:calc(30px + var(--safe-b));left:15px;z-index:1000;background:rgba(15,23,42,.85);backdrop-filter:blur(6px);color:#fff;padding:8px 14px;border-radius:10px;font-size:.75rem;font-family:'Courier New',monospace;display:none;gap:12px;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,.2)}
-        .cd.vis{display:flex}
-        .cl{color:#94a3b8;font-size:.65rem;text-transform:uppercase;letter-spacing:.5px}
-        .cv{color:#7dd3fc}
-        .ca{color:#fbbf24;font-size:.7rem}
-
+        /* ===================== RESPONSIVE ===================== */
         @media(max-width:768px){
-            .menu-btn{display:block}
+            .mbtn{display:block}
             .sb{position:absolute;height:100%;transform:translateX(-100%);box-shadow:2px 0 10px rgba(0,0,0,.2);padding-bottom:var(--safe-b)}
-            .sb.open{transform:translateX(0)}
-            .geo-btn .lbl{display:none}
-            .geo-btn{padding:7px 10px}
+            .sb.op{transform:translateX(0)}
+            .gbtn .lb{display:none}.gbtn{padding:7px 10px}
             .cd{left:10px;bottom:calc(85px + var(--safe-b));font-size:.7rem}
-            .ds .st{display:none}
-            .h-right .ver{display:none}
+            .ds .st{display:none}.mhdr-r .ver{display:none}
         }
         @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
     </style>
 </head>
 <body>
 
-<header>
-    <div class="h-left">
-        <button class="menu-btn" id="menuToggle" aria-label="Menú">☰</button>
-        <h1>OnBiciCU Mapa</h1>
-    </div>
-    <div class="h-right">
-        <div class="ds loading" id="ds">
-            <span class="dot"></span>
-            <span class="st">Cargando...</span>
-        </div>
-        <div class="ver" style="font-size:.8rem;color:var(--muted)">v1</div>
-        <button class="geo-btn" id="geoHdr" title="Mi ubicación">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
-            <span class="lbl">Mi ubicación</span>
+<!-- ==================== PANTALLA INICIO ==================== -->
+<div id="viewHome" class="view active home">
+    <img class="home-icon" src="ObCIcon.png" alt="OnBiciCU">
+    <div class="home-title">OnBiciCU</div>
+    <div class="home-sub">Tu mapa colaborativo para moverte en bicicleta por la CU.</div>
+    <button class="home-btn home-btn-main" onclick="goToMap()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        Mapa
+    </button>
+    <div class="home-row">
+        <button class="home-btn home-btn-sec" onclick="goToHelp()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Ayuda
+        </button>
+        <button class="home-btn home-btn-sec" onclick="goToDonate()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            Donar
         </button>
     </div>
-</header>
+    <div class="home-foot">v1 · Hecho con esfuerzo cubano 🇨🇺</div>
+</div>
 
-<div class="wrap">
-    <div class="sb-ov" id="sbOv"></div>
-    <aside class="sb" id="sb">
-        <div class="sb-title"><h3>Categorías</h3></div>
-        <div id="catList"></div>
-    </aside>
-    <div id="map">
-        <button class="geo-fab" id="geoFab" title="Mi ubicación">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--fg2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
-        </button>
-        <div class="cd" id="cd">
-            <div><div class="cl">Lat</div><div class="cv" id="cLat">--</div></div>
-            <div><div class="cl">Lng</div><div class="cv" id="cLng">--</div></div>
-            <div><div class="cl">Prec</div><div class="ca" id="cAcc">--</div></div>
+<!-- ==================== PANTALLA AYUDA ==================== -->
+<div id="viewHelp" class="view help">
+    <div class="help-hdr">
+        <button class="help-back" onclick="goHome()" aria-label="Volver">←</button>
+        <h2 class="help-h2" style="margin:0">Guía de OnBiciCU</h2>
+    </div>
+    <div class="help-body">
+        <p class="help-sub">Tu mapa colaborativo para moverte en bicicleta.</p>
+
+        <h3 class="help-h3"><span class="help-anim a-map">🗺️</span> Navegar el mapa</h3>
+        <ul class="help-ul">
+            <li><strong>Arrastra</strong> el dedo para moverte por el mapa.</li>
+            <li><strong>Pellizca</strong> con dos dedos para hacer zoom.</li>
+            <li>Usa el botón <strong>☰</strong> para abrir el menú de categorías.</li>
+        </ul>
+
+        <h3 class="help-h3"><span class="help-anim a-pin">📍</span> Ver información</h3>
+        <ul class="help-ul">
+            <li>Toca <strong>una vez</strong> sobre cualquier marcador para ver sus detalles.</li>
+            <li>Toca un lugar en la lista lateral para que el mapa te lleve ahí.</li>
+        </ul>
+
+        <h3 class="help-h3"><span class="help-anim a-loc">📏</span> Mi ubicación</h3>
+        <ul class="help-ul">
+            <li>Pulsa el botón de la brújula en la esquina para ubicarte (necesitas GPS activado).</li>
+        </ul>
+
+        <h3 class="help-h3 blue"><span class="help-anim a-spark">✨</span> Colaborar y Sugerir</h3>
+        <p class="help-label">¿Conoces un parqueo o taller que no está?</p>
+        <div class="help-highlight green">
+            <ul class="help-ul" style="margin:0">
+                <li>Mantén presionado sobre un <strong>espacio vacío</strong> del mapa unos segundos.</li>
+                <li>Rellena el nombre y la categoría, y envíalo.</li>
+            </ul>
+        </div>
+        <p class="help-label">¿Hay un error en un marcador existente?</p>
+        <div class="help-highlight yellow">
+            <ul class="help-ul" style="margin:0">
+                <li>Toca el marcador y pulsa <strong>"Sugerir cambio"</strong>.</li>
+                <li>Escribe el error o lo que falta y envíalo.</li>
+            </ul>
+        </div>
+
+        <h3 class="help-h3"><span class="help-anim a-sig">📡</span> Sin conexión</h3>
+        <p class="help-p">Si no tienes internet, el mapa no podrá cargar los datos. Reconecta y pulsa "Reintentar".</p>
+
+        <div style="margin-top:30px;border-top:2px solid var(--border);padding-top:20px">
+            <h3 class="help-h3 green"><span class="help-anim a-heart">❤️</span> Colabora con nosotros</h3>
+            <p class="help-p">Puedes colaborar haciendo un donativo de lo que estimes.</p>
+            <div style="text-align:center">
+                <button class="help-donate-btn" onclick="goToDonate()">❤️ Donar</button>
+            </div>
+        </div>
+
+        <div style="margin-top:25px">
+            <h3 class="help-h3"><span class="help-anim a-redes">📱</span> Síguenos</h3>
+            <div class="help-socials">
+                <button class="help-sbtn tg" onclick="tg.openTelegramLink('https://t.me/TU_CANAL')">👉 Telegram</button>
+                <button class="help-sbtn yt" onclick="tg.openLink('https://youtube.com/@TU_CANAL')">▶️ Youtube</button>
+                <button class="help-sbtn wa" onclick="tg.openLink('https://whatsapp.com/channel/TU_CANAL')">💬 Whatsapp</button>
+            </div>
+        </div>
+    </div>
+    <div class="help-foot">OnBiciCU v1 · Hecho con esfuerzo cubano 🇨🇺</div>
+</div>
+
+<!-- ==================== PANTALLA DONAR ==================== -->
+<div id="viewDonate" class="view">
+    <div class="help-hdr" style="background:var(--bg)">
+        <button class="help-back" onclick="goHome()" aria-label="Volver">←</button>
+        <h2 class="help-h2" style="margin:0">Apoya OnBiciCU</h2>
+    </div>
+    <div class="donate-body">
+        <div class="don-card">
+            <div class="don-hero">🚲❤️</div>
+            <h2 class="don-h2">¡Impulsa el pedal!</h2>
+            <p class="don-sub">Cada aporte mantiene a OnBiciCU rodando, libre de anuncios y al alcance de todos.</p>
+
+            <div class="don-box">
+                <div class="don-label">🏦 Transferencia a Tarjeta</div>
+                <div class="don-val" id="numTarjeta">9202959872137348</div>
+                <button class="don-copy" onclick="copiar('numTarjeta',this)">📋 Copiar número de tarjeta</button>
+            </div>
+
+            <div class="don-box">
+                <div class="don-label">📱 Verificación por Teléfono</div>
+                <div class="don-val" id="numTelefono">54262182</div>
+                <button class="don-copy" onclick="copiar('numTelefono',this)">📋 Copiar número de teléfono</button>
+            </div>
+
+            <p class="don-foot">Los datos se copian al portapapeles.<br>¡Gracias por creer en este proyecto! 🇨🇺</p>
         </div>
     </div>
 </div>
 
+<!-- ==================== PANTALLA MAPA ==================== -->
+<div id="viewMap" class="view">
+    <header class="mhdr">
+        <div class="mhdr-l">
+            <button class="mbtn" id="menuTgl" aria-label="Menú">☰</button>
+            <h1>OnBiciCU Mapa</h1>
+        </div>
+        <div class="mhdr-r">
+            <div class="ds ld" id="ds"><span class="dt"></span><span class="st">Cargando...</span></div>
+            <div class="ver" style="font-size:.8rem;color:var(--muted)">v1</div>
+            <button class="gbtn" id="gHdr" title="Mi ubicación">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+                <span class="lb">Mi ubicación</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="wrap">
+        <div class="sb-ov" id="sbOv"></div>
+        <aside class="sb" id="sb">
+            <div class="sb-t"><h3>Categorías</h3></div>
+            <div id="catL"></div>
+        </aside>
+        <div id="map">
+            <button class="gfb" id="gFab" title="Mi ubicación">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--fg2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+            </button>
+            <div class="cd" id="cd">
+                <div><div class="cl">Lat</div><div class="cv" id="cLa">--</div></div>
+                <div><div class="cl">Lng</div><div class="cv" id="cLn">--</div></div>
+                <div><div class="cl">Prec</div><div class="ca" id="cAc">--</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast (fuera de vistas) -->
 <div class="tc" id="tc"></div>
 
-<!-- Modal info -->
-<div class="modal" id="mInfo">
+<!-- Modales (fuera de vistas) -->
+<div class="modal" id="mI">
     <div class="mc">
-        <button class="x" id="xInfo" aria-label="Cerrar">&times;</button>
-        <h3 id="mT" style="margin-bottom:10px;color:var(--btn)">Título</h3>
-        <p id="mD" style="color:var(--fg2);line-height:1.6">Descripción...</p>
-        <img id="mI" class="m-img" src="" alt="Foto">
-        <a id="mL" class="m-link" href="#" target="_blank">Mas información...</a>
+        <button class="x" data-close="mI" aria-label="Cerrar">&times;</button>
+        <h3 id="mTi" style="margin-bottom:10px;color:var(--btn)">Título</h3>
+        <p id="mDe" style="color:var(--fg2);line-height:1.6">Descripción...</p>
+        <img id="mIm" class="m-img" src="" alt="Foto">
+        <a id="mLi" class="m-lnk" href="#" target="_blank">Mas información...</a>
         <div class="hint" style="display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap">
             Algo erróneo con este marcador
-            <button onclick="triggerEdit()">Sugerir cambio</button>
+            <button onclick="trigEdit()">Sugerir cambio</button>
         </div>
     </div>
 </div>
-
-<!-- Modal nuevo punto -->
-<div class="modal" id="mNew">
+<div class="modal" id="mN">
     <div class="mc">
-        <button class="x" onclick="closeM('mNew')" aria-label="Cerrar">&times;</button>
+        <button class="x" data-close="mN" aria-label="Cerrar">&times;</button>
         <h3 style="margin-bottom:5px;color:#16a34a">Sugerir nuevo punto</h3>
         <p style="font-size:.8rem;color:var(--muted);margin-bottom:15px">Coordenadas del lugar seleccionado:</p>
-        <div class="fg"><label>Coordenadas</label><div class="cc" id="nC">Cargando...</div></div>
-        <div class="fg"><label>Nombre del lugar *</label><input type="text" id="nT" placeholder="Ej: Parqueo en 5ta y 2da" required></div>
-        <div class="fg"><label>Categoría</label><select id="nCat"></select></div>
-        <div class="fg"><label>Comentarios</label><textarea id="nD" placeholder="Capacidad, estado, techo..."></textarea></div>
-        <button class="btn-s" onclick="sendNew()">Enviar sugerencia</button>
-        <div class="hint">Se enviará al bot para revisión.</div>
+        <div class="fg"><label>Coordenadas</label><div class="cc" id="nCo">Cargando...</div></div>
+        <div class="fg"><label>Nombre del lugar *</label><input type="text" id="nTi" placeholder="Ej: Parqueo en 5ta y 2da"></div>
+        <div class="fg"><label>Categoría</label><select id="nCa"></select></div>
+        <div class="fg"><label>Comentarios</label><textarea id="nDe" placeholder="Capacidad, estado, techo..."></textarea></div>
+        <button class="btn-s" id="btnNew" onclick="sendNew()"><span class="sl">Enviar sugerencia</span><span class="spin"></span></button>
+        <div class="hint">Llega como mensaje a Telegram.</div>
     </div>
 </div>
-
-<!-- Modal editar punto -->
-<div class="modal" id="mEdit">
+<div class="modal" id="mE">
     <div class="mc">
-        <button class="x" onclick="closeM('mEdit')" aria-label="Cerrar">&times;</button>
+        <button class="x" data-close="mE" aria-label="Cerrar">&times;</button>
         <h3 style="margin-bottom:5px;color:#f59e0b">Sugerir cambio en punto</h3>
         <p style="font-size:.8rem;color:var(--muted);margin-bottom:15px">Datos actuales:</p>
         <div style="background:var(--bg2);padding:10px;border-radius:8px;margin-bottom:15px;border-left:4px solid var(--border)">
-            <div style="font-weight:600;font-size:.9rem" id="eT">-</div>
-            <div style="font-size:.8rem;color:var(--fg2);margin-top:4px" id="eC">-</div>
+            <div style="font-weight:600;font-size:.9rem" id="eTi">-</div>
+            <div style="font-size:.8rem;color:var(--fg2);margin-top:4px" id="eCo">-</div>
         </div>
-        <div class="fg"><label>¿Qué cambiaría o agregaría?</label><textarea id="eD" placeholder="Ej: El nombre correcto es..., Tiene capacidad para 20 bicis..."></textarea></div>
-        <button class="btn-s warn" onclick="sendEdit()">Enviar corrección</button>
-        <div class="hint">Se enviará al bot para revisión.</div>
+        <div class="fg"><label>¿Qué cambiaría o agregaría?</label><textarea id="eDe" placeholder="Ej: El nombre correcto es..."></textarea></div>
+        <button class="btn-s w" id="btnEdit" onclick="sendEdit()"><span class="sl">Enviar corrección</span><span class="spin"></span></button>
+        <div class="hint">Llega como mensaje a Telegram.</div>
     </div>
 </div>
 
 <script>
-// =============================================
-//  TELEGRAM WEB APP
-// =============================================
+// ============================================================
+//  CONFIGURACIÓN
+// ============================================================
+const BOT_TOKEN = '7123456789:AAH...tu_token_aqui...';
+const CHAT_ID   = '123456789';
+
+// ============================================================
+//  TELEGRAM
+// ============================================================
 const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 tg.enableClosingConfirmation();
 applyTheme();
 tg.onEvent('themeChanged', applyTheme);
-
 const tgUser = tg.initDataUnsafe?.user;
 
 function applyTheme() {
     const r = document.documentElement.style, p = tg.themeParams;
-    if (p.bg_color)          r.setProperty('--bg', p.bg_color);
+    if (p.bg_color)           r.setProperty('--bg', p.bg_color);
     if (p.secondary_bg_color) r.setProperty('--bg2', p.secondary_bg_color);
     if (p.text_color)         r.setProperty('--fg', p.text_color);
     if (p.secondary_text_color) r.setProperty('--fg2', p.secondary_text_color);
@@ -268,382 +449,282 @@ function applyTheme() {
 }
 
 function haptic(t) {
-    const hf = tg.HapticFeedback;
-    if (!hf) return;
-    const map = { light:'light', medium:'medium', heavy:'heavy', success:'success', error:'error', warning:'warning', selection:'selection' };
-    if (map[t]) {
-        if (t === 'selection') hf.selectionChanged();
-        else hf.notificationOccurred(map[t]);
+    const h = tg.HapticFeedback; if (!h) return;
+    if (t === 'selection') h.selectionChanged();
+    else if (['success','error','warning'].includes(t)) h.notificationOccurred(t);
+    else h.impactOccurred(t);
+}
+
+// ============================================================
+//  NAVEGACIÓN ENTRE VISTAS
+// ============================================================
+let curView = 'home';
+let mapReady = false;
+
+function showView(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    curView = id;
+    updateBack();
+}
+
+function updateBack() {
+    if (curView === 'home') { hideBk(); return; }
+    if (curView === 'map') {
+        if (anyModalOpen() || $('sb').classList.contains('op')) showBk();
+        else hideBk();
+        return;
+    }
+    showBk();
+}
+
+function goHome() { haptic('light'); showView('viewHome'); }
+function goToHelp() { haptic('light'); showView('viewHelp'); }
+function goToDonate() { haptic('light'); showView('viewDonate'); }
+
+function goToMap() {
+    haptic('medium');
+    showView('viewMap');
+    if (!mapReady) {
+        setTimeout(() => { createMap(); initData(); mapReady = true; }, 60);
     } else {
-        hf.impactOccurred(t);
+        setTimeout(() => map.invalidateSize(), 60);
     }
 }
 
-// Botón Back: cierra modales → sidebar
 tg.BackButton.onClick(() => {
-    if (document.getElementById('mNew').classList.contains('open'))  { closeM('mNew'); return; }
-    if (document.getElementById('mEdit').classList.contains('open')) { closeM('mEdit'); return; }
-    if (document.getElementById('mInfo').classList.contains('open')) { closeM('mInfo'); return; }
-    if (document.getElementById('sb').classList.contains('open'))    { toggleMenu(); return; }
+    if (curView === 'help' || curView === 'donate') { goHome(); return; }
+    if (curView === 'map') {
+        if ($('sb').classList.contains('op')) { tglMenu(); return; }
+        if (closeTopModal()) return;
+        goHome();
+    }
 });
 
-function showBack() { tg.BackButton.show(); }
-function hideBack() { tg.BackButton.hide(); }
+function showBk() { tg.BackButton.show(); }
+function hideBk() { tg.BackButton.hide(); }
 
-// =============================================
-//  ESTADO
-// =============================================
-let points = [], categories = [], mapMarkers = [];
-let curPoint = null, editPoint = null;
-let lpTimer = null, isLP = false, lpX = 0, lpY = 0;
-const LP_TH = 10;
+// ============================================================
+//  DONAR: Copiar al portapapeles
+// ============================================================
+function copiar(id, btn) {
+    const txt = $(id).innerText.trim();
+    navigator.clipboard.writeText(txt).then(() => {
+        haptic('success');
+        const orig = btn.innerText;
+        btn.innerText = '✅ ¡Copiado!';
+        btn.classList.add('ok');
+        setTimeout(() => { btn.innerText = orig; btn.classList.remove('ok'); }, 2500);
+    }).catch(() => {
+        haptic('error');
+        const ta = document.createElement('textarea');
+        ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        try {
+            document.execCommand('copy');
+            btn.innerText = '✅ ¡Copiado!'; btn.classList.add('ok');
+            setTimeout(() => { btn.innerText = '📋 Copiar'; btn.classList.remove('ok'); }, 2500);
+        } catch(e) { toast('Copia el número manualmente','error'); }
+        document.body.removeChild(ta);
+    });
+}
 
-// =============================================
-//  DOM
-// =============================================
-const $=id=>document.getElementById(id);
-const catList=$('catList'), mapDiv=$('map'), ds=$('ds'), tc=$('tc');
+// ============================================================
+//  ESTADO DEL MAPA
+// ============================================================
+let points=[], cats=[], mkrs=[], curPt=null, edPt=null;
+let lpT=null, isLP=false, lpX=0, lpY=0;
+const LPT=10, $=id=>document.getElementById(id);
+let map, uMk=null, aCr=null, wId=null, locating=false;
 
-// =============================================
-//  MAPA
-// =============================================
-const map = L.map('map', { zoomControl: true }).setView([23.07961, -82.42297], 16);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
-    maxZoom: 19
-}).addTo(map);
+// ============================================================
+//  CREAR MAPA (diferido)
+// ============================================================
+function createMap() {
+    map = L.map('map', { zoomControl: true }).setView([23.07961, -82.42297], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>', maxZoom: 19
+    }).addTo(map);
+    setupMapInteractions();
+    setupGeoButtons();
+}
 
-// =============================================
+// ============================================================
 //  UTILIDADES
-// =============================================
-function toast(msg, type='info', dur=4000) {
-    const ico = {success:'✅',error:'❌',info:'ℹ️'};
-    const el = document.createElement('div');
-    el.className = `toast ${type}`;
-    el.innerHTML = `<span class="ti">${ico[type]||ico.info}</span><span class="tt">${msg}</span>`;
-    tc.appendChild(el);
-    el.offsetHeight;
-    el.classList.add('show');
+// ============================================================
+function toast(msg,type='info',dur=4000){
+    const ico={success:'✅',error:'❌',info:'ℹ️'};
+    const el=document.createElement('div');
+    el.className=`toast ${type}`;
+    el.innerHTML=`<span class="ti">${ico[type]||ico.info}</span><span class="tt">${msg}</span>`;
+    $('tc').appendChild(el);el.offsetHeight;el.classList.add('show');
     haptic(type==='success'?'success':type==='error'?'error':'light');
-    setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),400); }, dur);
+    setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},dur);
+}
+function setDS(s,t){const d=$('ds');d.className=`ds ${s==='loading'?'ld':s==='loaded'?'ok':'er'}`;const e=d.querySelector('.st');if(e)e.textContent=t}
+function emptySB(ico,msg,ret=false){$('catL').innerHTML=`<div class="sb-e"><i>${ico}</i><p>${msg}</p>${ret?'<button class="rbtn" onclick="initData()">Reintentar</button>':''}</div>`}
+
+// ============================================================
+//  ENVÍO AL BOT
+// ============================================================
+async function sendToBot(text) {
+    const r = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'MarkdownV2', disable_web_page_preview: true })
+    });
+    if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.description || `HTTP ${r.status}`); }
+    return r.json();
+}
+function escMd(s){return String(s).replace(/([_*\[\]()~`>#+\-=|{}.!])/g,'\\$1')}
+function setLoad(id,on){const b=$(id);if(on){b.classList.add('sending');b.disabled=true}else{b.classList.remove('sending');b.disabled=false}}
+
+async function sendNew(){
+    const title=$('nTi').value.trim();
+    if(!title){toast('Ponle un nombre al lugar','error');return}
+    const coords=($('nCo').innerText.match(/-?\d+\.\d+/g)||[]).join('; ');
+    const cat=$('nCa').value, desc=$('nDe').value.trim();
+    const user=tgUser?`@${tgUser.username||tgUser.id}`:'Anónimo';
+    const msg=['🆕 *NUEVO PUNTO SUGERIDO*','',`📍 *Nombre:* ${escMd(title)}`,`📂 *Categoría:* ${escMd(cat)}`,`🌐 *Coordenadas:* ${escMd(coords)}`,desc?`📝 *Comentarios:* ${escMd(desc)}`:'',`👤 *Usuario:* ${escMd(user)}`].filter(Boolean).join('\n');
+    setLoad('btnNew',true);
+    try{await sendToBot(msg);haptic('success');closeM('mN');toast('Sugerencia enviada','success')}
+    catch(e){haptic('error');toast('Error: '+e.message,'error',6000)}
+    finally{setLoad('btnNew',false)}
+}
+async function sendEdit(){
+    const desc=$('eDe').value.trim();
+    if(!desc){toast('Describe el cambio','error');return}
+    const user=tgUser?`@${tgUser.username||tgUser.id}`:'Anónimo';
+    const msg=['✏️ *CORRECCIÓN SUGERIDA*','',`📍 *Punto:* ${escMd(edPt.title)}`,`📂 *Categoría:* ${escMd(edPt.tipo)}`,`🌐 *Coordenadas:* ${escMd(edPt.lat+', '+edPt.lng)}`,`📝 *Sugerencia:* ${escMd(desc)}`,`👤 *Usuario:* ${escMd(user)}`].filter(Boolean).join('\n');
+    setLoad('btnEdit',true);
+    try{await sendToBot(msg);haptic('success');closeM('mE');toast('Corrección enviada','success')}
+    catch(e){haptic('error');toast('Error: '+e.message,'error',6000)}
+    finally{setLoad('btnEdit',false)}
 }
 
-function setDS(s, t) { ds.className=`ds ${s}`; const e=ds.querySelector('.st'); if(e) e.textContent=t; }
-function emptySB(ico, msg, retry=false) {
-    catList.innerHTML = `<div class="sb-empty"><div class="sb-empty-ico">${ico}</div><div class="sb-empty-txt">${msg}</div>${retry?'<button class="retry" onclick="init()">Reintentar</button>':''}</div>`;
-}
-
-// =============================================
+// ============================================================
 //  CSS DINÁMICO Y SELECT
-// =============================================
-function injectCSS(cats) {
-    let s = document.getElementById('dcss');
-    if (!s) { s = document.createElement('style'); s.id = 'dcss'; document.head.appendChild(s); }
-    s.textContent = cats.map(c =>
-        `.pin.${c.tipo}{background-color:${c.color};border-radius:${c.borderRadius};transform:rotate(${c.rotacion})}\n.pin.${c.tipo}:hover{transform:rotate(360deg) scale(1.2)!important}`
-    ).join('\n');
+// ============================================================
+function injectCSS(c){
+    let s=$('dcss');if(!s){s=document.createElement('style');s.id='dcss';document.head.appendChild(s)}
+    s.textContent=c.map(x=>`.pin.${x.tipo}{background-color:${x.color};border-radius:${x.borderRadius};transform:rotate(${x.rotacion})}\n.pin.${x.tipo}:hover{transform:rotate(360deg) scale(1.2)!important}`).join('\n');
 }
+function fillSel(){const s=$('nCa');s.innerHTML='';cats.forEach(c=>{const o=document.createElement('option');o.value=c.tipo;o.innerText=`${c.icono} ${c.nombre}`;s.appendChild(o)})}
 
-function fillSelect() {
-    const sel = $('nCat');
-    sel.innerHTML = '';
-    categories.forEach(c => {
-        const o = document.createElement('option');
-        o.value = c.tipo;
-        o.innerText = `${c.icono} ${c.nombre}`;
-        sel.appendChild(o);
-    });
-}
-
-// =============================================
+// ============================================================
 //  CARGA DE DATOS
-// =============================================
-async function init() {
-    setDS('loading','Cargando...');
-    emptySB('⏳','Descargando categorías...',false);
-    try {
-        const cr = await fetch('categorias.json');
-        if (!cr.ok) throw new Error(`Categorías (HTTP ${cr.status})`);
-        const cd = await cr.json();
-        if (!Array.isArray(cd)||!cd.length) throw new Error('Archivo de categorías vacío.');
-        categories = cd;
-        injectCSS(categories);
-        fillSelect();
-
-        setDS('loading','Descargando puntos...');
-        const res = await Promise.all(categories.map(c => {
-            if (!c.url) return [];
-            return fetch(c.url)
-                .then(r => { if(!r.ok) throw new Error(c.nombre); return r.json(); })
-                .then(d => Array.isArray(d) ? d.map(p=>({...p,tipo:c.tipo})) : [])
-                .catch(()=>[]);
-        }));
-
-        const all = res.flat().filter(p => p.lat && p.lng && p.title);
-        if (!all.length) throw new Error('Sin puntos válidos.');
-        all.forEach((p,i) => { if(!p.id) p.id=i+1; if(!p.desc) p.desc=''; });
-        points = all;
-
-        setDS('loaded',`${points.length} puntos`);
-        toast(`${categories.length} categorías, ${points.length} puntos`,'success');
-        renderSB();
-        filter('todos');
-    } catch(e) {
-        console.error(e);
-        setDS('error','Error');
-        emptySB('❌',`Fallo:<br><small>${e.message}</small><br><br>Revisa <code>categorias.json</code>`,true);
-        toast('Error al cargar','error',6000);
-    }
+// ============================================================
+async function initData(){
+    setDS('loading','Cargando...');emptySB('⏳','Descargando...',false);
+    try{
+        const cr=await fetch('categorias.json');
+        if(!cr.ok)throw new Error(`Categorías (HTTP ${cr.status})`);
+        const cd=await cr.json();
+        if(!Array.isArray(cd)||!cd.length)throw new Error('Archivo vacío.');
+        cats=cd;injectCSS(cats);fillSel();
+        setDS('loading','Puntos...');
+        const res=await Promise.all(cats.map(c=>{if(!c.url)return[];return fetch(c.url).then(r=>{if(!r.ok)throw new Error(c.nombre);return r.json()}).then(d=>Array.isArray(d)?d.map(p=>({...p,tipo:c.tipo})):[]).catch(()=>[])}));
+        const all=res.flat().filter(p=>p.lat&&p.lng&&p.title);
+        if(!all.length)throw new Error('Sin puntos válidos.');
+        all.forEach((p,i)=>{if(!p.id)p.id=i+1;if(!p.desc)p.desc=''});
+        points=all;setDS('loaded',`${points.length} puntos`);
+        toast(`${cats.length} categorías, ${points.length} puntos`,'success');
+        renderSB();filter('todos');
+    }catch(e){console.error(e);setDS('error','Error');emptySB('❌',`Fallo:<br><small>${e.message}</small><br><br>Revisa <code>categorias.json</code>`,true);toast('Error al cargar','error',6000)}
 }
 
-// =============================================
+// ============================================================
 //  SIDEBAR Y FILTRO
-// =============================================
-function renderSB() {
-    if (!points.length) return;
-    catList.innerHTML = '';
-    const types = ['todos', ...new Set(points.map(p=>p.tipo||'general'))];
-
-    types.forEach(t => {
-        const all = t==='todos';
-        const cat = categories.find(c=>c.tipo===t);
-        const pts = all ? points : points.filter(p=>(p.tipo||'general')===t);
-        const hdr = document.createElement('div');
-        hdr.className = 'ch';
-        hdr.innerHTML = `<span>${all?'Ver Todo':`${cat?cat.icono:'📍'} ${cat?cat.nombre:t[0].toUpperCase()+t.slice(1)}`}</span><div style="display:flex;align-items:center"><span class="badge">${pts.length}</span><span class="arr">▼</span></div>`;
-
-        const body = document.createElement('div');
-        body.className = 'cb';
-
-        pts.forEach(p => {
-            const it = document.createElement('div');
-            it.className = 'pi';
-            it.innerText = p.title;
-            it.onclick = e => {
-                e.stopPropagation();
-                haptic('light');
-                map.flyTo([p.lat,p.lng],17,{duration:1});
-                openInfo(p);
-                if (window.innerWidth<=768) toggleMenu();
-            };
-            body.appendChild(it);
-        });
-
-        hdr.onclick = () => {
-            haptic('selection');
-            document.querySelectorAll('.ch').forEach(h=>{if(h!==hdr)h.classList.remove('on')});
-            document.querySelectorAll('.cb').forEach(b=>{if(b!==body)b.classList.remove('open')});
-            body.classList.toggle('open');
-            hdr.classList.toggle('on');
-            filter(t);
-        };
-
-        catList.appendChild(hdr);
-        catList.appendChild(body);
-        if (all) { body.classList.add('open'); hdr.classList.add('on'); }
+// ============================================================
+function renderSB(){
+    if(!points.length)return;$('catL').innerHTML='';
+    const types=['todos',...new Set(points.map(p=>p.tipo||'general'))];
+    types.forEach(t=>{
+        const all=t==='todos',cat=cats.find(c=>c.tipo===t);
+        const pts=all?points:points.filter(p=>(p.tipo||'general')===t);
+        const h=document.createElement('div');h.className='ch';
+        h.innerHTML=`<span>${all?'Ver Todo':`${cat?cat.icono:'📍'} ${cat?cat.nombre:t[0].toUpperCase()+t.slice(1)}`}</span><div style="display:flex;align-items:center"><span class="bg">${pts.length}</span><span class="ar">▼</span></div>`;
+        const b=document.createElement('div');b.className='cb';
+        pts.forEach(p=>{const it=document.createElement('div');it.className='pi';it.innerText=p.title;it.onclick=e=>{e.stopPropagation();haptic('light');map.flyTo([p.lat,p.lng],17,{duration:1});openInfo(p);if(window.innerWidth<=768)tglMenu()};b.appendChild(it)});
+        h.onclick=()=>{haptic('selection');document.querySelectorAll('.ch').forEach(x=>{if(x!==h)x.classList.remove('on')});document.querySelectorAll('.cb').forEach(x=>{if(x!==b)x.classList.remove('op')});b.classList.toggle('op');h.classList.toggle('on');filter(t)};
+        $('catL').appendChild(h);$('catL').appendChild(b);
+        if(all){b.classList.add('op');h.classList.add('on')}
     });
 }
-
-function filter(type) {
-    mapMarkers.forEach(m=>map.removeLayer(m));
-    mapMarkers = [];
-    const pts = type==='todos' ? points : points.filter(p=>(p.tipo||'general')===type);
-
-    pts.forEach(p => {
-        const ico = L.divIcon({
-            className:'cmi',
-            html:`<div class="pin ${p.tipo||'general'}" data-id="${p.id}"></div><div class="tip">${p.title}</div>`,
-            iconSize:[24,24], iconAnchor:[12,12]
-        });
-        const mk = L.marker([p.lat,p.lng],{icon:ico}).addTo(map);
-        mk.on('click',()=>{ if(isLP){isLP=false;return;} haptic('light'); openInfo(p); });
-        mapMarkers.push(mk);
+function filter(type){
+    mkrs.forEach(m=>map.removeLayer(m));mkrs=[];
+    const pts=type==='todos'?points:points.filter(p=>(p.tipo||'general')===type);
+    pts.forEach(p=>{
+        const ico=L.divIcon({className:'cmi',html:`<div class="pin ${p.tipo||'general'}" data-id="${p.id}"></div><div class="tip">${p.title}</div>`,iconSize:[24,24],iconAnchor:[12,12]});
+        const mk=L.marker([p.lat,p.lng],{icon:ico}).addTo(map);
+        mk.on('click',()=>{if(isLP){isLP=false;return}haptic('light');openInfo(p)});
+        mkrs.push(mk);
     });
-    if (pts.length) map.fitBounds(L.featureGroup(mapMarkers).getBounds().pad(0.1));
+    if(pts.length)map.fitBounds(L.featureGroup(mkrs).getBounds().pad(0.1));
 }
 
-// =============================================
+// ============================================================
 //  CLIC LARGO
-// =============================================
-function lpDown(e) {
-    if (e.target.closest('.leaflet-control-container,.geo-fab,.cd')) return;
-    isLP = false;
-    const cx = e.clientX||(e.touches&&e.touches[0]?e.touches[0].clientX:0);
-    const cy = e.clientY||(e.touches&&e.touches[0]?e.touches[0].clientY:0);
-    lpX=cx; lpY=cy;
-    const tgt = e.target;
-    lpTimer = setTimeout(()=>{
-        isLP = true;
-        haptic('medium');
-        const pin = tgt.closest('.pin');
-        if (pin && pin.dataset.id) {
-            const pd = points.find(p=>p.id===+pin.dataset.id);
-            if (pd) { $('mInfo').classList.remove('open'); openEdit(pd); }
-        } else {
-            $('mInfo').classList.remove('open');
-            const r = mapDiv.getBoundingClientRect();
-            const ll = map.containerPointToLatLng(L.point(cx-r.left, cy-r.top));
-            openNew(ll.lat, ll.lng);
-        }
-    }, 1500);
+// ============================================================
+function setupMapInteractions(){
+    const md=$('map');
+    function lpD(e){if(e.target.closest('.leaflet-control-container,.gfb,.cd'))return;isLP=false;const cx=e.clientX||(e.touches&&e.touches[0]?e.touches[0].clientX:0);const cy=e.clientY||(e.touches&&e.touches[0]?e.touches[0].clientY:0);lpX=cx;lpY=cy;const tgt=e.target;lpT=setTimeout(()=>{isLP=true;haptic('medium');const pin=tgt.closest('.pin');if(pin&&pin.dataset.id){const pd=points.find(p=>p.id===+pin.dataset.id);if(pd){$('mI').classList.remove('op');openEdit(pd)}}else{$('mI').classList.remove('op');const r=md.getBoundingClientRect();const ll=map.containerPointToLatLng(L.point(cx-r.left,cy-r.top));openNew(ll.lat,ll.lng)}},1500)}
+    function lpM(e){const cx=e.clientX||(e.touches?e.touches[0].clientX:0);const cy=e.clientY||(e.touches?e.touches[0].clientY:0);if(Math.abs(cx-lpX)>LPT||Math.abs(cy-lpY)>LPT)clearTimeout(lpT)}
+    function lpU(){clearTimeout(lpT)}
+    md.addEventListener('mousedown',lpD);md.addEventListener('mousemove',lpM);md.addEventListener('mouseup',lpU);md.addEventListener('mouseleave',lpU);
+    md.addEventListener('touchstart',e=>{if(e.touches.length>1){clearTimeout(lpT);return}const t=e.touches[0];lpD({target:document.elementFromPoint(t.clientX,t.clientY),clientX:t.clientX,clientY:t.clientY,touches:e.touches})},{passive:true});
+    md.addEventListener('touchmove',e=>{if(e.touches.length>1){clearTimeout(lpT);return}lpM({clientX:e.touches[0].clientX,clientY:e.touches[0].clientY,touches:e.touches})},{passive:true});
+    md.addEventListener('touchend',lpU);
 }
-function lpMove(e) {
-    const cx = e.clientX||(e.touches?e.touches[0].clientX:0);
-    const cy = e.clientY||(e.touches?e.touches[0].clientY:0);
-    if (Math.abs(cx-lpX)>LP_TH||Math.abs(cy-lpY)>LP_TH) clearTimeout(lpTimer);
-}
-function lpUp() { clearTimeout(lpTimer); }
 
-mapDiv.addEventListener('mousedown',lpDown);
-mapDiv.addEventListener('mousemove',lpMove);
-mapDiv.addEventListener('mouseup',lpUp);
-mapDiv.addEventListener('mouseleave',lpUp);
-mapDiv.addEventListener('touchstart',e=>{
-    if(e.touches.length>1){clearTimeout(lpTimer);return;}
-    const t=e.touches[0];
-    lpDown({target:document.elementFromPoint(t.clientX,t.clientY),clientX:t.clientX,clientY:t.clientY,touches:e.touches});
-},{passive:true});
-mapDiv.addEventListener('touchmove',e=>{
-    if(e.touches.length>1){clearTimeout(lpTimer);return;}
-    lpMove({clientX:e.touches[0].clientX,clientY:e.touches[0].clientY,touches:e.touches});
-},{passive:true});
-mapDiv.addEventListener('touchend',lpUp);
-
-// =============================================
+// ============================================================
 //  MODALES
-// =============================================
-function anyModalOpen() { return !!document.querySelector('.modal.open'); }
+// ============================================================
+function anyModalOpen(){return!!document.querySelector('.modal.op')}
+function closeTopModal(){if($('sb').classList.contains('op')){tglMenu();return true}if($('mN').classList.contains('op')){closeM('mN');return true}if($('mE').classList.contains('op')){closeM('mE');return true}if($('mI').classList.contains('op')){closeM('mI');return true}return false}
+function closeM(id){$(id).classList.remove('op');updateBack()}
+function openInfo(d){curPt=d;$('mTi').innerText=d.title;$('mDe').innerText=d.desc;if(d.imagen){$('mIm').src=d.imagen;$('mIm').style.display='block'}else{$('mIm').style.display='none';$('mIm').src=''}if(d.enlace){$('mLi').href=d.enlace;$('mLi').classList.add('vis')}else{$('mLi').classList.remove('vis');$('mLi').href='#'}$('mI').classList.add('op');updateBack()}
+function trigEdit(){if(curPt){$('mI').classList.remove('op');openEdit(curPt)}}
+function openNew(lat,lng){$('nCo').innerText=`Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;$('nTi').value='';$('nDe').value='';$('nCa').selectedIndex=0;$('mN').classList.add('op');updateBack()}
+function openEdit(d){edPt=d;$('eTi').innerText=d.title;$('eCo').innerText=`Lat: ${d.lat}, Lng: ${d.lng} (${d.tipo})`;$('eDe').value='';$('mE').classList.add('op');updateBack()}
 
-function closeM(id) {
-    $(id).classList.remove('open');
-    if (!anyModalOpen() && !$('sb').classList.contains('open')) hideBack();
-}
+document.querySelectorAll('.x[data-close]').forEach(b=>{b.onclick=()=>closeM(b.dataset.close)});
+['mI','mN','mE'].forEach(id=>{$(id).addEventListener('click',e=>{if(e.target===$(id))closeM(id)})});
 
-function openInfo(d) {
-    curPoint = d;
-    $('mT').innerText = d.title;
-    $('mD').innerText = d.desc;
-    if (d.imagen) { $('mI').src=d.imagen; $('mI').style.display='block'; }
-    else { $('mI').style.display='none'; $('mI').src=''; }
-    if (d.enlace) { $('mL').href=d.enlace; $('mL').classList.add('vis'); }
-    else { $('mL').classList.remove('vis'); $('mL').href='#'; }
-    $('mInfo').classList.add('open');
-    showBack();
-}
-
-function triggerEdit() {
-    if (curPoint) { $('mInfo').classList.remove('open'); openEdit(curPoint); }
-}
-
-function openNew(lat, lng) {
-    $('nC').innerText = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
-    $('nT').value=''; $('nD').value=''; $('nCat').selectedIndex=0;
-    $('mNew').classList.add('open');
-    showBack();
-}
-
-function openEdit(d) {
-    editPoint = d;
-    $('eT').innerText = d.title;
-    $('eC').innerText = `Lat: ${d.lat}, Lng: ${d.lng} (${d.tipo})`;
-    $('eD').value = '';
-    $('mEdit').classList.add('open');
-    showBack();
-}
-
-// =============================================
-//  ENVIAR AL BOT
-// =============================================
-function sendNew() {
-    const title = $('nT').value.trim();
-    if (!title) { toast('Ponle un nombre al lugar','error'); return; }
-    const coords = ($('nC').innerText.match(/-?\d+\.\d+/g)||[]).join(';');
-    tg.sendData(JSON.stringify({
-        a:'new', t:title, c:$('nCat').value, g:coords,
-        d:$('nD').value.trim(),
-        u: tgUser ? (tgUser.username||tgUser.id) : 'anon'
-    }));
-    closeM('mNew');
-    toast('Sugerencia enviada','success');
-}
-
-function sendEdit() {
-    const desc = $('eD').value.trim();
-    if (!desc) { toast('Describe el cambio','error'); return; }
-    tg.sendData(JSON.stringify({
-        a:'edit', t:editPoint.title, c:editPoint.tipo,
-        g:`${editPoint.lat};${editPoint.lng}`, d:desc,
-        u: tgUser ? (tgUser.username||tgUser.id) : 'anon'
-    }));
-    closeM('mEdit');
-    toast('Corrección enviada','success');
-}
-
-// =============================================
-//  CIERRE DE MODALES
-// =============================================
- $('xInfo').onclick = () => closeM('mInfo');
- $('mInfo').onclick = e => { if(e.target===$('mInfo')) closeM('mInfo'); };
- $('mNew').onclick = e => { if(e.target===$('mNew')) closeM('mNew'); };
- $('mEdit').onclick = e => { if(e.target===$('mEdit')) closeM('mEdit'); };
-
-// =============================================
+// ============================================================
 //  MENÚ LATERAL
-// =============================================
-function toggleMenu() {
-    const sb=$('sb'), ov=$('sbOv'), open=sb.classList.toggle('open');
-    ov.classList.toggle('open',open);
-    if (open) showBack();
-    else if (!anyModalOpen()) hideBack();
-}
+// ============================================================
+function tglMenu(){const sb=$('sb'),ov=$('sbOv'),open=sb.classList.toggle('op');ov.classList.toggle('op',open);updateBack()}
+ $('menuTgl').onclick=()=>{haptic('light');tglMenu()};
+ $('sbOv').onclick=()=>{haptic('light');tglMenu()};
 
- $('menuToggle').onclick = () => { haptic('light'); toggleMenu(); };
- $('sbOv').onclick = () => { haptic('light'); toggleMenu(); };
-
-// =============================================
+// ============================================================
 //  GEOLOCALIZACIÓN
-// =============================================
-let uMarker=null, aCircle=null, wId=null, locating=false;
-const uIcon = L.divIcon({className:'ulm',html:'<div class="udo"></div><div class="udi"></div>',iconSize:[40,40],iconAnchor:[20,20]});
-
-function setULoc(lat,lng,acc,fly=true) {
-    if(uMarker) uMarker.setLatLng([lat,lng]);
-    else uMarker=L.marker([lat,lng],{icon:uIcon,zIndexOffset:10000}).addTo(map);
-    if(aCircle) { aCircle.setLatLng([lat,lng]); aCircle.setRadius(acc); }
-    else aCircle=L.circle([lat,lng],{radius:acc,color:'#2563eb',fillColor:'#2563eb',fillOpacity:.08,weight:1.5,opacity:.3}).addTo(map);
-    $('cLat').textContent=lat.toFixed(6);
-    $('cLng').textContent=lng.toFixed(6);
-    $('cAcc').textContent=acc<1000?`±${Math.round(acc)}m`:`±${(acc/1000).toFixed(1)}km`;
-    $('cd').classList.add('vis');
-    if(fly) map.flyTo([lat,lng],acc<50?18:acc<200?17:16,{duration:1.2});
-    $('geoFab').classList.add('on');
+// ============================================================
+function setupGeoButtons(){
+    $('gHdr').onclick=()=>{haptic('light');startLoc()};
+    $('gFab').onclick=()=>{haptic('light');startLoc()};
 }
-
-function startLoc() {
-    if(locating) return;
-    locating=true;
-    $('geoHdr').classList.add('loading');
-    $('geoFab').classList.add('ld');
-    if(!navigator.geolocation){ toast('Sin geolocalización','error'); stopLoc(); return; }
+const uIco=L.divIcon({className:'ulm',html:'<div class="udo"></div><div class="udi"></div>',iconSize:[40,40],iconAnchor:[20,20]});
+function setUL(lat,lng,acc,fly=true){
+    if(uMk)uMk.setLatLng([lat,lng]);else uMk=L.marker([lat,lng],{icon:uIco,zIndexOffset:10000}).addTo(map);
+    if(aCr){aCr.setLatLng([lat,lng]);aCr.setRadius(acc)}else aCr=L.circle([lat,lng],{radius:acc,color:'#2563eb',fillColor:'#2563eb',fillOpacity:.08,weight:1.5,opacity:.3}).addTo(map);
+    $('cLa').textContent=lat.toFixed(6);$('cLn').textContent=lng.toFixed(6);
+    $('cAc').textContent=acc<1000?`±${Math.round(acc)}m`:`±${(acc/1000).toFixed(1)}km`;
+    $('cd').classList.add('vis');
+    if(fly)map.flyTo([lat,lng],acc<50?18:acc<200?17:16,{duration:1.2});
+    $('gFab').classList.add('on');
+}
+function startLoc(){
+    if(locating)return;locating=true;$('gHdr').classList.add('ld');$('gFab').classList.add('ld');
+    if(!navigator.geolocation){toast('Sin geolocalización','error');stopLoc();return}
     navigator.geolocation.getCurrentPosition(
-        p => { setULoc(p.coords.latitude,p.coords.longitude,p.coords.accuracy,true); toast(`Ubicación (±${Math.round(p.coords.accuracy)}m)`,'success'); stopLoc(); startWatch(); },
-        e => { const m={1:'Permiso denegado',2:'Sin GPS',3:'Tiempo agotado'}; toast(m[e.code]||'Error','error',6000); stopLoc(); },
+        p=>{setUL(p.coords.latitude,p.coords.longitude,p.coords.accuracy,true);toast(`Ubicación (±${Math.round(p.coords.accuracy)}m)`,'success');stopLoc();startW()},
+        e=>{const m={1:'Permiso denegado',2:'Sin GPS',3:'Tiempo agotado'};toast(m[e.code]||'Error','error',6000);stopLoc()},
         {enableHighAccuracy:true,timeout:15000,maximumAge:0}
     );
 }
-function startWatch() {
-    if(wId!==null) navigator.geolocation.clearWatch(wId);
-    wId=navigator.geolocation.watchPosition(p=>setULoc(p.coords.latitude,p.coords.longitude,p.coords.accuracy,false),()=>{},{enableHighAccuracy:true,timeout:30000,maximumAge:5000});
-}
-function stopLoc() { locating=false; $('geoHdr').classList.remove('loading'); $('geoFab').classList.remove('ld'); }
-
- $('geoHdr').onclick = () => { haptic('light'); startLoc(); };
- $('geoFab').onclick = () => { haptic('light'); startLoc(); };
-
-// =============================================
-//  INICIO
-// =============================================
-init();
+function startW(){if(wId!==null)navigator.geolocation.clearWatch(wId);wId=navigator.geolocation.watchPosition(p=>setUL(p.coords.latitude,p.coords.longitude,p.coords.accuracy,false),()=>{},{enableHighAccuracy:true,timeout:30000,maximumAge:5000})}
+function stopLoc(){locating=false;$('gHdr').classList.remove('ld');$('gFab').classList.remove('ld')}
 </script>
 </body>
 </html>
