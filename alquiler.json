@@ -3,18 +3,30 @@
         "lat": 23.05589,
         "lng": -82.41960,
         "title": "🚲 Cujae Ha'bici",
-        "desc": "Punto de la Cujae"
+        "desc": "Ha'bici - Punto de la Cujae"
     },
     {
         "lat": 23.05808,
         "lng": -82.40280,
         "title": "🚲 Reloj Club",
-        "desc": "Ha'bici"
+        "desc": "Ha'bici - Reloj Club"
     },
 	{
         "lat": 23.14449,
         "lng": -82.35860,
         "title": "🚲 Prado 20",
         "desc": "VeloCuba"
+    },
+	{
+        "lat": 23.13523,
+        "lng": -82.35341,
+        "title": "🚲 Compostela",
+        "desc": "VeloCuba - Compostela e/ Muralla y Teniente Rey"
+    }
+	{
+        "lat": 23.142942,
+        "lng": -82.359532,
+        "title": "🚲 HABANA BIKES",
+        "desc": "Perticular - Consulado 61 e/ Genios y Refugio"
     }
 ]
