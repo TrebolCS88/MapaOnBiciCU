@@ -100,5 +100,11 @@
         "lng": -82.358568,
         "title": "🔒 Paseo del Prado 20",
         "desc": "Velocuba Ha'bici"
+    },
+    {
+        "lat": 23.074158,
+        "lng": -82.430136,
+        "title": "🔒 Anfiteatro de Mariano",
+        "desc": "Al costado del anfiteatro en horario del Banco"
     }
 ]
