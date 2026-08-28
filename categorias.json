@@ -67,7 +67,7 @@
         "nombre": "Alimentación Rápida",
         "icono": "🍔",
         "color": "#f97316",
-        "borderRadius": "0",
+        "borderRadius": "50%",
         "rotacion": "330deg",
         "url": "alimentos.json"
     },
