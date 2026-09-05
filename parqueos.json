@@ -106,5 +106,11 @@
         "lng": -82.430136,
         "title": "🔒 Anfiteatro de Mariano",
         "desc": "Al costado del anfiteatro en horario del Banco"
+    },
+    {
+        "lat": 23.140523,
+        "lng": -82.384728,
+        "title": "🔒 Calle 21 e/ K y L - Vedado",
+        "desc": "Detrás del Coopelia en un parqueo del estado"
     }
 ]
