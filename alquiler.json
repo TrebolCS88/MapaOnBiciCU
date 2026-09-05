@@ -27,6 +27,12 @@
         "lat": 23.142942,
         "lng": -82.359532,
         "title": "🚲 HABANA BIKES",
-        "desc": "Perticular - Consulado 61 e/ Genios y Refugio"
+        "desc": "Particular - Consulado 61 e/ Genios y Refugio"
+    },
+	{
+        "lat": 23.119719,
+        "lng": -82.391024,
+        "title": "🚲 Yagu -Rentas",
+        "desc": "Particular +Talles y Tienda"
     }
 ]
