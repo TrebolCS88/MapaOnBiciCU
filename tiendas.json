@@ -58,5 +58,17 @@
         "lng": -82.364888,
         "title": "🛒 Ave. Mexico e/ Concha y San Felipe - Cerro",
         "desc": "Varias mesas con piezas, accesorios e incluso bicicletas"
+    },
+	{
+        "lat": 23.119719,
+        "lng": -82.391024,
+        "title": "🛒 Yagu - Plaza de la Revolución",
+        "desc": "+Renta y Taller"
+    },
+	{
+        "lat": 23.137659,
+        "lng": -82.362482,
+        "title": "🛒 La casa del Ciclista - Centro Habana",
+        "desc": "Aguila e/ Neptuno y San Miguel -Llamar antes de ir (No es puerta a calle)"
     }
 ]
