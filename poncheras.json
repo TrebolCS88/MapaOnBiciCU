@@ -76,5 +76,17 @@
         "lng": -82.389668,
         "title": "🩹 Esquina Marino y San Pedro -Plaza",
         "desc": "Colaboración"
+    },
+    {
+        "lat": 23.076405,
+        "lng": -82.423832,
+        "title": "🩹 59 e/ 108 y 110 -Marianao",
+        "desc": "Cerca del parqueo de Comunales"
+    },
+    {
+        "lat": 23.076314,
+        "lng": -82.416440,
+        "title": "🩹 Calle 96 y 69 -Marianao",
+        "desc": "Particular"
     }
 ]
