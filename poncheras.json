@@ -88,5 +88,17 @@
         "lng": -82.416440,
         "title": "🩹 Calle 96 y 69 -Marianao",
         "desc": "Particular"
+    },
+    {
+        "lat": 23.123119,
+        "lng": -82.410238,
+        "title": "🩹 Calle 32 e/ 19 y 30 -Plaza",
+        "desc": "Colaboración"
+    },
+    {
+        "lat": 23.119991,
+        "lng": -82.403629,
+        "title": "🩹 Calle 26 y 29 -Plaza",
+        "desc": "Colaboración: Aire"
     }
 ]
