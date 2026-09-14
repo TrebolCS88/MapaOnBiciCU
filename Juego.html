@@ -23,7 +23,7 @@
             height: 100vh;
         }
 
-        /* HUD Mejorado */
+        /* HUD */
         #hud {
             position: absolute;
             top: 10px;
@@ -57,10 +57,10 @@
         
         .value { color: #ffeb3b; font-size: 12px; display: block; margin-top: 4px; font-weight: bold;}
 
-        /* Botón de Freno: Encima del R */
+        /* Bot贸n de Freno */
         #brake-btn {
             position: absolute;
-            bottom: 130px; /* Encima del pedal derecho (que está a 40px) */
+            bottom: 130px;
             right: 30px;
             width: 80px;
             height: 80px;
@@ -180,10 +180,10 @@
         <div id="start-screen" class="modal">
             <h1>City Biker Final</h1>
             <p>
-                ?? Ciclo 2km: Día(1km) -> Noche(0.6km).<br>
+                馃寙 Ciclo 2km: D铆a(1km) -> Noche(0.6km).<br>
                 1. Pedalear en SECUENCIA (L-R-L).<br>
                 2. Giro bloqueado bajo 2km/h.<br>
-                3. Botón FRENO encima de R.<br>
+                3. Bot贸n FRENO encima de R.<br>
                 4. Ciudad al anochecer.<br>
                 5. Baches en los bordes.
             </p>
@@ -191,7 +191,7 @@
         </div>
 
         <div id="game-over-screen" class="modal hidden">
-            <h1>?CHOQUE!</h1>
+            <h1>隆CHOQUE!</h1>
             <p>Distancia: <span id="final-score" class="value">0.00</span> km</p>
             <button id="btn-restart">REINTENTAR</button>
         </div>
@@ -202,7 +202,7 @@
             maxSpeed: 1.8,
             acceleration: 0.015,
             friction: 0.0005,
-            minSteerSpeedKmh: 2.0, // Velocidad mínima para girar
+            minSteerSpeedKmh: 2.0, 
             turnSensitivity: 0.12,
             roadWidth: 10,
             cycleLength: 20000, 
@@ -220,18 +220,20 @@
         let scenery = [];
         let ambientLight, sunLight, carHeadlight;
         let floorL, floorR;
+        let starField; // Textura de estrellas
 
         let state = {
             playing: false,
             speed: 0,
             distance: 0,
             bikeX: 0,
-            lastTap: null, // Para control de secuencia
+            lastTap: null, 
             frame: 0,
             level: 1,
             isNight: false,
             isCity: false,
-            isBraking: false
+            isBraking: false,
+            gyroEnabled: false
         };
 
         const ui = {
@@ -264,6 +266,7 @@
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             document.getElementById('game-container').appendChild(renderer.domElement);
 
+            // --- TUTORIAL VISUAL: Modificar Luces ---
             ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
 
@@ -287,6 +290,7 @@
             camera.add(carHeadlight.target);
             scene.add(camera);
 
+            createStarTexture(); // Crear estrellas
             createEnvironment();
             createBike();
             setupInputs();
@@ -300,7 +304,36 @@
             animate();
         }
 
+        // --- TUTORIAL VISUAL: Crear Cielo Estrellado ---
+        function createStarTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            
+            // Fondo Azul Oscuro (No liso, suave degradado)
+            const grad = ctx.createLinearGradient(0,0,0,512);
+            grad.addColorStop(0, '#0b1026'); // Azul muy oscuro arriba
+            grad.addColorStop(1, '#1b2845'); // Azul medio abajo
+            ctx.fillStyle = grad;
+            ctx.fillRect(0,0,512,512);
+
+            // Estrellas
+            ctx.fillStyle = '#ffffff';
+            for(let i=0; i<200; i++) {
+                const x = Math.random() * 512;
+                const y = Math.random() * 512;
+                const size = Math.random() * 2;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI*2);
+                ctx.fill();
+            }
+            
+            starField = new THREE.CanvasTexture(canvas);
+        }
+
         function createEnvironment() {
+            // Carretera
             const canvas = document.createElement('canvas');
             canvas.width = 512;
             canvas.height = 512;
@@ -325,6 +358,7 @@
             road.receiveShadow = true;
             scene.add(road);
 
+            // Suelo Lateral
             const floorGeo = new THREE.PlaneGeometry(200, 300);
             const floorMat = new THREE.MeshPhongMaterial({ color: 0x4caf50 });
             
@@ -341,10 +375,13 @@
             scene.add(floorR);
         }
 
+        // --- TUTORIAL VISUAL: Modificar Bici ---
         function createBike() {
             bikeGroup = new THREE.Group();
 
+            // Material Metal
             const metalMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.2 });
+            // Material Pintura (Cambiar 0xd32f2f por otro color HEX)
             const paintMat = new THREE.MeshStandardMaterial({ color: 0xd32f2f, metalness: 0.3, roughness: 0.5 });
             const gripMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
 
@@ -353,6 +390,7 @@
             const forkR = new THREE.Mesh(forkGeo, metalMat); forkR.position.set(0.3, -0.4, -0.1);
             bikeGroup.add(forkL, forkR);
 
+            // Barra del manubrio
             const barGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.8);
             const bar = new THREE.Mesh(barGeo, paintMat);
             bar.rotation.z = Math.PI / 2;
@@ -393,7 +431,6 @@
                 mesh.position.y = -0.05;
                 mesh.userData = { radius: r, type: 'pothole' };
 
-                // Baches en bordes (Anti-Trampa)
                 if (Math.random() > 0.5) {
                     xPos = (Math.random() > 0.5 ? 1 : -1) * (CONFIG.roadWidth/2 - 0.8);
                 } else {
@@ -466,7 +503,6 @@
                 mesh = new THREE.Mesh(geo, mat);
                 mesh.position.y = h/2;
                 
-                // Farola
                 const poleGeo = new THREE.CylinderGeometry(0.1, 0.1, 5);
                 const poleMat = new THREE.MeshStandardMaterial({color: 0x111111});
                 const pole = new THREE.Mesh(poleGeo, poleMat);
@@ -497,13 +533,16 @@
             scenery.push(mesh);
         }
 
+        // --- TUTORIAL VISUAL: Colores del Ciclo ---
         function updateDayNightCycle() {
             const scaledDist = state.distance * 10;
             const cyclePos = scaledDist % CONFIG.cycleLength;
             
+            // cDay: Color azul cielo (0x87CEEB)
+            // cNight: Color azul oscuro con estrellas (definido en createStarTexture)
             const cDay = new THREE.Color(0x87CEEB);
             const cDusk = new THREE.Color(0xfd5e53);
-            const cNight = new THREE.Color(0x050510);
+            const cNight = new THREE.Color(0x0b1026); // Base color for texture mix
             
             let targetColor = cDay;
             let targetFog = 120;
@@ -517,8 +556,8 @@
             state.isNight = false;
             state.isCity = false;
 
-            // Ciudad comienza al anochecer (duskStart)
-            const cityStart = CONFIG.phases.dayEnd; // 10000
+            // Solicitud usuario: Ciudad empieza al anochecer
+            const cityStart = CONFIG.phases.dayEnd; 
 
             const lightOn = 10000 - 1500; 
             const lightOff = 18000 + 800;  
@@ -526,23 +565,24 @@
             if (cyclePos < CONFIG.phases.dayEnd) {
                 targetColor = cDay;
             } else if (cyclePos < CONFIG.phases.duskEnd) {
-                // Atardecer: Ciudad empieza aquí
                 state.isCity = true;
                 const alpha = (cyclePos - CONFIG.phases.dayEnd) / (CONFIG.phases.duskEnd - CONFIG.phases.dayEnd);
                 targetColor.lerpColors(cDay, cDusk, alpha);
                 targetAmb = 0.6 * (1-alpha);
                 targetSun = 0.9 * (1-alpha);
             } else if (cyclePos < CONFIG.phases.nightEnd) {
-                // Noche: Ciudad plena
+                // Noche: Usamos textura de estrellas o color s贸lido suave
+                // Para una transici贸n suave, lerp del color atardecer al azul oscuro
+                // Al llegar a la noche, la textura de estrellas se ver铆a si usaramos CubeMap, 
+                // pero como usamos Color, usamos el azul oscuro definido en cNight.
                 targetColor = cNight;
                 state.isNight = true;
                 state.isCity = true;
                 targetFog = 60;
-                targetAmb = 1; // Ciudad iluminada
+                targetAmb = 0.3; 
                 targetSun = 0;
                 targetHeadlight = 2.5;
             } else {
-                // Amanecer: Sigue ciudad hasta terminar
                 state.isCity = true;
                 const alpha = (cyclePos - CONFIG.phases.nightEnd) / (CONFIG.phases.dawnEnd - CONFIG.phases.nightEnd);
                 targetColor.lerpColors(cNight, cDay, alpha);
@@ -570,7 +610,7 @@
             sunLight.intensity = THREE.MathUtils.lerp(sunLight.intensity, targetSun, 0.1);
             carHeadlight.intensity = THREE.MathUtils.lerp(carHeadlight.intensity, targetHeadlight, 0.1);
 
-            // Suelo: Noche/Ciudad con color azul oscuro (no negro)
+            // Suelo: Noche/Ciudad con color 0x00ffaa (Turquesa Brillante)
             const floorColor = state.isNight ? 0x00ffaa : 0x4caf50; 
             floorL.material.color.setHex(floorColor);
             floorR.material.color.setHex(floorColor);
@@ -592,7 +632,6 @@
             const handleTap = (side) => {
                 if (!state.playing) return;
                 
-                // Lógica de secuencia estricta: Si pulsas el mismo lado, no hace nada
                 if (state.lastTap === side) return;
 
                 const el = side === 'left' ? ui.indL : ui.indR;
@@ -607,7 +646,6 @@
                 setTimeout(() => { bikeGroup.rotation.z = 0; bikeGroup.position.y = -0.4; }, 100);
             };
 
-            // Touch Pedals (Evitar botón freno)
             document.addEventListener('touchstart', (e) => {
                 for (let i=0; i<e.touches.length; i++) {
                     if (e.target.id === 'brake-btn') continue;
@@ -615,7 +653,6 @@
                 }
             });
 
-            // Freno
             const startBrake = (e) => {
                 e.preventDefault();
                 if (!state.playing) return;
@@ -633,7 +670,6 @@
             ui.brakeBtn.addEventListener('mousedown', startBrake);
             ui.brakeBtn.addEventListener('mouseup', endBrake);
 
-            // Teclado
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'a' || e.key === 'A') handleTap('left');
                 if (e.key === 'd' || e.key === 'D') handleTap('right');
@@ -646,13 +682,11 @@
                 if (e.key === ' ' || e.key === 's') state.isBraking = false;
             });
 
+            // --- FIX GIROSCOPIO ---
             const handleOrientation = (e) => {
                 if (!state.playing) return;
                 
-                // Bloqueo de giro si la velocidad es baja
-                // Conversión: speed * 80 = km/h.
-                // Min speed needed: 2 km/h -> 0.025 units
-                const currentKmh = state.speed * 0.025;
+                const currentKmh = state.speed * 80;
                 if (currentKmh < CONFIG.minSteerSpeedKmh) return;
 
                 const tilt = e.gamma;
@@ -665,16 +699,25 @@
             };
 
             ui.btnPerm.addEventListener('click', () => {
+                // Intento gen茅rico de inicio
+                startGame();
+                
+                // Intento de permiso iOS 13+
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    DeviceOrientationEvent.requestPermission().then(response => {
-                        if (response === 'granted') {
-                            window.addEventListener('deviceorientation', handleOrientation);
-                            startGame();
-                        } else { startGame(); }
-                    }).catch(console.error);
+                    DeviceOrientationEvent.requestPermission()
+                        .then(response => {
+                            if (response === 'granted') {
+                                state.gyroEnabled = true;
+                                window.addEventListener('deviceorientation', handleOrientation);
+                            } else {
+                                alert("Permiso de giroscopio denegado. Usa las flechas del teclado.");
+                            }
+                        })
+                        .catch(console.error);
                 } else {
+                    // Android o viejos iOS
+                    state.gyroEnabled = true;
                     window.addEventListener('deviceorientation', handleOrientation);
-                    startGame();
                 }
             });
 
@@ -693,7 +736,7 @@
             state.bikeX = 0;
             state.level = 1;
             state.frame = 0;
-            state.lastTap = null; // Resetear secuencia
+            state.lastTap = null; 
             
             obstacles.forEach(o => scene.remove(o));
             obstacles = [];
@@ -703,7 +746,6 @@
 
         function gameOver() {
             state.playing = false;
-            // Distancia x3 en km
             ui.final.innerText = ((state.distance * 30) / 1000).toFixed(2);
             ui.over.classList.remove('hidden');
             ui.hud.classList.add('hidden');
@@ -719,10 +761,8 @@
 
             state.frame++;
 
-            // AJUSTE DE FRENO:
-            // Si el usuario pide modificar la fuerza del freno, cambiar el número '3' abajo.
-            // Actualmente es 1 veces más fuerte que la aceleración.
-            const BRAKE_MULTIPLIER = 1; 
+            // AJUSTE DE FRENO
+            const BRAKE_MULTIPLIER = 3; 
             const currentBrakeForce = CONFIG.acceleration * BRAKE_MULTIPLIER;
 
             if (state.isBraking) {
@@ -752,7 +792,6 @@
 
             if (state.speed > 0.8) camera.position.y = 1.7 + (Math.random() - 0.5) * 0.03;
 
-            // UI: Velocidad y Distancia (x3) en KM
             const realDist = (state.distance * 30) / 1000;
             ui.score.innerText = realDist.toFixed(2);
             ui.hudSpeed.innerText = Math.floor(state.speed * 80);
