@@ -313,8 +313,8 @@
             
             // Fondo Azul Oscuro (No liso, suave degradado)
             const grad = ctx.createLinearGradient(0,0,0,512);
-            grad.addColorStop(0, '#0b1026'); // Azul muy oscuro arriba
-            grad.addColorStop(1, '#1b2845'); // Azul medio abajo
+            grad.addColorStop(0, '#55ff55'); // Azul muy oscuro arriba
+            grad.addColorStop(1, '#55ff55'); // Azul medio abajo
             ctx.fillStyle = grad;
             ctx.fillRect(0,0,512,512);
 
@@ -385,7 +385,7 @@
             const paintMat = new THREE.MeshStandardMaterial({ color: 0xd32f2f, metalness: 0.3, roughness: 0.5 });
             const gripMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
 
-            const forkGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.8);
+            const forkGeo = new THREE.CylinderGeometry(0.03, 0.13, 0.8);
             const forkL = new THREE.Mesh(forkGeo, metalMat); forkL.position.set(-0.3, -0.4, -0.1);
             const forkR = new THREE.Mesh(forkGeo, metalMat); forkR.position.set(0.3, -0.4, -0.1);
             bikeGroup.add(forkL, forkR);
@@ -396,20 +396,20 @@
             bar.rotation.z = Math.PI / 2;
             bar.position.y = 0.05;
 
-            const stemGeo = new THREE.BoxGeometry(0.08, 0.15, 0.08);
+            const stemGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.14);
             const stem = new THREE.Mesh(stemGeo, paintMat);
-            stem.position.set(0, 0.1, 0);
+            stem.position.set(0, 0, 0.01);
 
-            const gripGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.2);
+            const gripGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.1);
             const gripL = new THREE.Mesh(gripGeo, gripMat);
             gripL.rotation.x = Math.PI / 2;
-            gripL.position.set(-0.45, 0.05, 0);
+            gripL.position.set(-1.45, -0.15, -1);
             const gripR = new THREE.Mesh(gripGeo, gripMat);
             gripR.rotation.x = Math.PI / 2;
-            gripR.position.set(0.45, 0.05, 0);
+            gripR.position.set(0.5, 0.15, 0);
 
             bikeGroup.add(bar, stem, gripL, gripR);
-            bikeGroup.position.set(0, -0.4, -0.6);
+            bikeGroup.position.set(0, -0.4, -0.7);
             camera.add(bikeGroup);
         }
 
@@ -762,7 +762,7 @@
             state.frame++;
 
             // AJUSTE DE FRENO
-            const BRAKE_MULTIPLIER = 3; 
+            const BRAKE_MULTIPLIER = 1; 
             const currentBrakeForce = CONFIG.acceleration * BRAKE_MULTIPLIER;
 
             if (state.isBraking) {
