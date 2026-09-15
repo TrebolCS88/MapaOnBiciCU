@@ -57,7 +57,7 @@
         
         .value { color: #ffeb3b; font-size: 12px; display: block; margin-top: 4px; font-weight: bold;}
 
-        /* Botón de Freno */
+        /* Bot車n de Freno */
         #brake-btn {
             position: absolute;
             bottom: 130px;
@@ -178,20 +178,20 @@
         <div id="pedal-right" class="pedal-indicator">R</div>
 
         <div id="start-screen" class="modal">
-            <h1>City Biker Final</h1>
+            <h1>OnBiciCU Simulator</h1>
             <p>
-                🌆 Ciclo 2km: Día(1km) -> Noche(0.6km).<br>
+                Pedalea y esquiva baches y ostaculos!<br>
                 1. Pedalear en SECUENCIA (L-R-L).<br>
-                2. Giro bloqueado bajo 2km/h.<br>
-                3. Botón FRENO encima de R.<br>
+                2. Cuidado con los baches!<br>
+                3. Botón FRENO para disminuir la velocidad<br>
                 4. Ciudad al anochecer.<br>
-                5. Baches en los bordes.
+                5. Cuidado con los bordes!
             </p>
-            <button id="btn-permission">INICIAR RUTA</button>
+            <button id="btn-permission">A PEDALEAR!</button>
         </div>
 
         <div id="game-over-screen" class="modal hidden">
-            <h1>¡CHOQUE!</h1>
+            <h1>CHOQUE!</h1>
             <p>Distancia: <span id="final-score" class="value">0.00</span> km</p>
             <button id="btn-restart">REINTENTAR</button>
         </div>
@@ -313,8 +313,8 @@
             
             // Fondo Azul Oscuro (No liso, suave degradado)
             const grad = ctx.createLinearGradient(0,0,0,512);
-            grad.addColorStop(0, '#55ff55'); // Azul muy oscuro arriba
-            grad.addColorStop(1, '#55ff55'); // Azul medio abajo
+            grad.addColorStop(0, '#0505ff'); // Azul muy oscuro arriba
+            grad.addColorStop(1, '#1a23ff'); // Azul medio abajo
             ctx.fillStyle = grad;
             ctx.fillRect(0,0,512,512);
 
@@ -381,7 +381,7 @@
 
             // Material Metal
             const metalMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.2 });
-            // Material Pintura (Cambiar 0xd32f2f por otro color HEX)
+            // Material Pintura
             const paintMat = new THREE.MeshStandardMaterial({ color: 0xd32f2f, metalness: 0.3, roughness: 0.5 });
             const gripMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
 
@@ -400,10 +400,10 @@
             const stem = new THREE.Mesh(stemGeo, paintMat);
             stem.position.set(0, 0, 0.01);
 
-            const gripGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.1);
+            const gripGeo = new THREE.CylinderGeometry(0.00, 0.00, 0.0);
             const gripL = new THREE.Mesh(gripGeo, gripMat);
             gripL.rotation.x = Math.PI / 2;
-            gripL.position.set(-1.45, -0.15, -1);
+            gripL.position.set(-0.5, -0.55, -0.1);
             const gripR = new THREE.Mesh(gripGeo, gripMat);
             gripR.rotation.x = Math.PI / 2;
             gripR.position.set(0.5, 0.15, 0);
@@ -533,16 +533,19 @@
             scenery.push(mesh);
         }
 
-        // --- TUTORIAL VISUAL: Colores del Ciclo ---
+        // --- FUNCI車N MODIFICADA ---
         function updateDayNightCycle() {
             const scaledDist = state.distance * 10;
             const cyclePos = scaledDist % CONFIG.cycleLength;
             
-            // cDay: Color azul cielo (0x87CEEB)
-            // cNight: Color azul oscuro con estrellas (definido en createStarTexture)
+            // Definici車n de colores base
             const cDay = new THREE.Color(0x87CEEB);
             const cDusk = new THREE.Color(0xfd5e53);
-            const cNight = new THREE.Color(0x0b1026); // Base color for texture mix
+            
+            // --- MODIFICACI車N 1: Color del cielo nocturno ---
+            // Cambia este valor HEX para alterar el color de la noche.
+            // 0x050510 es un azul muy oscuro.
+            const cNight = new THREE.Color(0x05ff10); 
             
             let targetColor = cDay;
             let targetFog = 120;
@@ -556,25 +559,26 @@
             state.isNight = false;
             state.isCity = false;
 
-            // Solicitud usuario: Ciudad empieza al anochecer
             const cityStart = CONFIG.phases.dayEnd; 
 
-            const lightOn = 10000 - 1500; 
-            const lightOff = 18000 + 800;  
+            // --- MODIFICACI車N 2: Control de encendido de luces ---
+            // Las luces se encienden exactamente cuando empieza el atardecer (dayEnd)
+            // y se apagan cuando termina el amanecer (dawnEnd).
+            const lightOn = CONFIG.phases.dayEnd; 
+            const lightOff = CONFIG.phases.dawnEnd;  
 
             if (cyclePos < CONFIG.phases.dayEnd) {
+                // Fase de D赤a
                 targetColor = cDay;
             } else if (cyclePos < CONFIG.phases.duskEnd) {
+                // Fase de Atardecer (Transici車n D赤a -> Noche)
                 state.isCity = true;
                 const alpha = (cyclePos - CONFIG.phases.dayEnd) / (CONFIG.phases.duskEnd - CONFIG.phases.dayEnd);
                 targetColor.lerpColors(cDay, cDusk, alpha);
                 targetAmb = 0.6 * (1-alpha);
                 targetSun = 0.9 * (1-alpha);
             } else if (cyclePos < CONFIG.phases.nightEnd) {
-                // Noche: Usamos textura de estrellas o color sólido suave
-                // Para una transición suave, lerp del color atardecer al azul oscuro
-                // Al llegar a la noche, la textura de estrellas se vería si usaramos CubeMap, 
-                // pero como usamos Color, usamos el azul oscuro definido en cNight.
+                // Fase de Noche
                 targetColor = cNight;
                 state.isNight = true;
                 state.isCity = true;
@@ -583,6 +587,7 @@
                 targetSun = 0;
                 targetHeadlight = 2.5;
             } else {
+                // Fase de Amanecer (Transici車n Noche -> D赤a)
                 state.isCity = true;
                 const alpha = (cyclePos - CONFIG.phases.nightEnd) / (CONFIG.phases.dawnEnd - CONFIG.phases.nightEnd);
                 targetColor.lerpColors(cNight, cDay, alpha);
@@ -596,13 +601,14 @@
                 }
             }
 
-            // Control luces
-            if (cyclePos > lightOn && cyclePos < lightOff) {
+            // Aplicar l車gica de luces basada en los umbrales modificados
+            if (cyclePos >= lightOn && cyclePos <= lightOff) {
                 targetHeadlight = 2.5;
             } else {
                 targetHeadlight = 0;
             }
 
+            // Aplicar cambios visuales
             scene.background.lerp(targetColor, 0.1);
             scene.fog.color.lerp(targetColor, 0.1);
             scene.fog.far = targetFog;
@@ -699,7 +705,7 @@
             };
 
             ui.btnPerm.addEventListener('click', () => {
-                // Intento genérico de inicio
+                // Intento gen谷rico de inicio
                 startGame();
                 
                 // Intento de permiso iOS 13+
