@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="9">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>City Biker: Ultimate Final</title>
+    <title>City Biker: App Inventor Control</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -27,7 +27,7 @@
         #hud {
             position: absolute;
             top: 10px;
-            left: 0;
+            left: 0B;
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -55,9 +55,9 @@
             min-width: 100px;
         }
         
-        .value { color: #ffeb3b; font-size: 12px; display: block; margin-top: 4px; font-weight: bold;}
+        .value { color: #ffeb3b; font-size: 12px; display2px; display: block; margin-top: 4px; font-weight: bold;}
 
-        /* Bot車n de Freno */
+        /* Boton de Freno */
         #brake-btn {
             position: absolute;
             bottom: 130px;
@@ -92,6 +92,7 @@
             height: 80px;
             border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.2);
+            display(0.2);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -135,7 +136,7 @@
             font-size: 12px;
             cursor: pointer;
             border-radius: 5px;
-            box-shadow: 0 4px 0 #e65100;
+0box-shadow: 0 4px 0 #e65*00;
             margin-top: 10px;
         }
         button:active { transform: translateY(4px); box-shadow: none; }
@@ -174,24 +175,22 @@
 
         <!-- Controles -->
         <div id="brake-btn">FRENO</div>
-        <div id="pedal-left" class="pedal-indicator">L</div>
+        <div id="pedal-left" class="ped"pedal-indicator">L</div>
         <div id="pedal-right" class="pedal-indicator">R</div>
 
         <div id="start-screen" class="modal">
-            <h1>OnBiciCU Simulator</h1>
+            <h1>City Biker Final</h1>
             <p>
-                Pedalea y esquiva baches y ostaculos!<br>
-                1. Pedalear en SECUENCIA (L-R-L).<br>
-                2. Cuidado con los baches!<br>
-                3. Botón FRENO para disminuir la velocidad<br>
-                4. Ciudad al anochecer.<br>
-                5. Cuidado con los bordes!
+                Controlado por App Inventor.<br>
+                1. Pedalear en SECUENCIA tocando pantalla (L-R-L).<br>
+                2. Inclinar el movil para girar (via App).<br>
+                3. Boton FRENO encima de R.
             </p>
-            <button id="btn-permission">A PEDALEAR!</button>
+            <button id="btn-start">INICIAR RUTA</button>
         </div>
 
         <div id="game-over-screen" class="modal hidden">
-            <h1>CHOQUE!</h1>
+            <h1>!CHOQUE!</h1>
             <p>Distancia: <span id="final-score" class="value">0.00</span> km</p>
             <button id="btn-restart">REINTENTAR</button>
         </div>
@@ -199,482 +198,147 @@
 
     <script>
         const CONFIG = {
-            maxSpeed: 1.8,
-            acceleration: 0.015,
-            friction: 0.0005,
-            minSteerSpeedKmh: 2.0, 
-            turnSensitivity: 0.12,
-            roadWidth: 10,
+            maxSpeed: 1, acceleration: 0.015, friction: 0.0005,
+            minSteerSpeedKmh: 0.5, turnSensitivity: 0.15, roadWidth: 10,
             cycleLength: 20000, 
-            phases: {
-                dayEnd: 10000,
-                duskEnd: 12000,
-                nightEnd: 18000,
-                dawnEnd: 20000
-            }
+            phases: { dayEnd: 10000, duskEnd: 12000, nightEnd: 18000, dawnEnd: 20000 },
+            handleColor: "#d32f2f", handleWidth: 0.85, handleReach: 0.05, handleDrop: 0.05, handleThickness: 0.03,
+            roadColor: "#555555", floorColor: "#4caf50",
+            potholeRadius: 0.5, potholeColor: "#8b8fa2", coneHeight: 0.9, coneColor: "#ff5722",
+            pedestrianHeight: 0.8, pedBodyColor: "#0fa4c2", pedSkinColor: "#ffccaa",
+            treeTrunkColor: "#5d4037", treeLeavesColor: "#2e7d32",
+            buildingMaxHeight: 20, buildingColor: "#000000", buildingEmissive: "#ffffff",
+            skyDay: "#87CEEB", skyNight: "#000047"
         };
 
-        let scene, camera, renderer;
-        let bikeGroup, road;
-        let obstacles = [];
-        let scenery = [];
-        let ambientLight, sunLight, carHeadlight;
-        let floorL, floorR;
-        let starField; // Textura de estrellas
+        let scene, camera, renderer, bikeGroup, road;
+        let obstacles = [], scenery = [];
+        let ambientLight, sunLight, carHeadlight, floorL, floorR, starField; 
 
         let state = {
-            playing: false,
-            speed: 0,
-            distance: 0,
-            bikeX: 0,
-            lastTap: null, 
-            frame: 0,
-            level: 1,
-            isNight: false,
-            isCity: false,
-            isBraking: false,
-            gyroEnabled: false
+            playing: false, speed: 0, distance: 0, bikeX: 0,
+            lastTap: null, frame: 0, level: 1, isNight: false, isCity: false, isBraking: false
         };
 
         const ui = {
-            start: document.getElementById('start-screen'),
-            over: document.getElementById('game-over-screen'),
-            hud: document.getElementById('hud'),
-            score: document.getElementById('score'),
-            level: document.getElementById('level'),
-            hudSpeed: document.getElementById('hud-speed'),
-            final: document.getElementById('final-score'),
-            btnPerm: document.getElementById('btn-permission'),
-            btnRestart: document.getElementById('btn-restart'),
-            indL: document.getElementById('pedal-left'),
-            indR: document.getElementById('pedal-right'),
-            cycleMsg: document.getElementById('cycle-msg'),
-            brakeBtn: document.getElementById('brake-btn')
+            start: document.getElementById('start-screen'), over: document.getElementById('game-over-screen'),
+            hud: document.getElementById('hud'), score: document.getElementById('score'), level: document.getElementById('level'),
+            hudSpeed: document.getElementById('hud-speed'), final: document.getElementById('final-score'),
+            btnStart: document.getElementById('btn-start'), btnRestart: document.getElementById('btn-restart'),
+            indL: document.getElementById('pedal-left'), indR: document.getElementById('pedal-right'),
+            cycleMsg: document.getElementById('cycle-msg'), brakeBtn: document.getElementById('brake-btn')
         };
 
         function init() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87CEEB);
-            scene.fog = new THREE.Fog(0x87CEEB, 20, 120);
-
+            scene.background = new THREE.Color(CONFIG.skyDay);
+            scene.fog = new THREE.Fog(CONFIG.skyDay, 20, 120);
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 300);
             camera.position.set(0, 1.7, 0);
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             document.getElementById('game-container').appendChild(renderer.domElement);
 
-            // --- TUTORIAL VISUAL: Modificar Luces ---
             ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
-
             sunLight = new THREE.DirectionalLight(0xffffff, 0.9);
-            sunLight.position.set(20, 50, 20);
-            sunLight.castShadow = true;
-            sunLight.shadow.mapSize.width = 1024;
-            sunLight.shadow.mapSize.height = 1024;
-            sunLight.shadow.camera.left = -50;
-            sunLight.shadow.camera.right = 50;
-            sunLight.shadow.camera.top = 50;
-            sunLight.shadow.camera.bottom = -50;
+            sunLight.position.set(20, 50, 20); sunLight.castShadow = true;
+            sunLight.shadow.mapSize.width = 1024; sunLight.shadow.mapSize.height = 1024;
+            sunLight.shadow.camera.left = -509; sunLight.shadow.camera.right = 50;
+            sunLight.shadow.camera.top = 50; sunLight.shadow(50); sunLight.shadow.camera.bottom = -50;
             scene.add(sunLight);
 
             carHeadlight = new THREE.SpotLight(0xffffaa, 0);
-            carHeadlight.position.set(0, 1.5, -0.5);
-            carHeadlight.target.position.set(0, 0, -20);
-            carHeadlight.angle = 0.6;
-            carHeadlight.penumbra = 0.5;
-            camera.add(carHeadlight);
-            camera.add(carHeadlight.target);
-            scene.add(camera);
+            carHeadlight.position.set(0, 1.5, -0.5); carHeadlight.target.position.set(0, 0, -20);
+            carHeadlight.angle = 0.6; carHeadlight.penumbra = 0.5;
+            camera.add(carHeadlight); camera.add(carHeadlight.target); scene.add(camera);
 
-            createStarTexture(); // Crear estrellas
-            createEnvironment();
-            createBike();
-            setupInputs();
+            createStar1ateEnvironment(); createBike(); setupInputs();
 
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
             });
-
             animate();
         }
 
-        // --- TUTORIAL VISUAL: Crear Cielo Estrellado ---
-        function createStarTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            
-            // Fondo Azul Oscuro (No liso, suave degradado)
-            const grad = ctx.createLinearGradient(0,0,0,512);
-            grad.addColorStop(0, '#0505ff'); // Azul muy oscuro arriba
-            grad.addColorStop(1, '#1a23ff'); // Azul medio abajo
-            ctx.fillStyle = grad;
-            ctx.fillRect(0,0,512,512);
-
-            // Estrellas
-            ctx.fillStyle = '#ffffff';
-            for(let i=0; i<200; i++) {
-                const x = Math.random() * 512;
-                const y = Math.random() * 512;
-                const size = Math.random() * 2;
-                ctx.beginPath();
-                ctx.arc(x, y, size, 0, Math.PI*2);
-                ctx.fill();
-            }
-            
-            starField = new THREE.CanvasTexture(canvas);
-        }
-
         function createEnvironment() {
-            // Carretera
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
+            const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#444';
-            ctx.fillRect(0, 0, 512, 512);
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(0, 0, 10, 512);
-            ctx.fillRect(502, 0, 10, 512);
-            ctx.fillStyle = '#ffcc00';
-            for(let i=0; i<12; i++) ctx.fillRect(246, i * 50, 20, 25);
-
+            ctx.fillStyle = CONFIG.roadColor; ctx.fillRect(0, 0, 512, 512);
+            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 10, 512); ctx.fillRect(502, 0, 10, 512);
+            ctx.fillStyle = '#ffcc00'; for(let i=0; i<12; i++) ctx.fillRect(246, i * 50, 20, 25);
             const roadTex = new THREE.CanvasTexture(canvas);
-            roadTex.wrapS = THREE.RepeatWrapping;
-            roadTex.wrapT = THREE.RepeatWrapping;
-            roadTex.repeat.set(1, 30);
+            roadTex.wrapS = THREE.RepeatWrapping; roadTex.wrapT = THREE.RepeatWrapping; roadTex.repeat.set(1, 30);
+            road = new THREE.Mesh(new THREE.PlaneGeometry(CONFIG.roadWidth, 300), new THREE.MeshPhongMaterial({ map: roadTex }));
+            road.rotation.x = -Math.PI / 2; road.receiveShadow = true; scene.add(road);
 
-            const roadGeo = new THREE.PlaneGeometry(CONFIG.roadWidth, 300);
-            const roadMat = new THREE.MeshPhongMaterial({ map: roadTex });
-            road = new THREE.Mesh(roadGeo, roadMat);
-            road.rotation.x = -Math.PI / 2;
-            road.receiveShadow = true;
-            scene.add(road);
-
-            // Suelo Lateral
-            const floorGeo = new THREE.PlaneGeometry(200, 300);
-            const floorMat = new THREE.MeshPhongMaterial({ color: 0x4caf50 });
-            
-            floorL = new THREE.Mesh(floorGeo, floorMat.clone());
-            floorL.rotation.x = -Math.PI / 2;
-            floorL.position.set(-100 - (CONFIG.roadWidth/2), -0.05, 0);
-            floorL.name = "floorL";
-            scene.add(floorL);
-
-            floorR = new THREE.Mesh(floorGeo, floorMat.clone());
-            floorR.rotation.x = -Math.PI / 2;
-            floorR.position.set(100 + (CONFIG.roadWidth/2), -0.05, 0);
-            floorR.name = "floorR";
-            scene.add(floorR);
+            const floorMat = new THREE.MeshLambertMaterial({ color: CONFIG.floorColor, side: THREE.DoubleSide });
+            floorL = new THREE.Mesh(new THREE.PlaneGeometry(200, 300), floorMat.clone());
+            floorL.rotation.x = -Math.PI / 2; floorL.position.set(-100 - (CONFIG.roadWidth/2), -0.05, 0); scene.add(floorL);
+            floorR = new THREE.Mesh(new THREE.PlaneGeometry(200, 300), floorMat.clone());
+            floorR.rotation.x = -Math.PI / 2; floorR.position.set(100 + (CONFIG.roadWidth/2), -0.05, 0); scene.add(floorR);
         }
 
-        // --- TUTORIAL VISUAL: Modificar Bici ---
         function createBike() {
             bikeGroup = new THREE.Group();
-
-            // Material Metal
             const metalMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.2 });
-            // Material Pintura
-            const paintMat = new THREE.MeshStandardMaterial({ color: 0xd32f2f, metalness: 0.3, roughness: 0.5 });
-            const gripMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
-
             const forkGeo = new THREE.CylinderGeometry(0.03, 0.13, 0.8);
             const forkL = new THREE.Mesh(forkGeo, metalMat); forkL.position.set(-0.3, -0.4, -0.1);
             const forkR = new THREE.Mesh(forkGeo, metalMat); forkR.position.set(0.3, -0.4, -0.1);
             bikeGroup.add(forkL, forkR);
-
-            // Barra del manubrio
-            const barGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.8);
-            const bar = new THREE.Mesh(barGeo, paintMat);
-            bar.rotation.z = Math.PI / 2;
-            bar.position.y = 0.05;
-
-            const stemGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.14);
-            const stem = new THREE.Mesh(stemGeo, paintMat);
+            const curve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, 0, 0), new THREE.Vector3(CONFIG.handleReach, -CONFIG.handleDrop * 0.2, 0),
+                new THREE.Vector3(CONFIG.handleWidth/2 * 0.6, -CONFIG.handleDrop, 0), new THREE.Vector3(CONFIG.handleWidth/2, -CONFIG.handleDrop, 0)
+            ]);
+            const handleMat = new THREE.MeshStandardMaterial({ color: CONFIG.handleColor, metalness: 0.6, roughness: 0.3 });
+            const handleRight = new THREE.Mesh(new THREE.TubeGeometry(curve, 20, CONFIG.handleThickness, 8, false), handleMat);
+            const handleLeft = handleRight.clone(); handleLeft.scale.x = -1;
+            const stem = new THREE.Mesh(new THREE.CylinderGeometry(CONFIG.handleThickness*1.5, CONFIG.handleThickness*1.5, 0.14), handleMat);
             stem.position.set(0, 0, 0.01);
-
-            const gripGeo = new THREE.CylinderGeometry(0.00, 0.00, 0.0);
-            const gripL = new THREE.Mesh(gripGeo, gripMat);
-            gripL.rotation.x = Math.PI / 2;
-            gripL.position.set(-0.5, -0.55, -0.1);
-            const gripR = new THREE.Mesh(gripGeo, gripMat);
-            gripR.rotation.x = Math.PI / 2;
-            gripR.position.set(0.5, 0.15, 0);
-
-            bikeGroup.add(bar, stem, gripL, gripR);
-            bikeGroup.position.set(0, -0.4, -0.7);
-            camera.add(bikeGroup);
+            bikeGroup.add(handleRight, handleLeft, stem);
+            bikeGroup.position.set(0, -0.4, -0.7); camera.add(bikeGroup);
         }
 
-        function spawnObstacle() {
-            let mesh;
-            let isPothole = true;
+        // --- PUENTE PARA APP INVENTOR ---
+        // Esta función es global para que App Inventor pueda llamarla con EvalJS
+        window.updateSteeringFromApp = function(tiltValue) {
+            if (!state.playing) return;
+            const currentKmh = state.speed * 80;
+            if (currentKmh < CONFIG.minSteerSpeedKmh) return; 
 
-            if (state.level >= 3) {
-                isPothole = Math.random() > 0.5;
-            }
-
-            let xPos;
-
-            if (isPothole) {
-                const r = 0.5 + Math.random() * 0.2;
-                const geo = new THREE.CylinderGeometry(r, r, 0.1, 16);
-                const mat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
-                mesh = new THREE.Mesh(geo, mat);
-                mesh.position.y = -0.05;
-                mesh.userData = { radius: r, type: 'pothole' };
-
-                if (Math.random() > 0.5) {
-                    xPos = (Math.random() > 0.5 ? 1 : -1) * (CONFIG.roadWidth/2 - 0.8);
-                } else {
-                    xPos = (Math.random() * (CONFIG.roadWidth - 2)) - (CONFIG.roadWidth/2 - 1);
-                }
-
-            } else {
-                const geo = new THREE.ConeGeometry(0.3, 0.8, 16);
-                const mat = new THREE.MeshStandardMaterial({ color: 0xff5722 });
-                mesh = new THREE.Mesh(geo, mat);
-                mesh.position.y = 0.4;
-                mesh.userData = { radius: 0.4, type: 'obstacle' };
-                xPos = (Math.random() * (CONFIG.roadWidth - 2)) - (CONFIG.roadWidth/2 - 1);
-            }
-
-            mesh.position.x = xPos;
-            mesh.position.z = -150;
-            scene.add(mesh);
-            obstacles.push(mesh);
-
-            if (Math.random() > 0.6) {
-                spawnPedestrian();
-            }
-        }
-
-        function spawnPedestrian() {
-            let xPos;
-
-            if (state.level >= 5) {
-                xPos = (Math.random() * (CONFIG.roadWidth - 2)) - (CONFIG.roadWidth/2 - 1);
-            } else {
-                const side = Math.random() > 0.5 ? 1 : -1;
-                xPos = side * (CONFIG.roadWidth/2 + 0.5); 
-            }
+            const maxTilt = 35; // Ajusta esto si la app envía$ datos de -90 a 90
+            const clamped = Math.max(-maxTilt, Math.min(maxTilt, tiltValue));
+            const currentRoadWidth = (CONFIG.roadWidth / 10) * road.scale.x;
+            const targetX = (clamped / maxTilt) * (currentRoadWidth/2 - 1);
             
-            const group = new THREE.Group();
-            const bodyGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.8);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: Math.random() * 0xffffff });
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
-            body.position.y = 0.8;
-            
-            const headGeo = new THREE.SphereGeometry(0.15);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa });
-            const head = new THREE.Mesh(headGeo, headMat);
-            head.position.y = 1.4;
-
-            group.add(body, head);
-            group.position.set(xPos, 0, -140 - Math.random()*20);
-            group.userData = { radius: 0.3, type: 'pedestrian' };
-            scene.add(group);
-            obstacles.push(group);
-        }
-
-        function spawnScenery() {
-            const side = Math.random() > 0.5 ? 1 : -1;
-            const distX = (CONFIG.roadWidth / 2) + 4 + Math.random() * 30;
-            const xPos = side * distX;
-            let mesh;
-
-            if (state.isCity) {
-                const h = 5 + Math.random() * 15;
-                const w = 3 + Math.random() * 4;
-                const geo = new THREE.BoxGeometry(w, h, w);
-                
-                const mat = new THREE.MeshStandardMaterial({ 
-                    color: 0x444444,
-                    emissive: 0xffaa00,
-                    emissiveIntensity: 0.6 
-                });
-                mesh = new THREE.Mesh(geo, mat);
-                mesh.position.y = h/2;
-                
-                const poleGeo = new THREE.CylinderGeometry(0.1, 0.1, 5);
-                const poleMat = new THREE.MeshStandardMaterial({color: 0x111111});
-                const pole = new THREE.Mesh(poleGeo, poleMat);
-                pole.position.set(side > 0 ? -w/2 - 1 : w/2 + 1, 2.5, 0);
-                mesh.add(pole);
-                
-                const bulbGeo = new THREE.SphereGeometry(0.4);
-                const bulbMat = new THREE.MeshBasicMaterial({color: 0xffffaa});
-                const bulb = new THREE.Mesh(bulbGeo, bulbMat);
-                bulb.position.set(side > 0 ? -w/2 - 1 : w/2 + 1, 5, 0);
-                mesh.add(bulb);
-
-            } else {
-                const trunkGeo = new THREE.CylinderGeometry(0.2, 0.3, 1.5);
-                const trunk = new THREE.Mesh(trunkGeo, new THREE.MeshStandardMaterial({color: 0x5d4037}));
-                trunk.position.y = 0.75;
-                
-                const leavesGeo = new THREE.ConeGeometry(1.5, 3, 8);
-                const leaves = new THREE.Mesh(leavesGeo, new THREE.MeshStandardMaterial({color: 0x2e7d32, flatShading: true}));
-                leaves.position.y = 2.5;
-                
-                mesh = new THREE.Group();
-                mesh.add(trunk, leaves);
-            }
-
-            mesh.position.set(xPos, 0, -150);
-            scene.add(mesh);
-            scenery.push(mesh);
-        }
-
-        // --- FUNCI車N MODIFICADA ---
-        function updateDayNightCycle() {
-            const scaledDist = state.distance * 10;
-            const cyclePos = scaledDist % CONFIG.cycleLength;
-            
-            // Definici車n de colores base
-            const cDay = new THREE.Color(0x87CEEB);
-            const cDusk = new THREE.Color(0xfd5e53);
-            
-            // --- MODIFICACI車N 1: Color del cielo nocturno ---
-            // Cambia este valor HEX para alterar el color de la noche.
-            // 0x050510 es un azul muy oscuro.
-            const cNight = new THREE.Color(0x05ff10); 
-            
-            let targetColor = cDay;
-            let targetFog = 120;
-            let targetAmb = 0.6;
-            let targetSun = 0.9;
-            let targetHeadlight = 0;
-            
-            let msg = "";
-            let showMsg = false;
-
-            state.isNight = false;
-            state.isCity = false;
-
-            const cityStart = CONFIG.phases.dayEnd; 
-
-            // --- MODIFICACI車N 2: Control de encendido de luces ---
-            // Las luces se encienden exactamente cuando empieza el atardecer (dayEnd)
-            // y se apagan cuando termina el amanecer (dawnEnd).
-            const lightOn = CONFIG.phases.dayEnd; 
-            const lightOff = CONFIG.phases.dawnEnd;  
-
-            if (cyclePos < CONFIG.phases.dayEnd) {
-                // Fase de D赤a
-                targetColor = cDay;
-            } else if (cyclePos < CONFIG.phases.duskEnd) {
-                // Fase de Atardecer (Transici車n D赤a -> Noche)
-                state.isCity = true;
-                const alpha = (cyclePos - CONFIG.phases.dayEnd) / (CONFIG.phases.duskEnd - CONFIG.phases.dayEnd);
-                targetColor.lerpColors(cDay, cDusk, alpha);
-                targetAmb = 0.6 * (1-alpha);
-                targetSun = 0.9 * (1-alpha);
-            } else if (cyclePos < CONFIG.phases.nightEnd) {
-                // Fase de Noche
-                targetColor = cNight;
-                state.isNight = true;
-                state.isCity = true;
-                targetFog = 60;
-                targetAmb = 0.3; 
-                targetSun = 0;
-                targetHeadlight = 2.5;
-            } else {
-                // Fase de Amanecer (Transici車n Noche -> D赤a)
-                state.isCity = true;
-                const alpha = (cyclePos - CONFIG.phases.nightEnd) / (CONFIG.phases.dawnEnd - CONFIG.phases.nightEnd);
-                targetColor.lerpColors(cNight, cDay, alpha);
-                targetAmb = 0.3 + (0.3 * alpha); 
-                targetSun = alpha;
-                targetHeadlight = 2.5 * (1-alpha);
-                
-                if (cyclePos > 19500) {
-                    msg = "SALIENDO DE LA CIUDAD";
-                    showMsg = true;
-                }
-            }
-
-            // Aplicar l車gica de luces basada en los umbrales modificados
-            if (cyclePos >= lightOn && cyclePos <= lightOff) {
-                targetHeadlight = 2.5;
-            } else {
-                targetHeadlight = 0;
-            }
-
-            // Aplicar cambios visuales
-            scene.background.lerp(targetColor, 0.1);
-            scene.fog.color.lerp(targetColor, 0.1);
-            scene.fog.far = targetFog;
-            ambientLight.intensity = THREE.MathUtils.lerp(ambientLight.intensity, targetAmb, 0.1);
-            sunLight.intensity = THREE.MathUtils.lerp(sunLight.intensity, targetSun, 0.1);
-            carHeadlight.intensity = THREE.MathUtils.lerp(carHeadlight.intensity, targetHeadlight, 0.1);
-
-            // Suelo: Noche/Ciudad con color 0x00ffaa (Turquesa Brillante)
-            const floorColor = state.isNight ? 0x00ffaa : 0x4caf50; 
-            floorL.material.color.setHex(floorColor);
-            floorR.material.color.setHex(floorColor);
-
-            if (showMsg) {
-                ui.cycleMsg.innerText = msg;
-                ui.cycleMsg.style.opacity = 1;
-                setTimeout(() => ui.cycleMsg.style.opacity = 0, 2500);
-            }
-
-            const cycleCount = Math.floor(scaledDist / CONFIG.cycleLength) + 1;
-            if (cycleCount > state.level) {
-                state.level = cycleCount;
-                ui.level.innerText = state.level;
-            }
-        }
+            state.bikeX += (targetX - state.bikeX) * CONFIG.turnSensitivity;
+        };
 
         function setupInputs() {
             const handleTap = (side) => {
-                if (!state.playing) return;
-                
-                if (state.lastTap === side) return;
-
+                if (!state.playing || state.lastTap === side) return;
                 const el = side === 'left' ? ui.indL : ui.indR;
-                el.classList.add('pedal-active');
-                setTimeout(() => el.classList.remove('pedal-active'), 100);
-
+                el.classList.add('pedal-active'); setTimeout(() => el.classList.remove('pedal-active'), 100);
                 state.lastTap = side;
-                state.speed = Math.min(state.speed + CONFIG.acceleration, CONFIG.maxSpeed);
-                
-                bikeGroup.rotation.z = side === 'left' ? 0.1 : -0.1;
-                bikeGroup.position.y = -0.35;
-                setTimeout(() => { bikeGroup.rotation.z = 0; bikeGroup.position.y = -0.4; }, 100);
+2               state.speed = Math.min(state.speed + CONFIG.acceleration, CONFIG.maxSpeed);
+                bikeGroup.rotation.z = side === 'left' ? 0.1 : -0.1; bikeGroup.position.y = -0.35;
+                setTimeout(() => { bikeGroup.rotation.z = 04; bikeGroup.position.y = -0.4; }, 100);
             };
 
             document.addEventListener('touchstart', (e) => {
                 for (let i=0; i<e.touches.length; i++) {
-                    if (e.target.id === 'brake-btn') continue;
+                   D                   if (e.target.id === 'brake-btn') continue;
                     handleTap(e.touches[i].clientX < window.innerWidth/2 ? 'left' : 'right');
                 }
             });
 
-            const startBrake = (e) => {
-                e.preventDefault();
-                if (!state.playing) return;
-                state.isBraking = true;
-                ui.brakeBtn.style.background = 'rgba(200,0,0,1)';
-            };
-            const endBrake = (e) => {
-                e.preventDefault();
-                state.isBraking = false;
-                ui.brakeBtn.style.background = 'rgba(255,0,0,0.6)';
-            };
-
-            ui.brakeBtn.addEventListener('touchstart', startBrake);
-            ui.brakeBtn.addEventListener('touchend', endBrake);
-            ui.brakeBtn.addEventListener('mousedown', startBrake);
-            ui.brakeBtn.addEventListener('mouseup', endBrake);
+            const startBrake = (e) => { e.preventDefault(); if(!state.playing) return; state.isBraking = true; ui.brakeBtn.style.background = 'rgba(200,0,0,1)'; };
+            const endBrake = (e) => { e.preventDefault(); state.isBraking = false; ui.brakeBtn.style.background = 'rgba(255,0,0,0.6)'; };
+            ui.brakeBtn.addEventListener('touchstart', startBrake); ui.brakeBtn.addEventListener('touchend', endBrake);
+            ui.brakeBtn.addEventListener('mousedown', startBrake); ui.brakeBtn.addEventListener('mouseup', endBrake);
 
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'a' || e.key === 'A') handleTap('left');
@@ -684,150 +348,61 @@
                 if (e.key === ' ' || e.key === 's') state.isBraking = true; 
                 state.bikeX = Math.max(-5, Math.min(5, state.bikeX));
             });
-            document.addEventListener('keyup', (e) => {
-                if (e.key === ' ' || e.key === 's') state.isBraking = false;
-            });
+            document.addEventListener('keyup', (6) => { if (e.key === ' ' || e.key === 's') state.isBraking = false; });
 
-            // --- FIX GIROSCOPIO ---
-            const handleOrientation = (e) => {
-                if (!state.playing) return;
-                
-                const currentKmh = state.speed * 80;
-                if (currentKmh < CONFIG.minSteerSpeedKmh) return;
-
-                const tilt = e.gamma;
-                if (tilt !== null) {
-                    const maxTilt = 35;
-                    const clamped = Math.max(-maxTilt, Math.min(maxTilt, tilt));
-                    const targetX = (clamped / maxTilt) * (CONFIG.roadWidth/2 - 1);
-                    state.bikeX += (targetX - state.bikeX) * 0.1;
-                }
-            };
-
-            ui.btnPerm.addEventListener('click', () => {
-                // Intento gen谷rico de inicio
-                startGame();
-                
-                // Intento de permiso iOS 13+
-                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    DeviceOrientationEvent.requestPermission()
-                        .then(response => {
-                            if (response === 'granted') {
-                                state.gyroEnabled = true;
-                                window.addEventListener('deviceorientation', handleOrientation);
-                            } else {
-                                alert("Permiso de giroscopio denegado. Usa las flechas del teclado.");
-                            }
-                        })
-                        .catch(console.error);
-                } else {
-                    // Android o viejos iOS
-                    state.gyroEnabled = true;
-                    window.addEventListener('deviceorientation', handleOrientation);
-                }
-            });
-
-            ui.btnRestart.addEventListener('click', () => {
-                ui.over.classList.add('hidden');
-                startGame();
-            });
+            ui.btnStart.addEventListener('click', startGame);
+            ui.btnRestart.addEventListener('click', () => { ui.over.classList.add('hidden'); startGame(); });
         }
 
         function startGame() {
-            ui.start.classList.add('hidden');
-            ui.hud.classList.remove('hidden');
-            state.playing = true;
-            state.speed = 0.2;
-            state.distance = 0;
-            state.bikeX = 0;
-            state.level = 1;
-            state.frame = 0;
-            state.lastTap = null; 
-            
-            obstacles.forEach(o => scene.remove(o));
-            obstacles = [];
-            scenery.forEach(s => scene.remove(s));
-            scenery = [];
+            ui.start.classList.add('hidden'); ui.hud.classList.remove('hidden');
+            state.playing = true; state.speed = 0.2; state.distance = 0;
+            state.bikeX = 0; state.level = 1; state.frame = 0; state.lastTap = null; road.scale.x = 1;
+            obstacles.forEach(o => scene.remove(o)); obstacles = [];
+            scenery.forEach(s => scene.remove(s)); scenery = [];
         }
 
         function gameOver() {
-            state.playing = false;
-            ui.final.innerText = ((state.distance * 30) / 1000).toFixed(2);
-            ui.over.classList.remove('hidden');
-            ui.hud.classList.add('hidden');
+            state.playing = false; ui.final.innerText = ((state.distance * 30) / 1000).toFixed(2);
+            ui.over.classList.remove('hidden'); ui.hud.classList.add('hidden');
         }
 
         function animate() {
             requestAnimationFrame(animate);
-
-            if (!state.playing) {
-                renderer.render(scene, camera);
-                return;
-            }
-
+            if (!state.playing) { renderer.render(scene, camera); return; }
             state.frame++;
-
-            // AJUSTE DE FRENO
-            const BRAKE_MULTIPLIER = 1; 
-            const currentBrakeForce = CONFIG.acceleration * BRAKE_MULTIPLIER;
-
-            if (state.isBraking) {
-                state.speed = Math.max(0, state.speed - currentBrakeForce);
-            } else {
-                if (state.speed > 0) state.speed -= CONFIG.friction;
-            }
-            if (state.speed < 0) state.speed = 0;
+            if (state.isBraking) { state.speed = Math.max(0, state.speed - CONFIG.acceleration); } 
+            else { if (state.speed > 0) state.speed -= CONFIG.friction; }
+            if (state.speed < 0)Cstate.speed = 0;
             state.distance += state.speed;
 
             updateDayNightCycle();
-
-            road.material.map.offset.y -= state.speed * 0.05;
-
+            if(road.material.map) road.material.map.offset.y -= state.speed * 0.05;
             const spawnRate = Math.max(20, 200 - (state.level * 30));
-            
             if (state.frame % spawnRate === 0 && state.speed > 0.1) spawnObstacle();
-            if (state.frame % 15 === 0) spawnScenery();
-
-            updateObjects(obstacles, true);
-            updateObjects(scenery, false);
+            if (state.frame % 15 ===?0) spawnScenery();
+            updateObjects(obstacles, true); updateObjects(scenery, false);
 
             camera.position.x += (state.bikeX - camera.position.x) * 0.1;
             const bankAngle = (state.bikeX - camera.position.x) * -0.8;
             bikeGroup.rotation.z = THREE.MathUtils.lerp(bikeGroup.rotation.z, bankAngle, 0.1);
             bikeGroup.rotation.y = -bankAngle * 0.3;
-
             if (state.speed > 0.8) camera.position.y = 1.7 + (Math.random() - 0.5) * 0.03;
+            if (state.level >= 3 && road.scale.x >D0.92) road.scale.x -= 0.0001;
 
-            const realDist = (state.distance * 30) / 1000;
-            ui.score.innerText = realDist.toFixed(2);
+            ui.score.innerText = ((state.distance * 30) / 1000).toFixed(2);
             ui.hudSpeed.innerText = Math.floor(state.speed * 80);
-
             renderer.render(scene, camera);
         }
 
-        function updateObjects(arr, checkCol) {
-            for (let i = arr.length - 1; i >= 0; i--) {
-                const obj = arr[i];
-                obj.position.z += state.speed;
-
-                if (checkCol) {
-                    if (obj.position.z > -2 && obj.position.z < 1) {
-                        const dist = Math.abs(obj.position.x - camera.position.x);
-                        if (dist < (0.5 + obj.userData.radius)) {
-                            gameOver();
-                        }
-                    }
-                }
-
-                if (obj.position.z > 5) {
-                    scene.remove(obj);
-                    arr.splice(i, 1);
-                }
-            }
-        }
+        // (Omito spawnObstacle, spawnScenery, updateDayNightCycle y updateObjects por espacio, pero van exactamente igual que en el código anterior)
+        function spawnObstacle() { let mesh; let isPothole = true; if (state.level >= 3) isPothole = Math.random() > 0.5; let xPos; if (isPothole) { const r = parseFloat(CONFIG.potholeRadius) + (Math.random() * 0.2); mesh = new THREEF.Mesh(new THREE.CylinderGeometry(r, r, 0.1, 16), new THREE.MeshStandardMaterial({ color: CONFIG.potholeColor, roughness: 0.9 })); mesh.position.y = -0.05; mesh.userData = { radius: r, type: 'pothole' }; if (Math.random() > 0.5) xPos = (Math.random() > 0.5 ? 1 : -1) * (CONFIG.roadWidth/2 - 0.8); else xPos = (Math.random() * (CONFIG.roadWidth - 2)) - (CONFIG.roadWidth/2 - 1); } else { mesh = new THREE.Mesh(new THREE.ConeGeometry(0.4, parseFloat(CONFIG.coneHeight), 16), new THREE.MeshStandardMaterial({ color: CONFIG.coneColor })); mesh.position.y = parseFloat(CONFIG.coneHeight) / 2; mesh.userData = { radius: 0.4, type: 'obstacle' }; xPos = (Math.random() * (CONFIG.roadWidth - 2)) - (CONFIG.roadWidth/2 - 1); } mesh.position.xF.x = xPos; mesh.position.z = -150; scene.add(mesh); obstacles.push(mesh); if (Math.random() > 0.6) spawnPedestrian(); }
+        function spawnPedestrian() { let xPos; if (state.level >= 5) xPos = (Math.random() * (CONFIG.roadWidth -%20)) - (CONFIG.roadWidth/2 - 1); else xPos = (Math.random() > 0.5 ? 1 : -1) * (CONFIG.roadWidth/2 + 0.5); const group = new THREE.Group(); const h = parseFloat(CONFIG.pedestrianHeight); const baseBodyColor&olor = new THREE.Color(CONFIG.pedBodyColor); const finalBodyColor = baseBodyColor.clone().offsetHSL(0, 0, (Math.random() - 0.5) * 0.2); const body = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, h), new THREE.MeshStandardMaterial({ color: finalBodyColor })); body.position.y = h/2; const baseSkinColor = new THREE.Color(CONFIG.pedSkinColor); const finalSkinColor = baseSkinColor.clone().multiplyScaler(0.9 + Math.random() * 0.2); const head = new THREE.Mesh(new THREE.SphereGeometry(0.15), new THREE.MeshStandardMaterial({ color: finalSkinColor })); head.position.y = h + 0.15; group.add(body, head); group.position.set(xPos, 0, -140 - Math.random()*20); group.userData = { radius: 0.3, type: 'pedestrian' }; scene.add(group); obstacles"obstacles.push(group); }
+        function spawnScenery() { const side = Math.random() > 0.5 ? 1 : -1; const xPos = side * ((CONFIG.roadWidth / 2) + 4 + Math.random() * 30); let mesh; if (state.isCity) { const h = 5 + Math.random() * (parseFloat(CONFIG.buildingMaxHeight) - 5); const w = 3 + Math.random() * 4; mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), new THREE.MeshStandardMaterial({ color: CONFIG.buildingColor, emissive: CONFIG.buildingEmissive, emissiveIntensity: 0.6 })); mesh.position.y = h/2; const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,5), new THREE.MeshStandardMaterial({color: 0x111111})); pole.position.set(side > 0 ? -w/2 - 1 : w/2 + 1, 2.5, 0); mesh.add(pole); const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.4), new THREE.MeshBasicMaterial({color: 0xffffaa})); bulb.position.set(side > 0 ? -w/2 - 1 : w/2 + 1, 5, 0); mesh.add(bulb); } else { const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.3,1.)5), new THREE.MeshStandardMaterial({color: CONFIG.treeTrunkColor})); trunk.position.y = 0.75; const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5, 3, 8), new THREE.MeshStandardMaterial({color: CONFIG.treeLeavesColor, flatShading: true}));< leaves.position.y = 2.5; mesh = new THREE.Group(); mesh.add(trunk, leaves); } mesh.position.set8set(xPos, 0, -150); scene.add(mesh); scenery.push(mesh); }
+        function updateDayNightCycle() { const scaledDist = state.distance * 10; const cyclePos = scaledDist % CONFIG.cycleLength; const cDay = new THREE.Color(CONFIG.skyDay); const cDusk = new THREE.Color(0xfd5e53); const cNight = new THREE.Color(CONFIG.skyNight); let targetColor = cDay; let targetFog = 120; let targetAmb = 0.6; let targetSun = 0.9; let targetHeadlight = 0; let msg = ""; let showMsg = false; state.isNight = false; state.isCity =#isCity = false; if (cyclePos < CONFIG.phases.dayEnd) targetColor = cDay; else if (cyclePos < CONFIG.phases.duskEnd) { state.isCity = true; const a = (cyclePos - CONFIG.phases.dayEnd) / (CONFIG.phases.duskEnd - CONFIG.phases.dayEnd); targetColor.lerpColors(cDay, cDusk, a); targetAmb = 0.6 * (1-a); targetSun = 0.9 * (1-a); } else if (cyclePos < CONFIG.phases.nightEnd) { targetColor = cNight; state.isNight = true; state.isCity = true; targetFog = 60; targetAmb = 0.3;(0.3); targetSun = 0; targetHeadlight = 2.5; } else { state.isCity = true; const a = (cyclePos - CONFIG.phases.nightEnd) / (CONFIG.phases.dawnEnd - CONFIG.phases.nightEnd); targetColor.lerpColors(cNight, cDay, a); targetAmb = 0.3D.3 + (0.3 * a); targetSun = a; targetHeadlight = 2.5 * (1-a); if (cyclePos > 19500) { msg = "SALIENDO DE LA CIUDAD"; showMsg = true; } } if (cyclePos'cyclePos >= CONFIG.phases.dayEnd && cyclePos <= CONFIG.phases.dawnEnd) targetHeadlight = 2.5; else targetHeadlight = 0; scene.background.lerp(targetColor, 0.1); scene.fog.color.lerp(targetColor, 0.1); scene.fog.far = targetFog; ambientLight.intensity6intensity = THREE.MathUtils.lerp(ambientLight.intensity, targetAmb, 0.1); sunLight.intensity = THREE.MathUtils.lerp(sunLight.intensity, targetSun, 0.1); carHeadlight.intensity = THREE.MathUtils.lerp(carHeadlight.intensity, targetHeadlight, 0.1); const cFloorDay = new THREE.Color(CONFIG.floorColor); const cFloorNight = new THREE.Color(0x3e4e2a); const darkFactor = 1 - (sunLight.intensity / 0.9); const targetFloorColor = new THREE.Color().lerpColors(cFloorDay, cFloorNight, darkFactor); floorL.material.color.copy(targetFloorColor); floorR.material.color.copy(targetFloorColor); if (showMsg) { ui.cycleMsg.innerText = msg; ui.cycleMsg.style.opacity = 1; setTimeout(() => ui.cycleMsg.style.opacity = 0, ?0, 2500); } const cycleCount = Math.floor(scaledDist / CONFIG.cycleLength) + 1; if (cycleCount > state.level) { state.level = cycleCount; ui.level.innerText = state.level; } }
+        function updateObjects(arr, checkCol) { for (let i = arr.length - 1; i >= 0; i--) { const obj = arr[i]; obj.position.z += state.speed;>speed; if (checkCol) if (obj.position.z > -2 && obj.position.z < 1) if (Math.abs(obj.position.x - camera.position.x) < (0.5 + obj.userData.radius)) gameOver(); if (obj.position.z > 5) { scene.remove(obj); arr.splice(i, 1); } } }
 
         init();
-
     </script>
 </body>
 </html>
