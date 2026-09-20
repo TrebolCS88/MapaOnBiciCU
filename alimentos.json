@@ -46,5 +46,41 @@
         "lng": -82.407660,
         "title": "🍔 Guarapera 24 e/ 15 y 17 -Plaza",
         "desc": "Comentario de Carlos: El mejor guarapo que e tomado en toda la habana"
+    },
+    {
+        "lat": 23.05277,
+        "lng": -82.41968,
+        "title": "🍔 Guarapera - Cujae",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat": 23.05250,
+        "lng": -82.41569,
+        "title": "🍔 Guarapera - Dentro de la Universidad de la CUJAE",
+        "desc": "Muy buen guarapo al mejor precio!"
+    },
+    {
+        "lat": 23.11072,
+        "lng": -82.34122,
+        "title": "🍔 Guarapera - Avenida del Puerto",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat": 23.04159,
+        "lng": -82.36276,
+        "title": "🍔 Guarapera - Güinera",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat": 23.11308,
+        "lng": -82.36139,
+        "title": "🍔 Guarapera - Hospital Miguel Enrique",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat": 23.03811,
+        "lng": -82.46229,
+        "title": "🍔 Guarapera - Autopista Pinar",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
     }
 ]
