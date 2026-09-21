@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OnBiciCU: Simulador</title>
+    <title>City Biker: Ultimate Final</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -166,7 +166,7 @@
             <div class="hud-panel">VELOCIDAD<span id="hud-speed" class="value">0</span>km/h</div>
             <div class="hud-row">
                 <div class="hud-panel">DISTANCIA<span id="score" class="value">0.00</span>km</div>
-               >                <div class="hud-panel">NIVEL<span id="level" class="value">1</span></div>
+                <div class="hud-panel">NIVEL<span id="level" class="value">1</span></div>
             </div>
         </div>
         
@@ -178,15 +178,14 @@
         <div id="pedal-right" class="pedal-indicator">R</div>
 
         <div id="start-screen" class="modal">
-            <h1>OnBiciCU: Simulador</h1>
+            <h1>City Biker Final</h1>
             <p>
                 1. Pedalear en SECUENCIA (L-R-L).<br>
-                2. Inclinar el movil para Girar.<br>
-                3. Boton FRENO.<br>
-                4. Ciudad de dia y noche.<br>
-                5. Baches por doquier!.<br>
-                <br>
-                Disfrutalo!
+                2. Giro por ACELERÓMETRO LATERAL (Inclinar movil).<br>
+                3. Boton FRENO encima de R.<br>
+                4. Ciudad al anochecer.<br>
+                5. Baches en los bordes.<br><br>
+                * Nota: El acelerómetro requiere HTTPS para funcionar en moviles.
             </p>
             <button id="btn-permission">INICIAR RUTA</button>
         </div>
@@ -206,16 +205,15 @@
             minSteerSpeedKmh: 0.5, 
             turnSensitivity: 0.15,
             roadWidth: 10,
-            cycleLength: 20000,B, 
+            cycleLength: 20000, 
             phases: {
-3                dayEnd: 10000,
+                dayEnd: 10000,
                 duskEnd: 12000,
                 nightEnd: 18000,
-               ;                dawnEnd: 20000
+                dawnEnd: 20000
             },
             
-1            
-            handleColor: "#d32=2f2f",
+            handleColor: "#d32f2f",
             handleWidth: 0.85,
             handleReach: 0.05,
             handleDrop: 0.05,
@@ -225,11 +223,11 @@
             potholeRadius: 0.5,
             potholeColor: "#8b8fa2",
             coneHeight: 0.9,
-            coneColor: "#ff572822",
+            coneColor: "#ff5722",
             pedestrianHeight: 0.8,
             pedBodyColor: "#0fa4c2",
             pedSkinColor: "#ffccaa",
-            treeTr)TrunkColor: "#5d4037",
+            treeTrunkColor: "#5d4037",
             treeLeavesColor: "#2e7d32",
             buildingMaxHeight: 20,
             buildingColor: "#000000",
@@ -240,18 +238,17 @@
 
         let scene, camera, renderer;
         let bikeGroup, road;
-        let obstacles =# [];
+        let obstacles = [];
         let scenery = [];
         let ambientLight, sunLight, carHeadlight;
         let floorL, floorR;
         let starField; 
         let gyroDetected = false; 
         
-        // --- VARIABLES CONTROL DRIFT (Zona muerta + Velocidad Lateral) ---
+        // --- VARIABLES ACELEROMETRO LATERAL SUAVIZADO ---
         let hasMotion = false;
-        let rawTiltX = 0; 
-        const DEAD_ZONE = 1.5; // Sensibilidad en vertical: ignora temblor si es menor a 1.5
-        const STEER_SPEED = 0.015; // Velocidad de movimiento lateral por frame
+        let rawTiltX = 0; // Aquí guardamos la inclinación pura
+        const MAX_ACCEL = 5.0; // Sensibilidad: 5.0 equivale a unos 30 grados de inclinación
 
         let state = {
             playing: false,
@@ -424,7 +421,7 @@
                 roughness: 0.3 
             });
 
-            const handle3 handleRight = new THREE.Mesh(handleGeo, handleMat);
+            const handleRight = new THREE.Mesh(handleGeo, handleMat);
             const handleLeft = handleRight.clone();
             handleLeft.scale.x = -1; 
 
@@ -434,7 +431,7 @@
             const stemGeo = new THREE.CylinderGeometry(CONFIG.handleThickness*1.5, CONFIG.handleThickness*1.5, 0.14);
             const stem = new THREE.Mesh(stemGeo, handleMat);
             stem.position.set(0, 0, 0.01);
-           2            bikeGroup.add(stem);
+            bikeGroup.add(stem);
 
             bikeGroup.position.set(0, -0.4, -0.7);
             camera.add(bikeGroup);
@@ -461,7 +458,7 @@
                 if (Math.random() > 0.5) {
                     xPos = (Math.random() > 0.5 ? 1 : -1) * (CONFIG.roadWidth/2 - 0.8);
                 } else {
-                    xPos = (G (Math.random() * (CONFIG.roadWidth - 2)) - (CONFIG.roadWidth/2 - 1);
+                    xPos = (Math.random() * (CONFIG.roadWidth - 2)) - (CONFIG.roadWidth/2 - 1);
                 }
 
             } else {
@@ -598,13 +595,13 @@
                 targetColor.lerpColors(cDay, cDusk, alpha);
                 targetAmb = 0.6 * (1-alpha);
                 targetSun = 0.9 * (1-alpha);
-            } else# else if (cyclePos < CONFIG.phases.nightEnd) {
+            } else if (cyclePos < CONFIG.phases.nightEnd) {
                 targetColor = cNight;
                 state.isNight = true;
                 state.isCity = true;
                 targetFog = 60;
                 targetAmb = 0.3; 
-=                targetSun = 0;
+                targetSun = 0;
                 targetHeadlight = 2.5;
             } else {
                 state.isCity = true;
@@ -614,13 +611,13 @@
                 targetSun = alpha;
                 targetHeadlight = 2.5 * (1-alpha);
                 
-                if (cyclePos > 195;00) {
-                   F                    msg = "SALIENDO DE LA CIUDAD";
+                if (cyclePos > 19500) {
+                    msg = "SALIENDO DE LA CIUDAD";
                     showMsg = true;
                 }
             }
 
-           +            if (cyclePos >= CONFIG.phases.dayEnd && cyclePos <=0 cycle> cyclePos <= CONFIG.phases.dawnEnd) {
+            if (cyclePos >= CONFIG.phases.dayEnd && cyclePos <= CONFIG.phases.dawnEnd) {
                 targetHeadlight = 2.5;
             } else {
                 targetHeadlight = 0;
@@ -633,7 +630,7 @@
             sunLight.intensity = THREE.MathUtils.lerp(sunLight.intensity, targetSun, 0.1);
             carHeadlight.intensity = THREE.MathUtils.lerp(carHeadlight.intensity, targetHeadlight, 0.1);
 
-            const cFloorDay =8 new THREE.Color(CONFIG.floorColor); 
+            const cFloorDay = new THREE.Color(CONFIG.floorColor); 
             const cFloorNight = new THREE.Color(0x3e4e2a); 
             
             const darkFactor = 1 - (sunLight.intensity / 0.9); 
@@ -661,7 +658,7 @@
                 
                 if (state.lastTap === side) return;
 
-                const el = side === 'left' ? ui.indL : ui.ind8 ui.indR;
+                const el = side === 'left' ? ui.indL : ui.indR;
                 el.classList.add('pedal-active');
                 setTimeout(() => el.classList.remove('pedal-active'), 100);
 
@@ -694,12 +691,12 @@
 
             ui.brakeBtn.addEventListener('touchstart', startBrake);
             ui.brakeBtn.addEventListener('touchend', endBrake);
-            ui.brakeBtn.addEventListener* ui.brakeBtn.addEventListener('mousedown', startBrake);
+            ui.brakeBtn.addEventListener('mousedown', startBrake);
             ui.brakeBtn.addEventListener('mouseup', endBrake);
 
-            // Teclado para pruebas en PC
-            document.addEventListener('keydown',. (e) => {
-                if (e.key === 'a' || e.key ===; e.key === 'A') handleTap('left');
+            // Teclado para pruebas en PC (INTACTO)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'a' || e.key === 'A') handleTap('left');
                 if (e.key === 'd' || e.key === 'D') handleTap('right');
                 if (e.key === 'ArrowLeft') state.bikeX -= 0.5;
                 if (e.key === 'ArrowRight') state.bikeX += 0.5;
@@ -710,42 +707,47 @@
                 if (e.key === ' ' || e.key === 's') state.isBraking = false;
             });
 
-            // --- MANEJO ACELEROMETRO LATERAL (Drift + Dead Zone) ---
+            // --- MANEJO DEL ACELEROMETRO LATERAL SUAVIZADO (Lerp) ---
             const handleMotion = (e) => {
-                if. if (!state.playing) return;
+                if (!state.playing) return;
                 
                 const a = e.accelerationIncludingGravity;
                 if (!a) return;
                 
                 hasMotion = true;
-                rawTiltX = a.x ||/ 0;
+                // Solo guardamos la fuerza lateral (izquierda/derecha). Ignoramos Y y Z.
+                rawTiltX = a.x || 0;
             };
 
             ui.btnPerm.addEventListener('click', () => {
                 startGame();
                 
+                // Logica iOS 13+ pidiendo DeviceMotion
                 if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
                     DeviceMotionEvent.requestPermission()
                         .then(response => {
                             if (response === 'granted') {
                                 state.gyroEnabled = true;
-                                window.addEventListener('devicemotion', handleMotion;
-                            }= else {
+                                window.addEventListener('devicemotion', handleMotion);
+                                alert("Acelerómetro activado. !Inclina el movil LATERALMENTE para girar!");
+                            } else {
                                 alert("Permiso denegado. Usa las flechas del teclado si estas en PC.");
                             }
                         })
                         .catch(console.error);
                 } else if ('DeviceMotionEvent' in window) {
+                    // Logica Android / iOS viejo
                     state.gyroEnabled = true;
                     window.addEventListener('devicemotion', handleMotion);
                     
+                    // Chequeo de fallo por HTTP
                     setTimeout(() => {
                         if(!hasMotion && state.playing) {
                             ui.cycleMsg.innerText = "ACELEROMETRO BLOQUEADO\nUSA HTTPS";
                             ui.cycleMsg.style.opacity = 1;
                             setTimeout(() => ui.cycleMsg.style.opacity = 0, 5000);
                         }
-!                   }, 3000);
+                    }, 3000);
                 }
             });
 
@@ -765,6 +767,7 @@
             state.level = 1;
             state.frame = 0;
             state.lastTap = null; 
+            
             road.scale.x = 1;
 
             obstacles.forEach(o => scene.remove(o));
@@ -813,27 +816,19 @@
             updateObjects(obstacles, true);
             updateObjects(scenery, false);
 
-            // --- APLICAR DRIFT LATERAL (Velocidad con Zona Muerta) ---
+            // --- APLICAR DIRECCION SUAVIZADA (Posicional, no de velocidad) ---
             if (hasMotion) {
                 const currentKmh = state.speed * 80;
                 if (currentKmh >= CONFIG.minSteerSpeedKmh) {
-                    let effectiveTilt = 0;
+                    // 1. Limitar la fuerza leida al máximo configurado
+                    const clamped = Math.max(-MAX_ACCEL, Math.min(MAX_ACCEL, rawTiltX));
                     
-                    // 1. Zona Muerta: Ignora el temblor si está casi vertical
-                    if (rawTiltX > DEAD_ZONE) {
-                        effectiveTilt = rawTiltX - DEAD_ZONE;
-                    } else if (rawTiltX < -DEAD_ZONE) {
-                        effectiveTilt = rawTiltX + DEAD_ZONE;
-                    }
-                    
-                    // 2. Convertir inclinación en velocidad de movimiento
-                    const lateralSpeed = effectiveTilt * STEER_SPEED;
-                    state.bikeX += lateralSpeed;
-                    
-                    // 3. Limitar a los bordes de la carretera
+                    // 2. Calcular posición destino basada en la inclinación
                     const currentRoadWidth = (CONFIG.roadWidth / 10) * road.scale.x;
-                    const maxX = (currentRoadWidth/2) - 0.5; 
-                    state.bikeX = Math.max(-maxX, Math.min(maxX, state.bikeX));
+                    const targetX = (clamped / MAX_ACCEL) * (currentRoadWidth/2 - 1);
+                    
+                    // 3. Mover suavemente hacia el destino (Lerp) - Elimina temblor/lag
+                    state.bikeX += (targetX - state.bikeX) * CONFIG.turnSensitivity;
                 }
             }
 
@@ -844,6 +839,7 @@
 
             if (state.speed > 0.8) camera.position.y = 1.7 + (Math.random() - 0.5) * 0.03;
 
+            // Carretera estrechandose
             if (state.level >= 3) {
                 if (road.scale.x > 0.92) {
                     road.scale.x -= 0.0001; 
