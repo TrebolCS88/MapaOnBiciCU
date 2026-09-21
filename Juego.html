@@ -753,7 +753,7 @@
                 
                 hasMotion = true;
                 // Solo guardamos la fuerza lateral (izquierda/derecha)
-                rawTiltX = a.x || 0;
+                rawTiltX = -(a.x || 0);
             };
 
             ui.btnPerm.addEventListener('click', () => {
