@@ -155,6 +155,31 @@
             transition: opacity 1s;
             z-index: 12;
         }
+
+        /* Indicador visual de posición en carril */
+        #lane-indicator {
+            position: absolute;
+            bottom: 135px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 6px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 3px;
+            z-index: 15;
+            pointer-events: none;
+        }
+        #lane-dot {
+            position: absolute;
+            top: -3px;
+            width: 12px;
+            height: 12px;
+            background: #ffeb3b;
+            border-radius: 50%;
+            left: 54px;
+            transition: left 0.05s linear;
+            box-shadow: 0 0 6px rgba(255,235,59,0.6);
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -172,6 +197,11 @@
         
         <div id="cycle-msg">CIUDAD</div>
 
+        <!-- Indicador de posición en carril -->
+        <div id="lane-indicator" class="hidden">
+            <div id="lane-dot"></div>
+        </div>
+
         <!-- Controles -->
         <div id="brake-btn">FRENO</div>
         <div id="pedal-left" class="pedal-indicator">L</div>
@@ -185,7 +215,9 @@
                 3. Boton FRENO encima de R.<br>
                 4. Ciudad al anochecer.<br>
                 5. Baches en los bordes.<br><br>
-                * Nota: El acelerómetro requiere HTTPS para funcionar en moviles.
+                * Inclina el telefono para cambiar de carril.<br>
+                * Vuelve a posicion vertical para MANTENERTE donde estes.<br>
+                * Nota: El acelerometro requiere HTTPS para funcionar en moviles.
             </p>
             <button id="btn-permission">INICIAR RUTA</button>
         </div>
@@ -203,7 +235,9 @@
             acceleration: 0.015,
             friction: 0.0005,
             minSteerSpeedKmh: 0.5, 
-            turnSensitivity: 0.15,
+            // Velocidad lateral por frame a inclinacion maxima
+            // 0.1 = recorre medio carril (~2.5u) en ~25 frames (~0.4s)
+            turnSensitivity: 0.1,
             roadWidth: 10,
             cycleLength: 20000, 
             phases: {
@@ -245,10 +279,13 @@
         let starField; 
         let gyroDetected = false; 
         
-        // --- VARIABLES ACELEROMETRO LATERAL SUAVIZADO ---
+        // --- VARIABLES ACELEROMETRO LATERAL ---
         let hasMotion = false;
-        let rawTiltX = 0; // Aquí guardamos la inclinación pura
-        const MAX_ACCEL = 5.0; // Sensibilidad: 5.0 equivale a unos 30 grados de inclinación
+        let rawTiltX = 0;
+        // Sensibilidad: 5.0 equivale a unos 30 grados de inclinacion
+        const MAX_ACCEL = 5.0;
+        // Zona muerta: inclinaciones menores a esto se ignoran (evita deriva lenta)
+        const TILT_DEADZONE = 0.3;
 
         let state = {
             playing: false,
@@ -277,7 +314,9 @@
             indL: document.getElementById('pedal-left'),
             indR: document.getElementById('pedal-right'),
             cycleMsg: document.getElementById('cycle-msg'),
-            brakeBtn: document.getElementById('brake-btn')
+            brakeBtn: document.getElementById('brake-btn'),
+            laneIndicator: document.getElementById('lane-indicator'),
+            laneDot: document.getElementById('lane-dot')
         };
 
         function init() {
@@ -694,20 +733,19 @@
             ui.brakeBtn.addEventListener('mousedown', startBrake);
             ui.brakeBtn.addEventListener('mouseup', endBrake);
 
-            // Teclado para pruebas en PC (INTACTO)
+            // Teclado para pruebas en PC
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'a' || e.key === 'A') handleTap('left');
                 if (e.key === 'd' || e.key === 'D') handleTap('right');
-                if (e.key === 'ArrowLeft') state.bikeX -= 0.5;
-                if (e.key === 'ArrowRight') state.bikeX += 0.5;
+                if (e.key === 'ArrowLeft') state.bikeX -= 0.3;
+                if (e.key === 'ArrowRight') state.bikeX += 0.3;
                 if (e.key === ' ' || e.key === 's') state.isBraking = true; 
-                state.bikeX = Math.max(-5, Math.min(5, state.bikeX));
             });
             document.addEventListener('keyup', (e) => {
                 if (e.key === ' ' || e.key === 's') state.isBraking = false;
             });
 
-            // --- MANEJO DEL ACELEROMETRO LATERAL SUAVIZADO (Lerp) ---
+            // --- MANEJO DEL ACELEROMETRO LATERAL ---
             const handleMotion = (e) => {
                 if (!state.playing) return;
                 
@@ -715,7 +753,7 @@
                 if (!a) return;
                 
                 hasMotion = true;
-                // Solo guardamos la fuerza lateral (izquierda/derecha). Ignoramos Y y Z.
+                // Solo guardamos la fuerza lateral (izquierda/derecha)
                 rawTiltX = a.x || 0;
             };
 
@@ -729,7 +767,7 @@
                             if (response === 'granted') {
                                 state.gyroEnabled = true;
                                 window.addEventListener('devicemotion', handleMotion);
-                                alert("Acelerómetro activado. !Inclina el movil LATERALMENTE para girar!");
+                                alert("Acelerometro activado. Inclina el movil LATERALMENTE para girar. Vuelvelo vertical para mantener tu posicion.");
                             } else {
                                 alert("Permiso denegado. Usa las flechas del teclado si estas en PC.");
                             }
@@ -760,6 +798,7 @@
         function startGame() {
             ui.start.classList.add('hidden');
             ui.hud.classList.remove('hidden');
+            ui.laneIndicator.classList.remove('hidden');
             state.playing = true;
             state.speed = 0.2;
             state.distance = 0;
@@ -781,6 +820,7 @@
             ui.final.innerText = ((state.distance * 30) / 1000).toFixed(2);
             ui.over.classList.remove('hidden');
             ui.hud.classList.add('hidden');
+            ui.laneIndicator.classList.add('hidden');
         }
 
         function animate() {
@@ -816,23 +856,43 @@
             updateObjects(obstacles, true);
             updateObjects(scenery, false);
 
-            // --- APLICAR DIRECCION SUAVIZADA (Posicional, no de velocidad) ---
+            // --- DIRECCION POR ACELEROMETRO: MODO VELOCIDAD ---
+            // La inclinacion actua como VELOCIDAD lateral, no como posicion destino.
+            // Telefono vertical = velocidad 0 = la moto se queda donde esta.
+            // Telefono inclinado = la moto se mueve hacia ese lado continuamente.
             if (hasMotion) {
                 const currentKmh = state.speed * 80;
                 if (currentKmh >= CONFIG.minSteerSpeedKmh) {
-                    // 1. Limitar la fuerza leida al máximo configurado
+                    // 1. Limitar la fuerza leida al maximo configurado
                     const clamped = Math.max(-MAX_ACCEL, Math.min(MAX_ACCEL, rawTiltX));
                     
-                    // 2. Calcular posición destino basada en la inclinación
-                    const currentRoadWidth = (CONFIG.roadWidth / 10) * road.scale.x;
-                    const targetX = (clamped / MAX_ACCEL) * (currentRoadWidth/2 - 1);
+                    // 2. Aplicar zona muerta: ignora inclinaciones muy pequenas
+                    //    Esto evita que la moto se mueva lentamente cuando el telefono
+                    //    esta "casi" vertical pero no exactamente
+                    let tiltNormalized = clamped / MAX_ACCEL; // -1 a 1
+                    if (Math.abs(tiltNormalized) < TILT_DEADZONE) {
+                        tiltNormalized = 0;
+                    } else {
+                        // Re-mapear para que fuera de la zona muerta vaya de 0 a 1 suavemente
+                        tiltNormalized = (tiltNormalized > 0) 
+                            ? (tiltNormalized - TILT_DEADZONE) / (1 - TILT_DEADZONE)
+                            : (tiltNormalized + TILT_DEADZONE) / (1 - TILT_DEADZONE);
+                    }
                     
-                    // 3. Mover suavemente hacia el destino (Lerp) - Elimina temblor/lag
-                    state.bikeX += (targetX - state.bikeX) * CONFIG.turnSensitivity;
+                    // 3. Mover la moto: inclinacion como VELOCIDAD
+                    state.bikeX += tiltNormalized * CONFIG.turnSensitivity;
+                    
+                    // 4. Limitar a los bordes de la carretera
+                    const roadHalfWidth = (CONFIG.roadWidth / 2) * road.scale.x;
+                    const maxEdge = roadHalfWidth - 0.5; // 0.5 de margen para no salirse
+                    state.bikeX = Math.max(-maxEdge, Math.min(maxEdge, state.bikeX));
                 }
             }
 
+            // Camara sigue suavemente a la moto
             camera.position.x += (state.bikeX - camera.position.x) * 0.1;
+            
+            // Inclinacion visual de la moto basada en el movimiento lateral actual
             const bankAngle = (state.bikeX - camera.position.x) * -0.8;
             bikeGroup.rotation.z = THREE.MathUtils.lerp(bikeGroup.rotation.z, bankAngle, 0.1);
             bikeGroup.rotation.y = -bankAngle * 0.3;
@@ -845,6 +905,13 @@
                     road.scale.x -= 0.0001; 
                 }
             }
+
+            // Actualizar indicador visual de posicion en carril
+            const roadHalfWidth = (CONFIG.roadWidth / 2) * road.scale.x;
+            const maxEdge = roadHalfWidth - 0.5;
+            const normalizedPos = (state.bikeX / maxEdge + 1) / 2; // 0 a 1
+            const dotLeft = Math.max(0, Math.min(108, normalizedPos * 120 - 6));
+            ui.laneDot.style.left = dotLeft + 'px';
 
             const realDist = (state.distance * 30) / 1000;
             ui.score.innerText = realDist.toFixed(2);
