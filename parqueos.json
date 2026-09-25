@@ -112,5 +112,11 @@
         "lng": -82.384728,
         "title": "🔒 Calle 21 e/ K y L - Vedado",
         "desc": "Detrás del Coopelia en un parqueo del estado"
+    },
+    {
+        "lat": 23.136631,
+        "lng": -82.386808,
+        "title": "🔒 23 y H - Vedado",
+        "desc": "Colaboración de Christian: Es 24 Horas, tienes que llevar candado para dejar la bici"
     }
 ]
