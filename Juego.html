@@ -156,7 +156,7 @@
             z-index: 12;
         }
 
-        /* Indicador visual de posición en carril */
+        /* Indicador visual de posicion en carril */
         #lane-indicator {
             position: absolute;
             bottom: 135px;
@@ -197,7 +197,7 @@
         
         <div id="cycle-msg">CIUDAD</div>
 
-        <!-- Indicador de posición en carril -->
+        <!-- Indicador de posicion en carril -->
         <div id="lane-indicator" class="hidden">
             <div id="lane-dot"></div>
         </div>
@@ -364,8 +364,13 @@
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
-            });
-
+			});
+			
+			// Enviar señal "LISTO" a App Inventor al cargar
+			if (window.AppInventor) {
+				window.AppInventor.setWebViewString("LISTO");
+			}
+			
             animate();
         }
 
