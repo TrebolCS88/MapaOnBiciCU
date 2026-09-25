@@ -82,5 +82,17 @@
         "lng": -82.46229,
         "title": "🍔 Guarapera - Autopista Pinar",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat": 23.06389,
+        "lng": -82.39004,
+        "title": "🍔 Guarapera Calle Perla - 10 de Octubre",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat": 23.07099,
+        "lng": -82.39735,
+        "title": "🍔 Guarapera Puente de 100 y Boyeros",
+        "desc": "Bajo del puente dentro de la feria"
     }
 ]
