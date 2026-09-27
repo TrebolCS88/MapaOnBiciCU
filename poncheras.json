@@ -130,5 +130,11 @@
         "lng": -82.384962,
         "title": "🩹 Calzada de Vento -10 de Octubre",
         "desc": "Cerca de la linea del tren"
+    },
+    {
+        "lat": 23.124917,
+        "lng": -82.364376,
+        "title": "🩹 Vives e/ Rastro y Jesus María -Habana Vieja",
+        "desc": "Cerca del mercado de 4 caminos"
     }
 ]
