@@ -118,5 +118,17 @@
         "lng": -82.38245,
         "title": "🩹 Calle 100 -10 de Octubre",
         "desc": "En ocaciones no tienen ponche caliente para bicicletas"
+    },
+    {
+        "lat": 23.076711,
+        "lng": -82.387274,
+        "title": "🩹 Calzada de Vento -10 de Octubre",
+        "desc": "Cerca de un puentesito"
+    },
+    {
+        "lat": 23.078834,
+        "lng": -82.384962>,
+        "title": "🩹 Calzada de Vento -10 de Octubre",
+        "desc": "Cerca de la linea del tren"
     }
 ]
