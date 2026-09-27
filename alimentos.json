@@ -94,5 +94,17 @@
         "lng": -82.39735,
         "title": "🍔 Guarapera Puente de 100 y Boyeros",
         "desc": "Bajo del puente dentro de la feria"
+    },
+    {
+        "lat": 23.078861,
+        "lng": -82.384914,
+        "title": "🍔 Guarapera Calzada de Vento - 10 de Octubre",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat": 23.079147,
+        "lng": -82.384165,
+        "title": "🍔 Guarapera Calzada de Vento - 10 de Octubre",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
     }
 ]
