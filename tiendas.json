@@ -69,6 +69,12 @@
         "lat": 23.137659,
         "lng": -82.362482,
         "title": "🛒 La casa del Ciclista - Centro Habana",
-        "desc": "Aguila e/ Neptuno y San Miguel -Llamar antes de ir (No es puerta a calle)"
+        "desc": "Aguila e/ Neptuno y San Miguel"
+    },
+	{
+        "lat": 23.078767,
+        "lng": -82.382652,
+        "title": "🛒 Locos Por Las Bicis - 10 de Octubre",
+        "desc": "Calle A e/ 2da y 3ra -Llamar antes de ir"
     }
 ]
