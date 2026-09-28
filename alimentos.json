@@ -106,5 +106,17 @@
         "lng": -82.384165,
         "title": "🍔 Guarapera Calzada de Vento - 10 de Octubre",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat": 23.130395,
+        "lng": -82.354124,
+        "title": "🍔 Guarapera y Pizería Terminal de Trenes - Habana Vieja",
+        "desc": "Es importante recargar energías para continuar el viaje"
+    },
+    {
+        "lat": 23.131276,
+        "lng": -82.354953,
+        "title": "🍔 Guarapera Egido - Habana Vieja",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
     }
 ]
