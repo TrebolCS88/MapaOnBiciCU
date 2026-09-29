@@ -118,5 +118,11 @@
         "lng": -82.354953,
         "title": "🍔 Guarapera Egido - Habana Vieja",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat": 23.103151,
+        "lng": -82.341443,
+        "title": "🍔 Guarapera Virgen del Camino - San Miguel del Padrón",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
     }
 ]
