@@ -124,5 +124,11 @@
         "lng": -82.341443,
         "title": "🍔 Guarapera Virgen del Camino - San Miguel del Padrón",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat": 23.097050,
+        "lng": -82.327340,
+        "title": "🍔 Guarapera Calzada de San Miguel y Garrido - San Miguel del Padrón",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
     }
 ]
