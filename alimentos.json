@@ -130,5 +130,17 @@
         "lng": -82.327340,
         "title": "🍔 Guarapera Calzada de San Miguel y Garrido - San Miguel del Padrón",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat": 23.07772,
+        "lng": -82.42867,
+        "title": "🍔 Guarapera 114 e/ 43 y 45 - Marianao",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat":  23.08145,
+        "lng": -82.43118,
+        "title": "🍔 Guarapera 114 e/ 31 y 35 - Marianao",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
     }
 ]
