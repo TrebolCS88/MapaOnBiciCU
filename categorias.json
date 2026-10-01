@@ -79,5 +79,14 @@
         "borderRadius": "0",
         "rotacion": "330deg",
         "url": "otros.json"
+    },
+    {
+        "tipo": "robos",
+        "nombre": "Reportes de Robos!",
+        "icono": "🚨",
+        "color": "#000000",
+        "borderRadius": "0",
+        "rotacion": "0deg",
+        "url": "robos.json"
     }
 ]
