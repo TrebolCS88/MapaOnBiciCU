@@ -137,21 +137,58 @@
         .coord-val { color: #7dd3fc; }
         .coord-accuracy { color: #fbbf24; font-size: 0.7rem; }
 
-        .leaflet-routing-container {
-            position: absolute !important;
-            top: 10px !important;
-            right: 10px !important;
-            max-height: 300px !important;
-            width: 300px !important;
-            background: white !important;
-            padding: 10px !important;
-            border-radius: 8px !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
-            z-index: 1000 !important;
-            overflow-y: auto !important;
-            font-size: 0.85rem !important;
+        /* ========= NUESTRO PANEL DE RUTAS PERSONALIZADO ========= */
+        .custom-itinerary-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border: 1px solid #e2e8f0;
+            width: 320px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none; 
         }
-        .leaflet-routing-alt { border-bottom: 1px solid #e2e8f0; }
+        .custom-itinerary-header {
+            padding: 15px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #0f172a;
+            border-radius: 10px 10px 0 0;
+        }
+        .custom-itinerary-summary { font-size: 1rem; }
+        .custom-itinerary-toggle {
+            font-size: 0.8rem;
+            font-weight: normal;
+            color: #64748b;
+            background: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .custom-itinerary-steps {
+            padding: 10px 15px;
+            display: none; 
+        }
+        .custom-itinerary-step {
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+        .custom-itinerary-step:last-child { border-bottom: none; }
+        .step-icon { font-size: 1.2rem; line-height: 1; }
+        .step-text { flex: 1; color: #334155; }
+        .step-dist { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
 
         @media (max-width: 768px) {
             .menu-btn { display: block; }
@@ -162,7 +199,7 @@
             .geo-btn-header { padding: 8px 12px; }
             .coord-display { left: 10px; bottom: 85px; font-size: 0.7rem; }
             .data-status span.status-text { display: none; }
-            .leaflet-routing-container { width: 250px !important; max-height: 200px !important; right: 5px !important; top: 5px !important; }
+            .custom-itinerary-panel { width: 260px; }
         }
     </style>
 </head>
@@ -205,6 +242,16 @@
                 <div><div class="coord-label">Lng</div><div class="coord-val" id="coordLng">--</div></div>
                 <div><div class="coord-label">Precisión</div><div class="coord-accuracy" id="coordAcc">--</div></div>
             </div>
+
+            <!-- NUESTRO PANEL DE RUTAS PERSONALIZADO -->
+            <div id="customItinerary" class="custom-itinerary-panel">
+                <div id="customItineraryHeader" class="custom-itinerary-header">
+                    <span id="customItinerarySummary" class="custom-itinerary-summary">Calculando...</span>
+                    <span id="customItineraryToggle" class="custom-itinerary-toggle">▼ Indicaciones</span>
+                </div>
+                <div id="customItinerarySteps" class="custom-itinerary-steps"></div>
+            </div>
+
         </div>
     </div>
 
@@ -217,8 +264,8 @@
             <p id="mDesc" style="color:#475569; line-height:1.6;">Descripción...</p>
             <img id="mImg" class="modal-img" src="" alt="Foto del lugar">
             <a id="mLink" class="modal-link" href="#" target="_blank">👉Mas información...</a>
-            <button class="btn-route" onclick="routeToPoint()">🚴 Trazar ruta hasta aquí</button>
             <div class="hint-text" style="display:flex; align-items:center; justify-content:center; gap:5px; flex-wrap:wrap;">📍 Si hay algo erróneo con este marcador puedes <button onclick="triggerEditFromModal()" style="background:none; border:none; color:var(--primary-color); font-weight:700; cursor:pointer; font-size:0.85rem; padding:0; text-decoration:underline;">👉 Sugerir</button></div>
+            <button class="btn-route" onclick="routeToPoint()">🚴 Como llegar? Trazar ruta🧭</button>
         </div>
     </div>
 
@@ -287,13 +334,11 @@
         let isLongPress = false;
         let currentEditPoint = null;
 
-        // Variable global para la velocidad (Por defecto 15 km/h)
         let bikeSpeedKmH = 15; 
 
         // =============================================
         //  FUNCIÓN PARA APP INVENTOR
         // =============================================
-        // App Inventor puede llamar esta función para cambiar la velocidad dinámicamente
         window.setBikeSpeed = function(speed) {
             const parsedSpeed = parseFloat(speed);
             if (!isNaN(parsedSpeed) && parsedSpeed > 0) {
@@ -362,6 +407,20 @@
 
         function showSidebarEmpty(icon, message, showRetry = false) {
             categoryList.innerHTML = `<div class="sidebar-empty"><div class="sidebar-empty-icon">${icon}</div><div class="sidebar-empty-text">${message}</div>${showRetry ? '<button class="retry-btn" onclick="initApp()">Reintentar</button>' : ''}</div>`;
+        }
+        
+        function getDirectionIcon(type) {
+            switch(type) {
+                case 'Left': return '↰'; 
+                case 'Right': return '↱'; 
+                case 'SlightLeft': return '↖';
+                case 'SlightRight': return '↗';
+                case 'SharpLeft': return '⬅';
+                case 'SharpRight': return '➡';
+                case 'Straight': return '⬆';
+                case 'DestinationReached': return '📍';
+                default: return '⬆';
+            }
         }
 
         // =============================================
@@ -548,12 +607,12 @@
 
         function calculateRoute(start, end) {
             clearRouteBtn.style.display = 'flex'; 
+            document.getElementById('customItinerary').style.display = 'block';
+            document.getElementById('customItinerarySummary').innerText = 'Calculando ruta...';
+            document.getElementById('customItinerarySteps').innerHTML = '';
 
             routingControl = L.Routing.control({
-                waypoints: [
-                    start,
-                    end
-                ],
+                waypoints: [ start, end ],
                 router: L.Routing.osrmv1({
                     serviceUrl: 'https://router.project-osrm.org/route/v1',
                     profile: 'car', 
@@ -564,27 +623,54 @@
                 },
                 addWaypoints: false, 
                 routeWhileDragging: false,
-                show: true, 
+                show: false, 
                 createMarker: function() { return null; } 
             }).addTo(map);
 
-            // Interceptamos la ruta calculada para transformar el tiempo a Bicicleta
             routingControl.on('routesfound', function(e) {
                 const route = e.routes[0];
                 if (route && route.summary) {
-                    
-                    // Obtenemos la velocidad (por defecto 15, o la que haya enviado AppInventor)
                     const bikeSpeedMps = (bikeSpeedKmH * 1000) / 3600; 
-                    
-                    // 1. Recalcular el tiempo TOTAL de la ruta
                     route.summary.totalTime = route.summary.totalDistance / bikeSpeedMps;
                     
-                    // 2. Recalcular el tiempo de CADA instrucción (para consistencia)
                     if (route.instructions) {
                         route.instructions.forEach(instr => {
                             instr.time = instr.distance / bikeSpeedMps;
                         });
                     }
+
+                    const distanceKm = (route.summary.totalDistance / 1000).toFixed(1);
+                    const timeMin = Math.round(route.summary.totalTime / 60);
+                    
+                    document.getElementById('customItinerarySummary').innerText = `🚴 ${distanceKm} km | ⏱️ ~${timeMin} min`;
+                    
+                    const stepsContainer = document.getElementById('customItinerarySteps');
+                    stepsContainer.innerHTML = ''; 
+
+                    if (route.instructions) {
+                        route.instructions.forEach(instr => {
+                            if (instr.distance === 0 && instr.type !== 'DestinationReached') return; 
+                            
+                            const stepDiv = document.createElement('div');
+                            stepDiv.className = 'custom-itinerary-step';
+                            
+                            const icon = getDirectionIcon(instr.type);
+                            const text = instr.text || 'Continúe';
+                            const dist = instr.distance > 0 ? (instr.distance >= 1000 ? `${(instr.distance/1000).toFixed(1)} km` : `${Math.round(instr.distance)} m`) : '';
+
+                            stepDiv.innerHTML = `
+                                <span class="step-icon">${icon}</span>
+                                <div>
+                                    <div class="step-text">${text}</div>
+                                    ${dist ? `<div class="step-dist">${dist}</div>` : ''}
+                                </div>
+                            `;
+                            stepsContainer.appendChild(stepDiv);
+                        });
+                    }
+
+                    stepsContainer.style.display = 'none';
+                    document.getElementById('customItineraryToggle').innerText = '▼ Indicaciones';
                 }
             });
 
@@ -594,12 +680,28 @@
             });
         }
 
+        // =============================================
+        //  ACORDEÓN PARA NUESTRO PANEL
+        // =============================================
+        document.getElementById('customItineraryHeader').addEventListener('click', () => {
+            const steps = document.getElementById('customItinerarySteps');
+            const toggle = document.getElementById('customItineraryToggle');
+            if (steps.style.display === 'none' || steps.style.display === '') {
+                steps.style.display = 'block';
+                toggle.innerText = '▲ Ocultar';
+            } else {
+                steps.style.display = 'none';
+                toggle.innerText = '▼ Indicaciones';
+            }
+        });
+
         function clearRoute() {
             if (routingControl) {
                 map.removeControl(routingControl);
                 routingControl = null;
             }
             clearRouteBtn.style.display = 'none'; 
+            document.getElementById('customItinerary').style.display = 'none';
         }
 
         // =============================================
@@ -610,7 +712,7 @@
         const MOVE_THRESHOLD = 10;
 
         function handlePointerDown(e) {
-            if (e.target.closest('.leaflet-control-container') || e.target.closest('.geo-float-btn') || e.target.closest('.coord-display') || e.target.closest('.clear-route-btn')) {
+            if (e.target.closest('.leaflet-control-container') || e.target.closest('.geo-float-btn') || e.target.closest('.coord-display') || e.target.closest('.clear-route-btn') || e.target.closest('.custom-itinerary-panel')) {
                 return; 
             }
 
