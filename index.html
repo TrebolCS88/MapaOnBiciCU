@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OnBiciCU Mapa</title>
     <link rel="icon" href="ObCIcon.png" type="image/png">
+    
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+    <!-- Leaflet Routing Machine CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    
     <style>
         :root {
             --primary-color: #2563eb;
@@ -75,6 +78,9 @@
         .geo-float-btn.loading-btn svg { animation: pulse-icon 1s ease-in-out infinite; }
         @keyframes pulse-icon { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
 
+        .clear-route-btn { position: absolute; bottom: 85px; right: 15px; z-index: 1000; width: 46px; height: 46px; background: white; border: 2px solid #fecaca; border-radius: 50%; display: none; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.15); font-size: 1.2rem; color: var(--accent-color); transition: all 0.25s ease; }
+        .clear-route-btn:hover { background: var(--accent-color); color: white; border-color: var(--accent-color); transform: scale(1.08); }
+
         .user-location-marker { background: transparent !important; border: none !important; width: 40px !important; height: 40px !important; overflow: visible !important; }
         .user-dot-outer { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(37, 99, 235, 0.15); animation: user-pulse 2s ease-out infinite; }
         .user-dot-inner { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; transform: translate(-50%, -50%); background: var(--primary-color); border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.5); z-index: 2; }
@@ -94,6 +100,9 @@
         .modal-link { display: none; width: 100%; text-align: center; margin-top: 15px; padding: 12px; background-color: white; color: var(--primary-color); border: 1px solid var(--primary-color); text-decoration: none; border-radius: 6px; font-weight: 600; transition: all 0.2s; }
         .modal-link.visible { display: block !important; }
         .modal-link:hover { background-color: var(--primary-color); color: white; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        .btn-route { display: block; width: 100%; text-align: center; margin-top: 15px; padding: 12px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .btn-route:hover { background-color: #059669; transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
         .form-group { margin-top: 15px; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #334155; margin-bottom: 5px; }
@@ -128,6 +137,22 @@
         .coord-val { color: #7dd3fc; }
         .coord-accuracy { color: #fbbf24; font-size: 0.7rem; }
 
+        .leaflet-routing-container {
+            position: absolute !important;
+            top: 10px !important;
+            right: 10px !important;
+            max-height: 300px !important;
+            width: 300px !important;
+            background: white !important;
+            padding: 10px !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+            z-index: 1000 !important;
+            overflow-y: auto !important;
+            font-size: 0.85rem !important;
+        }
+        .leaflet-routing-alt { border-bottom: 1px solid #e2e8f0; }
+
         @media (max-width: 768px) {
             .menu-btn { display: block; }
             .sidebar { position: absolute; height: 100%; transform: translateX(-100%); box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
@@ -137,6 +162,7 @@
             .geo-btn-header { padding: 8px 12px; }
             .coord-display { left: 10px; bottom: 85px; font-size: 0.7rem; }
             .data-status span.status-text { display: none; }
+            .leaflet-routing-container { width: 250px !important; max-height: 200px !important; right: 5px !important; top: 5px !important; }
         }
     </style>
 </head>
@@ -145,8 +171,7 @@
     <header>
         <div class="header-left">
             <button class="menu-btn" id="menuToggle">☰</button>
-            <h1>OnBiciCU Mapa</h1><!-- Contador de visitas -->
-<img src="https://visitor-badge.laobi.icu/badge?page_id=https%3A%2F%2Ftrebolcs88.github.io%2FMapaOnBiciCU%2F&left_text=👁&left_color=%239d9595" alt="Contador de Visitas"/>
+            <h1>OnBiciCU Mapa</h1>
         </div>
         <div class="header-right">
             <div class="data-status loading" id="dataStatus">
@@ -158,7 +183,6 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
                 <span class="btn-label">Mi ubicación</span>
             </button>
-            
         </div>
     </header>
 
@@ -175,6 +199,7 @@
             <button class="geo-float-btn" id="geoFloatBtn" title="Mi ubicación">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
             </button>
+            <button class="clear-route-btn" id="clearRouteBtn" title="Limpiar ruta">❌</button>
             <div class="coord-display" id="coordDisplay">
                 <div><div class="coord-label">Lat</div><div class="coord-val" id="coordLat">--</div></div>
                 <div><div class="coord-label">Lng</div><div class="coord-val" id="coordLng">--</div></div>
@@ -192,6 +217,7 @@
             <p id="mDesc" style="color:#475569; line-height:1.6;">Descripción...</p>
             <img id="mImg" class="modal-img" src="" alt="Foto del lugar">
             <a id="mLink" class="modal-link" href="#" target="_blank">👉Mas información...</a>
+            <button class="btn-route" onclick="routeToPoint()">🚴 Trazar ruta hasta aquí</button>
             <div class="hint-text" style="display:flex; align-items:center; justify-content:center; gap:5px; flex-wrap:wrap;">📍 Si hay algo erróneo con este marcador puedes <button onclick="triggerEditFromModal()" style="background:none; border:none; color:var(--primary-color); font-weight:700; cursor:pointer; font-size:0.85rem; padding:0; text-decoration:underline;">👉 Sugerir</button></div>
         </div>
     </div>
@@ -206,26 +232,19 @@
                 <label>Coordenadas (Automático)</label>
                 <div class="coord-copy" id="newCoords">Cargando...</div>
             </div>
-
             <div class="form-group">
                 <label>Nombre del lugar *</label>
                 <input type="text" id="newTitle" placeholder="Ej: Parqueo en la esquina de 5ta y 2da" required>
             </div>
-
             <div class="form-group">
                 <label>Categoría sugerida</label>
-                <select id="newCategory">
-                </select>
+                <select id="newCategory"></select>
             </div>
-
             <div class="form-group">
                 <label>Descripción o Comentarios</label>
                 <textarea id="newDesc" placeholder="Capacidad, estado, si tiene techo, etc..."></textarea>
             </div>
-
-            <button class="btn-submit-suggest" onclick="sendNewSuggestion()">
-                📩 Enviar sugerencia por correo
-            </button>
+            <button class="btn-submit-suggest" onclick="sendNewSuggestion()">📩 Enviar sugerencia por correo</button>
             <div class="hint-text">Se abrirá tu aplicación de correo con los datos listos para enviar.</div>
         </div>
     </div>
@@ -240,18 +259,19 @@
                 <div style="font-weight:600; font-size:0.9rem;" id="editCurrentTitle">-</div>
                 <div style="font-size:0.8rem; color:#64748b; margin-top:4px;" id="editCurrentCoords">-</div>
             </div>
-
             <div class="form-group">
                 <label>¿Qué cambiaría o agregaría?</label>
                 <textarea id="editDesc" placeholder="Ej: El nombre correcto es..., Agregar que tiene capacidad para 20 bicicletas..."></textarea>
             </div>
-
-            <button class="btn-submit-suggest" style="background: #f59e0b;" onclick="sendEditSuggestion()" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
-                📩 Enviar corrección por correo
-            </button>
+            <button class="btn-submit-suggest" style="background: #f59e0b;" onclick="sendEditSuggestion()" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">📩 Enviar corrección por correo</button>
             <div class="hint-text">Se abrirá tu aplicación de correo con los datos actuales y tu sugerencia.</div>
         </div>
     </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Routing Machine JS -->
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 
     <script>
         // =============================================
@@ -261,10 +281,28 @@
         let categories = [];
         let mapMarkers = [];
         let currentModalPoint = null;
+        let routingControl = null; 
         
         let longPressTimer = null;
         let isLongPress = false;
         let currentEditPoint = null;
+
+        // Variable global para la velocidad (Por defecto 15 km/h)
+        let bikeSpeedKmH = 15; 
+
+        // =============================================
+        //  FUNCIÓN PARA APP INVENTOR
+        // =============================================
+        // App Inventor puede llamar esta función para cambiar la velocidad dinámicamente
+        window.setBikeSpeed = function(speed) {
+            const parsedSpeed = parseFloat(speed);
+            if (!isNaN(parsedSpeed) && parsedSpeed > 0) {
+                bikeSpeedKmH = parsedSpeed;
+                showToast(`Velocidad ajustada a ${bikeSpeedKmH} km/h`, 'info');
+            } else {
+                showToast('Velocidad no válida, se mantiene 15 km/h', 'error');
+            }
+        };
 
         // =============================================
         //  CONFIGURACIÓN
@@ -291,6 +329,7 @@
         const toastContainer = document.getElementById('toastContainer');
         const dataStatus = document.getElementById('dataStatus');
         const mapDiv = document.getElementById('map');
+        const clearRouteBtn = document.getElementById('clearRouteBtn');
 
         // =============================================
         //  MAPA BASE
@@ -398,7 +437,6 @@
                 renderSidebarMenu();
                 filterMap('todos');
 
-                // >>> ENVIAR "CARGADO" A APP INVENTOR <<<
                 try {
                     window.AppInventor.setWebViewString("CARGADO");
                 } catch(e) {
@@ -456,7 +494,6 @@
 
                 categoryList.appendChild(header);
                 categoryList.appendChild(body);
-                
             });
         }
 
@@ -486,6 +523,86 @@
         }
 
         // =============================================
+        //  SISTEMA DE RUTAS (ROUTING)
+        // =============================================
+        function routeToPoint() {
+            if (!currentModalPoint) return;
+            modal.classList.remove('open'); 
+
+            if (routingControl) clearRoute();
+
+            let endLat = currentModalPoint.lat;
+            let endLng = currentModalPoint.lng;
+
+            if (userMarker) {
+                let startLat = userMarker.getLatLng().lat;
+                let startLng = userMarker.getLatLng().lng;
+                calculateRoute(L.latLng(startLat, startLng), L.latLng(endLat, endLng));
+            } else {
+                showToast('Haz clic en el mapa para elegir el punto de inicio de la ruta', 'info', 5000);
+                map.once('click', function(e) {
+                    calculateRoute(e.latlng, L.latLng(endLat, endLng));
+                });
+            }
+        }
+
+        function calculateRoute(start, end) {
+            clearRouteBtn.style.display = 'flex'; 
+
+            routingControl = L.Routing.control({
+                waypoints: [
+                    start,
+                    end
+                ],
+                router: L.Routing.osrmv1({
+                    serviceUrl: 'https://router.project-osrm.org/route/v1',
+                    profile: 'car', 
+                    language: 'es'
+                }),
+                lineOptions: {
+                    styles: [{ color: '#10b981', opacity: 0.8, weight: 6 }] 
+                },
+                addWaypoints: false, 
+                routeWhileDragging: false,
+                show: true, 
+                createMarker: function() { return null; } 
+            }).addTo(map);
+
+            // Interceptamos la ruta calculada para transformar el tiempo a Bicicleta
+            routingControl.on('routesfound', function(e) {
+                const route = e.routes[0];
+                if (route && route.summary) {
+                    
+                    // Obtenemos la velocidad (por defecto 15, o la que haya enviado AppInventor)
+                    const bikeSpeedMps = (bikeSpeedKmH * 1000) / 3600; 
+                    
+                    // 1. Recalcular el tiempo TOTAL de la ruta
+                    route.summary.totalTime = route.summary.totalDistance / bikeSpeedMps;
+                    
+                    // 2. Recalcular el tiempo de CADA instrucción (para consistencia)
+                    if (route.instructions) {
+                        route.instructions.forEach(instr => {
+                            instr.time = instr.distance / bikeSpeedMps;
+                        });
+                    }
+                }
+            });
+
+            routingControl.on('routingerror', function(e) {
+                showToast('No se pudo trazar una ruta! Algo ha sucedido! 😢🚲', 'error', 6000);
+                clearRoute();
+            });
+        }
+
+        function clearRoute() {
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+            clearRouteBtn.style.display = 'none'; 
+        }
+
+        // =============================================
         //  SISTEMA DE CLIC LARGO (LONG PRESS)
         // =============================================
         let pointerStartX = 0;
@@ -493,7 +610,7 @@
         const MOVE_THRESHOLD = 10;
 
         function handlePointerDown(e) {
-            if (e.target.closest('.leaflet-control-container') || e.target.closest('.geo-float-btn') || e.target.closest('.coord-display')) {
+            if (e.target.closest('.leaflet-control-container') || e.target.closest('.geo-float-btn') || e.target.closest('.coord-display') || e.target.closest('.clear-route-btn')) {
                 return; 
             }
 
