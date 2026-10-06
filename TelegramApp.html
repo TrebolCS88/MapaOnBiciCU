@@ -6,7 +6,11 @@
     <title>OnBiciCU</title>
     <link rel="icon" href="ObCIcon.png" type="image/png">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet Routing Machine CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Routing Machine JS -->
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
@@ -157,6 +161,21 @@
         .cl{color:#94a3b8;font-size:.65rem;text-transform:uppercase;letter-spacing:.5px}
         .cv{color:#7dd3fc}.ca{color:#fbbf24;font-size:.7rem}
 
+        /* ===================== MAPA: RUTAS ===================== */
+        .clear-route-btn{position:absolute;bottom:calc(85px + var(--safe-b));right:15px;z-index:1000;width:46px;height:46px;background:var(--bg);border:2px solid #fecaca;border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.15);font-size:1.2rem;color:var(--accent);transition:all .25s}
+        .clear-route-btn:active{transform:scale(.92)}
+
+        .custom-itinerary-panel{position:absolute;top:10px;right:10px;z-index:1000;background:var(--bg);border-radius:10px;box-shadow:0 4px 15px rgba(0,0,0,.15);border:1px solid var(--border);width:320px;max-height:80vh;overflow-y:auto;display:none}
+        .custom-itinerary-header{padding:15px;background:var(--bg2);border-bottom:1px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;color:var(--fg);border-radius:10px 10px 0 0}
+        .custom-itinerary-summary{font-size:1rem}
+        .custom-itinerary-toggle{font-size:.8rem;font-weight:normal;color:var(--fg2);background:var(--border);padding:4px 8px;border-radius:4px}
+        .custom-itinerary-steps{padding:10px 15px;display:none}
+        .custom-itinerary-step{padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;font-size:.85rem}
+        .custom-itinerary-step:last-child{border-bottom:none}
+        .step-icon{font-size:1.2rem;line-height:1}
+        .step-text{flex:1;color:var(--fg)}
+        .step-dist{font-size:.75rem;color:var(--muted);margin-top:2px}
+
         /* ===================== MAPA: MARCADORES ===================== */
         .ulm{background:transparent!important;border:none!important;width:40px!important;height:40px!important;overflow:visible!important}
         .udo{position:absolute;top:50%;left:50%;width:40px;height:40px;transform:translate(-50%,-50%);border-radius:50%;background:rgba(37,99,235,.15);animation:up 2s ease-out infinite}
@@ -177,6 +196,8 @@
         .m-lnk{display:none;width:100%;text-align:center;margin-top:15px;padding:12px;background:var(--bg);color:var(--btn);border:1px solid var(--btn);text-decoration:none;border-radius:8px;font-weight:600;transition:all .2s}
         .m-lnk.vis{display:block!important}
         .m-lnk:active{background:var(--btn);color:#fff}
+        .btn-route{display:block;width:100%;text-align:center;margin-top:15px;padding:12px;background:var(--btn);color:var(--btn-fg);border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:.9rem;transition:all .2s}
+        .btn-route:active{opacity:.85;transform:scale(.98)}
 
         /* ===================== FORMULARIOS ===================== */
         .fg{margin-top:15px}
@@ -212,6 +233,7 @@
             .gbtn .lb{display:none}.gbtn{padding:7px 10px}
             .cd{left:10px;bottom:calc(85px + var(--safe-b));font-size:.7rem}
             .ds .st{display:none}.mhdr-r .ver{display:none}
+            .custom-itinerary-panel{width:260px}
         }
         @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
     </style>
@@ -362,11 +384,21 @@
             <button class="gfb" id="gFab" title="Mi ubicación">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--fg2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
             </button>
+            <button class="clear-route-btn" id="clrRoute" title="Limpiar ruta">❌</button>
             <div class="cd" id="cd">
                 <div><div class="cl">Lat</div><div class="cv" id="cLa">--</div></div>
                 <div><div class="cl">Lng</div><div class="cv" id="cLn">--</div></div>
                 <div><div class="cl">Prec</div><div class="ca" id="cAc">--</div></div>
             </div>
+
+            <div id="customItinerary" class="custom-itinerary-panel">
+                <div id="customItineraryHeader" class="custom-itinerary-header">
+                    <span id="customItinerarySummary" class="custom-itinerary-summary">Calculando...</span>
+                    <span id="customItineraryToggle" class="custom-itinerary-toggle">▼ Indicaciones</span>
+                </div>
+                <div id="customItinerarySteps" class="custom-itinerary-steps"></div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -386,13 +418,16 @@
             Algo erróneo con este marcador
             <button onclick="trigEdit()">Sugerir cambio</button>
         </div>
+        <button class="btn-route" onclick="routeToPoint()">🚴 Como llegar? Trazar ruta🧭</button>
     </div>
 </div>
 <div class="modal" id="mN">
     <div class="mc">
         <button class="x" data-close="mN" aria-label="Cerrar">&times;</button>
-        <h3 style="margin-bottom:5px;color:#16a34a">Sugerir nuevo punto</h3>
-        <p style="font-size:.8rem;color:var(--muted);margin-bottom:15px">Coordenadas del lugar seleccionado:</p>
+        <h3 style="margin-bottom:5px;color:#16a34a">📍 Ubicación seleccionada</h3>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:15px">Has marcado un lugar en el mapa. ¿Qué deseas hacer?</p>
+        <button class="btn-route" onclick="routeToLongPressPoint()">🚴 Trazar ruta hasta aquí</button>
+        <div style="text-align:center; color:var(--muted); font-size:.75rem; margin:15px 0;">ó si prefieres, sugiere un nuevo punto:</div>
         <div class="fg"><label>Coordenadas</label><div class="cc" id="nCo">Cargando...</div></div>
         <div class="fg"><label>Nombre del lugar *</label><input type="text" id="nTi" placeholder="Ej: Parqueo en 5ta y 2da"></div>
         <div class="fg"><label>Categoría</label><select id="nCa"></select></div>
@@ -536,6 +571,7 @@ let points=[], cats=[], mkrs=[], curPt=null, edPt=null;
 let lpT=null, isLP=false, lpX=0, lpY=0;
 const LPT=10, $=id=>document.getElementById(id);
 let map, uMk=null, aCr=null, wId=null, locating=false;
+let routingControl=null, bikeSpeedKmH=15, longPressCoords=null;
 
 // ============================================================
 //  CREAR MAPA (diferido)
@@ -547,6 +583,7 @@ function createMap() {
     }).addTo(map);
     setupMapInteractions();
     setupGeoButtons();
+    setupItineraryAccordion();
 }
 
 // ============================================================
@@ -563,6 +600,7 @@ function toast(msg,type='info',dur=4000){
 }
 function setDS(s,t){const d=$('ds');d.className=`ds ${s==='loading'?'ld':s==='loaded'?'ok':'er'}`;const e=d.querySelector('.st');if(e)e.textContent=t}
 function emptySB(ico,msg,ret=false){$('catL').innerHTML=`<div class="sb-e"><i>${ico}</i><p>${msg}</p>${ret?'<button class="rbtn" onclick="initData()">Reintentar</button>':''}</div>`}
+function getDirectionIcon(type){switch(type){case'Left':return'↰';case'Right':return'↱';case'SlightLeft':return'↖';case'SlightRight':return'↗';case'SharpLeft':return'⬅';case'SharpRight':return'➡';case'Straight':return'⬆';case'DestinationReached':return'📍';default:return'⬆'}}
 
 // ============================================================
 //  ENVÍO AL BOT
@@ -667,7 +705,7 @@ function filter(type){
 // ============================================================
 function setupMapInteractions(){
     const md=$('map');
-    function lpD(e){if(e.target.closest('.leaflet-control-container,.gfb,.cd'))return;isLP=false;const cx=e.clientX||(e.touches&&e.touches[0]?e.touches[0].clientX:0);const cy=e.clientY||(e.touches&&e.touches[0]?e.touches[0].clientY:0);lpX=cx;lpY=cy;const tgt=e.target;lpT=setTimeout(()=>{isLP=true;haptic('medium');const pin=tgt.closest('.pin');if(pin&&pin.dataset.id){const pd=points.find(p=>p.id===+pin.dataset.id);if(pd){$('mI').classList.remove('op');openEdit(pd)}}else{$('mI').classList.remove('op');const r=md.getBoundingClientRect();const ll=map.containerPointToLatLng(L.point(cx-r.left,cy-r.top));openNew(ll.lat,ll.lng)}},1500)}
+    function lpD(e){if(e.target.closest('.leaflet-control-container,.gfb,.cd,.custom-itinerary-panel,.clear-route-btn'))return;isLP=false;const cx=e.clientX||(e.touches&&e.touches[0]?e.touches[0].clientX:0);const cy=e.clientY||(e.touches&&e.touches[0]?e.touches[0].clientY:0);lpX=cx;lpY=cy;const tgt=e.target;lpT=setTimeout(()=>{isLP=true;haptic('medium');const pin=tgt.closest('.pin');if(pin&&pin.dataset.id){const pd=points.find(p=>p.id===+pin.dataset.id);if(pd){$('mI').classList.remove('op');openEdit(pd)}}else{$('mI').classList.remove('op');const r=md.getBoundingClientRect();const ll=map.containerPointToLatLng(L.point(cx-r.left,cy-r.top));openNew(ll.lat,ll.lng)}},1500)}
     function lpM(e){const cx=e.clientX||(e.touches?e.touches[0].clientX:0);const cy=e.clientY||(e.touches?e.touches[0].clientY:0);if(Math.abs(cx-lpX)>LPT||Math.abs(cy-lpY)>LPT)clearTimeout(lpT)}
     function lpU(){clearTimeout(lpT)}
     md.addEventListener('mousedown',lpD);md.addEventListener('mousemove',lpM);md.addEventListener('mouseup',lpU);md.addEventListener('mouseleave',lpU);
@@ -684,7 +722,7 @@ function closeTopModal(){if($('sb').classList.contains('op')){tglMenu();return t
 function closeM(id){$(id).classList.remove('op');updateBack()}
 function openInfo(d){curPt=d;$('mTi').innerText=d.title;$('mDe').innerText=d.desc;if(d.imagen){$('mIm').src=d.imagen;$('mIm').style.display='block'}else{$('mIm').style.display='none';$('mIm').src=''}if(d.enlace){$('mLi').href=d.enlace;$('mLi').classList.add('vis')}else{$('mLi').classList.remove('vis');$('mLi').href='#'}$('mI').classList.add('op');updateBack()}
 function trigEdit(){if(curPt){$('mI').classList.remove('op');openEdit(curPt)}}
-function openNew(lat,lng){$('nCo').innerText=`Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;$('nTi').value='';$('nDe').value='';$('nCa').selectedIndex=0;$('mN').classList.add('op');updateBack()}
+function openNew(lat,lng){longPressCoords={lat,lng};$('nCo').innerText=`Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;$('nTi').value='';$('nDe').value='';$('nCa').selectedIndex=0;$('mN').classList.add('op');updateBack()}
 function openEdit(d){edPt=d;$('eTi').innerText=d.title;$('eCo').innerText=`Lat: ${d.lat}, Lng: ${d.lng} (${d.tipo})`;$('eDe').value='';$('mE').classList.add('op');updateBack()}
 
 document.querySelectorAll('.x[data-close]').forEach(b=>{b.onclick=()=>closeM(b.dataset.close)});
@@ -725,6 +763,69 @@ function startLoc(){
 }
 function startW(){if(wId!==null)navigator.geolocation.clearWatch(wId);wId=navigator.geolocation.watchPosition(p=>setUL(p.coords.latitude,p.coords.longitude,p.coords.accuracy,false),()=>{},{enableHighAccuracy:true,timeout:30000,maximumAge:5000})}
 function stopLoc(){locating=false;$('gHdr').classList.remove('ld');$('gFab').classList.remove('ld')}
+
+// ============================================================
+//  SISTEMA DE RUTAS
+// ============================================================
+function routeToPoint(){
+    if(!curPt)return;closeM('mI');haptic('light');
+    if(routingControl)clearRoute();
+    let endLat=curPt.lat,endLng=curPt.lng;
+    if(uMk){let sL=uMk.getLatLng();calculateRoute(L.latLng(sL.lat,sL.lng),L.latLng(endLat,endLng))}
+    else{toast('Haz clic en el mapa para elegir el punto de inicio de la ruta','info',5000);map.once('click',function(e){calculateRoute(e.latlng,L.latLng(endLat,endLng))})}
+}
+function routeToLongPressPoint(){
+    if(!longPressCoords)return;closeM('mN');haptic('light');
+    if(routingControl)clearRoute();
+    let endLat=longPressCoords.lat,endLng=longPressCoords.lng;
+    if(uMk){let sL=uMk.getLatLng();calculateRoute(L.latLng(sL.lat,sL.lng),L.latLng(endLat,endLng))}
+    else{toast('Haz clic en el mapa para elegir el punto de inicio de la ruta','info',5000);map.once('click',function(e){calculateRoute(e.latlng,L.latLng(endLat,endLng))})}
+}
+function calculateRoute(start,end){
+    $('clrRoute').style.display='flex';
+    $('customItinerary').style.display='block';
+    $('customItinerarySummary').innerText='Calculando ruta...';
+    $('customItinerarySteps').innerHTML='';
+    routingControl=L.Routing.control({
+        waypoints:[start,end],
+        router:L.Routing.osrmv1({serviceUrl:'https://router.project-osrm.org/route/v1',profile:'car',language:'es'}),
+        lineOptions:{styles:[{color:'var(--btn)',opacity:0.8,weight:6}]},
+        addWaypoints:false,routeWhileDragging:false,show:false,createMarker:function(){return null}
+    }).addTo(map);
+    routingControl.on('routesfound',function(e){
+        const route=e.routes[0];
+        if(route&&route.summary){
+            const bMps=(bikeSpeedKmH*1000)/3600;
+            route.summary.totalTime=route.summary.totalDistance/bMps;
+            if(route.instructions){route.instructions.forEach(i=>{i.time=i.distance/bMps})}
+            const dKm=(route.summary.totalDistance/1000).toFixed(1);
+            const tMin=Math.round(route.summary.totalTime/60);
+            $('customItinerarySummary').innerText=`🚴 ${dKm} km | ⏱️ ~${tMin} min`;
+            const sC=$('customItinerarySteps');sC.innerHTML='';
+            if(route.instructions){route.instructions.forEach(i=>{
+                if(i.distance===0&&i.type!=='DestinationReached')return;
+                const sD=document.createElement('div');sD.className='custom-itinerary-step';
+                const ic=getDirectionIcon(i.type),tx=i.text||'Continúe';
+                const ds=i.distance>0?(i.distance>=1000?`${(i.distance/1000).toFixed(1)} km`:`${Math.round(i.distance)} m`):'';
+                sD.innerHTML=`<span class="step-icon">${ic}</span><div><div class="step-text">${tx}</div>${ds?`<div class="step-dist">${ds}</div>`:''}</div>`;
+                sC.appendChild(sD);
+            })}
+            sC.style.display='none';$('customItineraryToggle').innerText='▼ Indicaciones';
+        }
+    });
+    routingControl.on('routingerror',function(e){toast('No se pudo trazar la ruta! Algo ha sucedido! 😢🚲','error',6000);clearRoute()});
+}
+function setupItineraryAccordion(){
+    $('customItineraryHeader').addEventListener('click',()=>{
+        const s=$('customItinerarySteps'),t=$('customItineraryToggle');
+        if(s.style.display==='none'||s.style.display===''){s.style.display='block';t.innerText='▲ Ocultar'}
+        else{s.style.display='none';t.innerText='▼ Indicaciones'}
+    });
+}
+function clearRoute(){
+    if(routingControl){map.removeControl(routingControl);routingControl=null}
+    $('clrRoute').style.display='none';$('customItinerary').style.display='none';
+}
 </script>
 </body>
 </html>
