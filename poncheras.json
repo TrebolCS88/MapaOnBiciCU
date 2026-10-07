@@ -164,7 +164,7 @@
     {
         "lat": 23.07876,
         "lng": -82.42949,
-        "title": "🩹 41 e/ 114 y 116 - Marianao (SOLO AIRE!)",
+        "title": "🎈 41 e/ 114 y 116 - Marianao",
         "desc": "No cojen ponches a bicicletas, solo aire!"
     },
     {
@@ -172,5 +172,47 @@
         "lng": -82.41784,
         "title": "🩹 49 e/ 78 y 80A - Marianao",
         "desc": "Cerca de ITM"
+    },
+    {
+        "lat": 23.10424,
+        "lng": -82.42267,
+        "title": "🩹 25 y 60 - Playa",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.103697,
+        "lng": -82.422062,
+        "title": "🩹 60 e/ 58 y 27 - Playa",
+        "desc": "Particular"
+    },
+    {
+        "lat":  23.13435,
+        "lng": -82.39430,
+        "title": "🩹 19 e/ A y B - Plaza de la Revolución",
+        "desc": "Ponchera y parqueo"
+    },
+    {
+        "lat": 23.135541,
+        "lng": -82.394929,
+        "title": "🩹 B e/ 15 y 17 - Plaza de la Revolución",
+        "desc": "Al lado de un taller/parqueo de autos"
+    },
+    {
+        "lat": 23.127016,
+        "lng": -82.400701,
+        "title": "🎈 23 y 14 - Plaza de la Revolución",
+        "desc": "Solo Aire"
+    },
+    {
+        "lat": 23.106188,
+        "lng": -82.415703,
+        "title": "🩹 41 y 50 - Playa",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.105915,
+        "lng": -82.415904,
+        "title": "🎈 41 e/ 50 y 52 - Playa",
+        "desc": "Solo Aire"
     }
 ]
