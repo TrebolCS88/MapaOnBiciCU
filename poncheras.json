@@ -214,5 +214,23 @@
         "lng": -82.415904,
         "title": "🎈 41 e/ 50 y 52 - Playa",
         "desc": "Solo Aire"
+    },
+    {
+        "lat": 23.135693,
+        "lng": -82.375722,
+        "title": "🩹 Hospital y San Rafael - Centro Habana",
+        "desc": "Ponchera"
+    },
+    {
+        "lat": 23.101040,
+        "lng": -82.431863,
+        "title": "🩹 Avenida 19 y 76 - Playa",
+        "desc": "Servicentro Coyula"
+    },
+    {
+        "lat": 23.107790,
+        "lng": -82.424675,
+        "title": "🩹 Avenida 19 y 52 - Playa",
+        "desc": "Particular"
     }
 ]
