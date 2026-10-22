@@ -44,103 +44,109 @@
     {
         "lat": 23.126159,
         "lng": -82.407660,
-        "title": "🍔 Guarapera 24 e/ 15 y 17 -Plaza",
+        "title": "🥤 Guarapera 24 e/ 15 y 17 -Plaza",
         "desc": "Comentario de Carlos: El mejor guarapo que e tomado en toda la habana"
     },
     {
         "lat": 23.05277,
         "lng": -82.41968,
-        "title": "🍔 Guarapera - Cujae",
+        "title": "🥤 Guarapera - Cujae",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat": 23.05250,
         "lng": -82.41569,
-        "title": "🍔 Guarapera - Dentro de la Universidad de la CUJAE",
+        "title": "🥤 Guarapera - Dentro de la Universidad de la CUJAE",
         "desc": "Muy buen guarapo al mejor precio!"
     },
     {
         "lat": 23.11072,
         "lng": -82.34122,
-        "title": "🍔 Guarapera - Avenida del Puerto",
+        "title": "🥤 Guarapera - Avenida del Puerto",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat": 23.04159,
         "lng": -82.36276,
-        "title": "🍔 Guarapera - Güinera",
+        "title": "🥤 Guarapera - Güinera",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat": 23.11308,
         "lng": -82.36139,
-        "title": "🍔 Guarapera - Hospital Miguel Enrique",
+        "title": "🥤 Guarapera - Hospital Miguel Enrique",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat": 23.03811,
         "lng": -82.46229,
-        "title": "🍔 Guarapera - Autopista Pinar",
+        "title": "🥤 Guarapera - Autopista Pinar",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat": 23.06389,
         "lng": -82.39004,
-        "title": "🍔 Guarapera Calle Perla - 10 de Octubre",
+        "title": "🥤 Guarapera Calle Perla - 10 de Octubre",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat": 23.07099,
         "lng": -82.39735,
-        "title": "🍔 Guarapera Puente de 100 y Boyeros",
+        "title": "🥤 Guarapera Puente de 100 y Boyeros",
         "desc": "Bajo del puente dentro de la feria"
     },
     {
         "lat": 23.078861,
         "lng": -82.384914,
-        "title": "🍔 Guarapera Calzada de Vento - 10 de Octubre",
+        "title": "🥤 Guarapera Calzada de Vento - 10 de Octubre",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat": 23.079147,
         "lng": -82.384165,
-        "title": "🍔 Guarapera Calzada de Vento - 10 de Octubre",
+        "title": "🥤 Guarapera Calzada de Vento - 10 de Octubre",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat": 23.130395,
         "lng": -82.354124,
-        "title": "🍔 Guarapera y Pizería Terminal de Trenes - Habana Vieja",
+        "title": "🥤 Guarapera y Pizería Terminal de Trenes - Habana Vieja",
         "desc": "Es importante recargar energías para continuar el viaje"
     },
     {
         "lat": 23.131276,
         "lng": -82.354953,
-        "title": "🍔 Guarapera Egido - Habana Vieja",
+        "title": "🥤 Guarapera Egido - Habana Vieja",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat": 23.103151,
         "lng": -82.341443,
-        "title": "🍔 Guarapera Virgen del Camino - San Miguel del Padrón",
+        "title": "🥤 Guarapera Virgen del Camino - San Miguel del Padrón",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat": 23.097050,
         "lng": -82.327340,
-        "title": "🍔 Guarapera Calzada de San Miguel y Garrido - San Miguel del Padrón",
+        "title": "🥤 Guarapera Calzada de San Miguel y Garrido - San Miguel del Padrón",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat": 23.07772,
         "lng": -82.42867,
-        "title": "🍔 Guarapera 114 e/ 43 y 45 - Marianao",
+        "title": "🥤 Guarapera 114 e/ 43 y 45 - Marianao",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     },
     {
         "lat":  23.08145,
         "lng": -82.43118,
-        "title": "🍔 Guarapera 114 e/ 31 y 35 - Marianao",
+        "title": "🥤 Guarapera 114 e/ 31 y 35 - Marianao",
+        "desc": "Buena bebida para recargar energías y continuar el viaje"
+    },
+    {
+        "lat":  23.085957,
+        "lng": -82.437994,
+        "title": "🥤 Guarapera 25 e/ 120 y 120A - Marianao",
         "desc": "Buena bebida para recargar energías y continuar el viaje"
     }
 ]
