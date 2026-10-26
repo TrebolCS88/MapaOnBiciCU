@@ -56,25 +56,19 @@
 	{
         "lat": 23.119719,
         "lng": -82.391024,
-        "title": "🛒 Yagu - Plaza de la Revolución",
+        "title": "🛒 Yagu- Colon e/ Hidalgo y Estancia - Plaza de la Revolución",
         "desc": "Colon e/ Hidalgo y Estancia # 213 Apto 11 +Renta y Taller"
-    },
-	{
-        "lat": 23.137659,
-        "lng": -82.362482,
-        "title": "🛒 La casa del Ciclista - Centro Habana",
-        "desc": "Aguila e/ Neptuno y San Miguel"
     },
 	{
         "lat": 23.078767,
         "lng": -82.382652,
-        "title": "🛒 Locos Por Las Bicis - 10 de Octubre",
+        "title": "🛒 Locos Por Las Bicis- Calle A e/ 2da y 3ra - 10 de Octubre",
         "desc": "Calle A e/ 2da y 3ra -Llamar antes de ir"
     },
 	{
         "lat": 23.117414,
         "lng": -82.420057,
-        "title": "🛒 Taller Monta Seguro Bici Habana - Playa",
-        "desc": "26 e/ 23 y 25, Playa. También funciona como taller Horario de lunes a sábado de 8:30 am a 6:00 pm"
+        "title": "🛒 Taller Monta Seguro Bici Habana- 26 e/ 23 y 25 - Playa",
+        "desc": "26 e/ 23 y 25, Playa. También funciona como tienda Horario de lunes a sábado de 8:30 am a 6:00 pm"
     }
 ]
