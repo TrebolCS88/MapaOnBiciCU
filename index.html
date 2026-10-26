@@ -48,6 +48,35 @@
         .main-container { display: flex; flex: 1; height: calc(100vh - var(--header-height)); position: relative; }
         .sidebar { width: var(--sidebar-width); background: white; border-right: 1px solid #cbd5e1; padding: 0; overflow-y: auto; z-index: 1000; transition: transform 0.3s ease; display: flex; flex-direction: column; }
         .sidebar-title { padding: 20px; border-bottom: 1px solid #e2e8f0; }
+
+        /* ========= BARRA DE BÚSQUEDA ========= */
+        .search-wrapper { padding: 12px 20px; background: white; border-bottom: 1px solid #e2e8f0; position: relative; }
+        .search-input-wrapper { position: relative; display: flex; align-items: center; }
+        .search-input {
+            width: 100%; padding: 10px 36px 10px 36px; border: 1px solid #cbd5e1; border-radius: 8px;
+            font-size: 0.85rem; font-family: inherit; transition: all 0.2s; background: #f8fafc; color: #334155;
+        }
+        .search-input:focus {
+            outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); background: white;
+        }
+        .search-input::placeholder { color: #94a3b8; }
+        .search-icon {
+            position: absolute; left: 11px; pointer-events: none; color: #94a3b8; display: flex; align-items: center;
+        }
+        .search-clear-btn {
+            position: absolute; right: 8px; width: 20px; height: 20px; border: none; background: #e2e8f0; color: #64748b;
+            border-radius: 50%; cursor: pointer; display: none; align-items: center; justify-content: center;
+            font-size: 0.75rem; line-height: 1; transition: all 0.2s; padding: 0;
+        }
+        .search-clear-btn:hover { background: var(--accent-color); color: white; }
+        .search-clear-btn.visible { display: flex; }
+        .search-count { font-size: 0.72rem; color: #94a3b8; margin-top: 6px; padding: 0 2px; display: none; }
+        .search-count.visible { display: block; }
+        .search-count strong { color: var(--primary-color); }
+        .point-item mark { background: #fef3c7; color: #92400e; padding: 0 2px; border-radius: 2px; font-weight: 600; }
+        .search-no-results { padding: 20px; text-align: center; color: #94a3b8; font-size: 0.85rem; display: none; }
+        .search-no-results.visible { display: block; }
+        .search-no-results-icon { font-size: 2rem; margin-bottom: 8px; }
         
         .cat-header { padding: 15px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: #334155; background: white; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; border-left: 4px solid transparent; }
         .cat-header:hover { background-color: #f8fafc; color: var(--primary-color); }
@@ -177,8 +206,8 @@
             <button class="menu-btn" id="menuToggle">☰</button>
             <h1>OnBiciCU Mapa</h1>
             <div style="text-align: center; margin: 20px 0;">
-			<img src="https://visitor-badge.laobi.icu/badge?page_id=https%3A%2F%2Ftrebolcs88.github.io%2FMapaOnBiciCU%2F&left_text=%F0%9F%91%81&format=true&radius=8&height=22" alt="visitor badge"/>
-		</div>
+                        <img src="https://visitor-badge.laobi.icu/badge?page_id=https%3A%2F%2Ftrebolcs88.github.io%2FMapaOnBiciCU%2F&left_text=%F0%9F%91%81&format=true&radius=8&height=22" alt="visitor badge"/>
+                </div>
         </div>
         <div class="header-right">
             <div class="data-status loading" id="dataStatus">
@@ -199,7 +228,21 @@
             <div class="sidebar-title">
                 <h3 style="font-size:0.9rem; color:#64748b; text-transform:uppercase; margin:0;">Categorías</h3>
             </div>
+            <div class="search-wrapper">
+                <div class="search-input-wrapper">
+                    <span class="search-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </span>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Buscar punto..." autocomplete="off" />
+                    <button class="search-clear-btn" id="searchClearBtn" title="Limpiar búsqueda">&times;</button>
+                </div>
+                <div class="search-count" id="searchCount"></div>
+            </div>
             <div id="categoryList"></div>
+            <div class="search-no-results" id="searchNoResults">
+                <div class="search-no-results-icon">🔍</div>
+                <div>No se encontraron puntos<br>para tu búsqueda.</div>
+            </div>
         </aside>
 
         <div id="map">
@@ -902,6 +945,119 @@
 
         document.getElementById('menuToggle').addEventListener('click', toggleMenu);
         document.getElementById('sidebarOverlay').addEventListener('click', toggleMenu);
+
+        // =============================================
+        //  BARRA DE BÚSQUEDA DE PUNTOS
+        // =============================================
+        const searchInput = document.getElementById('searchInput');
+        const searchClearBtn = document.getElementById('searchClearBtn');
+        const searchCount = document.getElementById('searchCount');
+        const searchNoResults = document.getElementById('searchNoResults');
+
+        // Normaliza texto: minúsculas y sin acentos para buscar sin importar tildes
+        function normalizeText(str) {
+            if (!str) return '';
+            return str.toString().toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+        }
+
+        // Resalta la coincidencia dentro del texto del punto
+        function highlightMatch(text, query) {
+            const normText = normalizeText(text);
+            const idx = normText.indexOf(query);
+            if (idx === -1) return text;
+            const before = text.substring(0, idx);
+            const match = text.substring(idx, idx + query.length);
+            const after = text.substring(idx + query.length);
+            return before + '<mark>' + match + '</mark>' + after;
+        }
+
+        function performSearch() {
+            const rawQuery = searchInput.value.trim();
+            const query = normalizeText(rawQuery);
+
+            // Botón de limpiar visible solo si hay texto
+            searchClearBtn.classList.toggle('visible', rawQuery.length > 0);
+
+            // Sin consulta: restaurar estado natural del sidebar
+            if (!query) {
+                document.querySelectorAll('.cat-body').forEach(b => {
+                    b.classList.remove('open');
+                    b.querySelectorAll('.point-item').forEach(item => {
+                        item.style.display = '';
+                        const original = item.getAttribute('data-original-text');
+                        if (original) item.innerText = original;
+                    });
+                });
+                document.querySelectorAll('.cat-header').forEach(h => {
+                    h.classList.remove('active');
+                    h.style.display = '';
+                });
+                searchCount.classList.remove('visible');
+                searchNoResults.classList.remove('visible');
+                return;
+            }
+
+            // Hay consulta: filtrar puntos dentro de cada categoría
+            let totalMatches = 0;
+            document.querySelectorAll('.cat-body').forEach(body => {
+                let visibleInCat = 0;
+                body.querySelectorAll('.point-item').forEach(item => {
+                    const original = item.getAttribute('data-original-text') || item.innerText;
+                    if (!item.getAttribute('data-original-text')) {
+                        item.setAttribute('data-original-text', original);
+                    }
+                    const haystack = normalizeText(original);
+                    if (haystack.includes(query)) {
+                        item.style.display = '';
+                        item.innerHTML = highlightMatch(original, query);
+                        visibleInCat++;
+                        totalMatches++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                const header = body.previousElementSibling;
+                if (visibleInCat > 0) {
+                    body.classList.add('open');
+                    if (header) {
+                        header.classList.add('active');
+                        header.style.display = '';
+                    }
+                } else {
+                    body.classList.remove('open');
+                    if (header) header.style.display = 'none';
+                }
+            });
+
+            // Contador de resultados y mensaje de "sin resultados"
+            if (totalMatches > 0) {
+                searchCount.innerHTML = '<strong>' + totalMatches + '</strong> resultado' + (totalMatches === 1 ? '' : 's') + ' encontrado' + (totalMatches === 1 ? '' : 's');
+                searchCount.classList.add('visible');
+                searchNoResults.classList.remove('visible');
+            } else {
+                searchCount.classList.remove('visible');
+                searchNoResults.classList.add('visible');
+            }
+        }
+
+        // Eventos de la barra de búsqueda
+        searchInput.addEventListener('input', performSearch);
+        searchClearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            performSearch();
+            searchInput.focus();
+        });
+
+        // Atajo: tecla Escape limpia la búsqueda
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                performSearch();
+            }
+        });
 
         // =============================================
         //  INICIO
