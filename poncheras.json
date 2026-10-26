@@ -232,5 +232,17 @@
         "lng": -82.424675,
         "title": "🩹 Avenida 19 y 52 - Playa",
         "desc": "Particular"
+    },
+    {
+        "lat": 23.095912,
+        "lng": -82.42072,
+        "title": "🩹 Avenida 41 e/ 70 y 72 - Playa",
+        "desc": "Colaboración"
+    },
+    {
+        "lat": 23.074037,
+        "lng": -82.432700,
+        "title": "🩹 Avenida 124 y 47 - Marianao",
+        "desc": "Particular"
     }
 ]
