@@ -244,5 +244,17 @@
         "lng": -82.432700,
         "title": "🩹 Avenida 124 y 47 - Marianao",
         "desc": "Particular"
+    },
+    {
+        "lat": 23.018269,
+        "lng": -82.398984,
+        "title": "🩹 Avenida Rancho Boyeros e/ 136 y 152 - Boyeros",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.099702,
+        "lng": -82.441728,
+        "title": "🩹 90 y 7ma B - Playa",
+        "desc": "Particular"
     }
 ]
