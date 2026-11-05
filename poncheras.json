@@ -262,5 +262,17 @@
         "lng": -82.383280,
         "title": "🩹 Via Blanca e/ Palatino y Chaple - Cerro",
         "desc": "Particular"
+    },
+    {
+        "lat": 23.100448,
+        "lng": -82.441908,
+        "title": "🎈 88A e/ 7ma A y 7ma B - Playa",
+        "desc": "Solo Aire"
+    },
+    {
+        "lat": 23.048489,
+        "lng": -82.454420,
+        "title": "🩹 Avenida 240 - La Lisa",
+        "desc": "Particular"
     }
 ]
