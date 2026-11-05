@@ -249,12 +249,18 @@
         "lat": 23.018269,
         "lng": -82.398984,
         "title": "🩹 Avenida Rancho Boyeros e/ 136 y 152 - Boyeros",
-        "desc": "Particular"
+        "desc": "Particular - La Lomita"
     },
     {
         "lat": 23.099702,
         "lng": -82.441728,
         "title": "🩹 90 y 7ma B - Playa",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.102577,
+        "lng": -82.383280,
+        "title": "🩹 Via Blanca e/ Palatino y Chaple - Cerro",
         "desc": "Particular"
     }
 ]
