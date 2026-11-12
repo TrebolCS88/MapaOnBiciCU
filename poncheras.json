@@ -274,5 +274,17 @@
         "lng": -82.454420,
         "title": "🩹 Avenida 240 - La Lisa",
         "desc": "Particular"
+    },
+    {
+        "lat": 23.10722,
+        "lng": -82.34094,
+        "title": "🩹 Via Blanca y Calzada de Guanabacoa - San Miguel del Padrón",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.09333,
+        "lng": -82.30712,
+        "title": "🩹 El Pitirre e/ Calzada de San Miguel y Garciga - San Miguel del Padrón",
+        "desc": "Particular"
     }
 ]
