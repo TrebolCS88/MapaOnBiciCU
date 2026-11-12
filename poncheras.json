@@ -286,5 +286,53 @@
         "lng": -82.30712,
         "title": "🩹 El Pitirre e/ Calzada de San Miguel y Garciga - San Miguel del Padrón",
         "desc": "Particular"
+    },
+    {
+        "lat": 23.08205,
+        "lng": -82.30927,
+        "title": "🩹 Calzada de San Miguel del Padrón e/ Belinda y Eva Elena - San Miguel del Padrón",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.08274,
+        "lng": -82.32741,
+        "title": "🩹 Dolores y Calzada de Guines - San Miguel del Padrón",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.08155,
+        "lng": -82.32473,
+        "title": "🩹 Calzada de Guines y Calle 3 - San Miguel del Padrón",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.08503,
+        "lng": -82.32942,
+        "title": "🩹 Calzada de Guines e/ Lucero y Carmelo - San Miguel del Padrón",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.08469,
+        "lng": -82.32942,
+        "title": "🩹 Calzada de Guines y Lucero - San Miguel del Padrón",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.08404,
+        "lng": -82.33895,
+        "title": "🩹 Dolores e/ 24 y 25 - San Miguel del Padrón",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.08491,
+        "lng": -82.34027,
+        "title": "🩹 Dolores e/ 22 y Central - Lawton",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.10271,
+        "lng": -82.39204,
+        "title": "🩹 Via Blanca y Pizarro - Cerro",
+        "desc": "Particular"
     }
 ]
