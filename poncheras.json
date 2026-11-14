@@ -334,5 +334,11 @@
         "lng": -82.39204,
         "title": "🩹 Via Blanca y Pizarro - Cerro",
         "desc": "Particular"
+    },
+    {
+        "lat": 23.1697,
+        "lng": -82.22285,
+        "title": "🩹 Via Blanca y Granja Pepito Tey - Habana del Este",
+        "desc": "Particular"
     }
 ]
