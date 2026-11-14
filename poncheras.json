@@ -340,5 +340,17 @@
         "lng": -82.22285,
         "title": "🩹 Via Blanca y Granja Pepito Tey - Habana del Este",
         "desc": "Particular"
+    },
+    {
+        "lat": 23.12339,
+        "lng": -82.32436,
+        "title": "🩹 Ave Rotaria e/ Enlace y Calzada Vieja de Casablanca - Regla",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.12281,
+        "lng": -82.32647,
+        "title": "🩹 Ave Rotaria y Calzada Vieja de Casablanca - Regla",
+        "desc": "Particular"
     }
 ]
