@@ -352,5 +352,23 @@
         "lng": -82.32647,
         "title": "🩹 Ave Rotaria y Calzada Vieja de Casablanca - Regla",
         "desc": "Particular"
+    },
+    {
+        "lat": 23.16326,
+        "lng": -82.15211,
+        "title": "🩹 Via Blanca y Avenida Boca Este - Guanabo",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.16093,
+        "lng": -82.14843,
+        "title": "🩹 Vía Blanca y 462 - Guanabo",
+        "desc": "Particular"
+    },
+    {
+        "lat": 23.16827,
+        "lng": -82.11823,
+        "title": "🩹 Vía Blanca y 420 - Guanabo",
+        "desc": "Particular"
     }
 ]
